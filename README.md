@@ -50,3 +50,4 @@ Atidaryti naršyklėje: http://localhost:3000
 - [ ] Kandidatavimo sistema
 - [ ] AI matching
 - [ ] Mokėjimai (Stripe)
+- [ ] Vetkarjera OS
