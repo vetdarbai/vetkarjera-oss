@@ -1,0 +1,187 @@
+/* Main Container */
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* Back Button */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #0066cc;
+  text-decoration: none;
+  font-size: 0.95rem;
+  margin-bottom: 2rem;
+  transition: gap 0.2s ease;
+}
+
+.back-link:hover {
+  gap: 0.75rem;
+}
+
+/* Job Header */
+.job-header {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  margin-bottom: 2rem;
+}
+
+.job-badge {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: rgba(0, 102, 204, 0.1);
+  color: #0066cc;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+}
+
+.job-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1d1d1f;
+  margin-bottom: 1rem;
+  letter-spacing: -1px;
+  line-height: 1.2;
+}
+
+.job-company {
+  font-size: 1.25rem;
+  color: #0066cc;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+}
+
+.job-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e5e7;
+  font-size: 1rem;
+  color: #6e6e73;
+}
+
+.job-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Job Content */
+.job-content {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  margin-bottom: 2rem;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin-bottom: 1rem;
+  margin-top: 2rem;
+}
+
+.section-title:first-child {
+  margin-top: 0;
+}
+
+.job-description {
+  color: #1d1d1f;
+  font-size: 1rem;
+  line-height: 1.8;
+  margin-bottom: 1.5rem;
+}
+
+.job-list {
+  list-style: none;
+  margin-bottom: 1.5rem;
+}
+
+.job-list li {
+  padding-left: 1.5rem;
+  margin-bottom: 0.75rem;
+  position: relative;
+  color: #1d1d1f;
+  line-height: 1.7;
+}
+
+.job-list li:before {
+  content: "•";
+  color: #0066cc;
+  font-weight: bold;
+  position: absolute;
+  left: 0;
+}
+
+.job-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.job-tag {
+  padding: 0.5rem 1rem;
+  background: #f5f5f7;
+  color: #1d1d1f;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Apply Section */
+.apply-section {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  text-align: center;
+}
+
+.apply-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin-bottom: 1rem;
+}
+
+.apply-description {
+  color: #6e6e73;
+  margin-bottom: 2rem;
+  font-size: 1rem;
+}
+
+.apply-section .btn-secondary {
+  margin-left: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .job-title {
+    font-size: 2rem;
+  }
+
+  .job-meta {
+    gap: 1rem;
+  }
+
+  .apply-section .btn-secondary {
+    margin-left: 0;
+    margin-top: 1rem;
+  }
+
+  .job-header,
+  .job-content,
+  .apply-section {
+    padding: 1.5rem;
+  }
+}

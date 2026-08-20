@@ -1,0 +1,130 @@
+/* Hero Section */
+.hero {
+  min-height: calc(100vh - 200px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+}
+
+.hero-content {
+  max-width: 800px;
+}
+
+.hero-badge {
+  display: inline-block;
+  background: rgba(0, 102, 204, 0.1);
+  color: #0066cc;
+  padding: 0.5rem 1.25rem;
+  border-radius: 50px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 2rem;
+  letter-spacing: 0.3px;
+}
+
+h1 {
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: #1d1d1f;
+  margin-bottom: 1.5rem;
+  letter-spacing: -1.5px;
+  line-height: 1.1;
+}
+
+.hero-description {
+  font-size: 1.25rem;
+  color: #6e6e73;
+  margin-bottom: 3rem;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+/* Benefits Section */
+.benefits {
+  background: white;
+  padding: 5rem 2rem;
+}
+
+.benefits-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-align: center;
+  color: #1d1d1f;
+  letter-spacing: -1px;
+  margin-bottom: 3rem;
+}
+
+.benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 3rem;
+}
+
+.benefit-card {
+  text-align: center;
+  padding: 2rem;
+  border-radius: 16px;
+}
+
+.benefit-icon {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #0066cc 0%, #0099ff 100%);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  font-size: 1.75rem;
+}
+
+.benefit-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: #1d1d1f;
+}
+
+.benefit-description {
+  color: #6e6e73;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2.5rem;
+  }
+
+  .hero-description {
+    font-size: 1.1rem;
+  }
+
+  .section-title {
+    font-size: 2rem;
+  }
+
+  .benefits {
+    padding: 3rem 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 2rem;
+    letter-spacing: -1px;
+  }
+
+  .hero {
+    padding: 2rem 1.5rem;
+  }
+}
