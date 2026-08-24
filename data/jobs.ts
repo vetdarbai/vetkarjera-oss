@@ -1,251 +1,196 @@
-export const jobs = [
+import { Job } from '@/types/jobs';
+
+export const jobs: Job[] = [
   {
     id: 1,
-    title: "Veterinarijos gydytojas (-a)",
-    company: "Vilniaus Veterinarijos Klinika",
-    location: "Vilnius",
-    address: "Žirmūnų g. 15",
-    salary: "2000-3000 €/mėn.",
-    type: "Pilnas etatas",
-    postedDate: "2026-07-29",
-    postedDaysAgo: 2,
-    specialization: "Bendroji praktika",
-    description: "Ieškome patyrimo turinčio veterinarijos gydytojo (-os) į mūsų komandą. Siūlome modernią kliniką, draugišką kolektyvą ir galimybę tobulėti. Darbas su smulkiais gyvūnais.",
-    tags: ["Bendroji praktika", "Smulkūs gyvūnai", "2+ metų patirtis"],
+    title: 'Veterinarijos gydytojas (-a)',
+    company: 'Vilniaus veterinarijos klinika',
+    location: 'Vilnius',
+    address: 'Vilnius',
+    salary: '2200–3200 € / mėn.',
+    salaryFrom: 2200,
+    salaryTo: 3200,
+    type: 'Pilnas etatas',
+    postedDate: '2026-08-18',
+    postedDaysAgo: 6,
+    specialization: 'Bendroji praktika',
+    sector: 'Veterinarijos klinika',
+    description: 'Ieškome veterinarijos gydytojo darbui su šunimis ir katėmis. Vertiname savarankiškumą, smalsumą ir norą augti kartu su komanda.',
+    tags: ['Smulkūs gyvūnai', 'Bendroji praktika', 'Mokymų biudžetas'],
     fullDescription: {
-      about: "Vilniaus Veterinarijos Klinika – tai moderni, puikiai įrengta klinika Vilniaus centre, veikianti jau 15 metų. Mūsų komandą sudaro 8 aukštos kvalifikacijos veterinarijos gydytojai ir 5 veterinarijos felčeriai. Teikiame pilną spektrą veterinarinių paslaugų: nuo profilaktinių apžiūrų iki sudėtingų chirurginių operacijų.",
-      jobDescription: "Ieškome patyrimo turinčio veterinarijos gydytojo (-os), kuris (-i) prisijungtų prie mūsų draugiškos komandos. Darbas apims bendrąją praktiką su smulkiais gyvūnais (šunimis ir katėmis), konsultacijas, diagnostiką ir gydymą.",
-      responsibilities: [
-        "Gyvūnų klinikiniai tyrimai ir diagnostika",
-        "Gydymo planų sudarymas ir įgyvendinimas",
-        "Chirurginės procedūros (kastracija, sterilizacija, minkštųjų audinių chirurgija)",
-        "Vakcinacija ir profilaktika",
-        "Konsultacijos gyvūnų savininkams",
-        "Medicininės dokumentacijos tvarkymas"
-      ],
-      requirements: [
-        "Veterinarijos gydytojo diplomas ir teisė verstis veterinarijos praktika Lietuvoje",
-        "Bent 2 metų darbo patirtis veterinarijos klinikoje",
-        "Patirtis dirbant su smulkiais gyvūnais",
-        "Geros komunikacijos ir komandinio darbo įgūdžiai",
-        "Atsakingumas ir empatija",
-        "Noras tobulėti ir mokytis"
-      ],
-      weOffer: [
-        "Konkurencingą atlyginimą 2000-3000 €/mėn. (priklausomai nuo patirties)",
-        "Modernią kliniką su naujausią įranga",
-        "Draugišką ir palaikantį kolektyvą",
-        "Galimybę tobulėti ir dalyvauti mokymuose",
-        "Lankstų darbo grafiką",
-        "Apmokamas kasmetines atostogas",
-        "Sveikatos draudimą"
-      ],
-      conditions: [
-        "Darbo laikas: 40 val./savaitę",
-        "Grafikas: 5 darbo dienos, suderinama su darbuotoju",
-        "Budėjimai: 1-2 kartus per mėnesį (papildomai apmokama)",
-        "Pradžia: kuo greičiau arba pagal susitarimą"
-      ]
+      about: 'Moderni smulkių gyvūnų klinika, orientuota į kokybišką diagnostiką, komandinius sprendimus ir nuolatinį profesinį tobulėjimą.',
+      jobDescription: 'Kasdienė smulkių gyvūnų praktika: konsultacijos, diagnostika, gydymo planai ir bazinės procedūros.',
+      responsibilities: ['Klinikinės konsultacijos', 'Diagnostinių tyrimų planavimas', 'Gydymo planų sudarymas', 'Bendravimas su gyvūnų savininkais'],
+      requirements: ['Veterinarijos gydytojo kvalifikacija', 'Gebėjimas dirbti komandoje', 'Atsakingas požiūris į pacientą'],
+      weOffer: ['2200–3200 € bruto priklausomai nuo patirties', 'Mokymų biudžetas', 'Lankstus grafikas', 'Mentorystė jaunesniam kolegai'],
+      conditions: ['Pilnas etatas', 'Darbo vieta Vilniuje', 'Pradžia pagal susitarimą']
     }
   },
   {
     id: 2,
-    title: "Veterinarijos chirurgas (-ė)",
-    company: "Kauno Gyvūnų Ligoninė",
-    location: "Kaunas",
-    address: "Savanorių pr. 28",
-    salary: "2500-4000 €/mėn.",
-    type: "Pilnas etatas",
-    postedDate: "2026-07-26",
-    postedDaysAgo: 5,
-    specialization: "Chirurgija",
-    description: "Modernioje ligoninėje ieškome patyrimo turinčio veterinarijos chirurgo. Turime naujausią įrangą, atliekame sudėtingas operacijas. Siūlome konkurencingą atlyginimą.",
-    tags: ["Chirurgija", "Minkštųjų audinių chirurgija", "5+ metų patirtis"],
+    title: 'Veterinarijos chirurgas (-ė)',
+    company: 'Kauno gyvūnų ligoninė',
+    location: 'Kaunas',
+    address: 'Kaunas',
+    salary: '3000–4500 € / mėn.',
+    salaryFrom: 3000,
+    salaryTo: 4500,
+    type: 'Pilnas etatas',
+    postedDate: '2026-08-17',
+    postedDaysAgo: 7,
+    specialization: 'Chirurgija',
+    sector: 'Veterinarijos klinika',
+    description: 'Ieškome patyrusio chirurgo, norinčio dirbti su sudėtingesniais atvejais, modernia diagnostika ir stipria anestezijos komanda.',
+    tags: ['Chirurgija', 'Ortopedija', 'Patyrusi komanda'],
     fullDescription: {
-      about: "Kauno Gyvūnų Ligoninė – tai didžiausia ir moderniausia veterinarijos ligoninė Kaune, veikianti nuo 2010 metų. Turime pilnai aprūpintą operacinę, intensyviosios terapijos skyrių ir diagnostikos centrą.",
-      jobDescription: "Ieškome patyrimo turinčio veterinarijos chirurgo, kuris prisijungtų prie mūsų specialistų komandos. Atliekame įvairias chirurgines procedūras – nuo standartinių iki sudėtingų ortopedijos ir minkštųjų audinių operacijų.",
-      responsibilities: [
-        "Chirurginių operacijų atlikimas",
-        "Pacientų būklės vertinimas prieš ir po operacijų",
-        "Operacinės įrangos valdymas",
-        "Konsultacijos sudėtingais atvejais",
-        "Jaunesnių kolegų mokymas"
-      ],
-      requirements: [
-        "Veterinarijos gydytojo diplomas",
-        "Bent 5 metų patirtis chirurgijoje",
-        "Patirtis atliekant minkštųjų audinių operacijas",
-        "Gebėjimas dirbti streso situacijose",
-        "Komandinio darbo įgūdžiai"
-      ],
-      weOffer: [
-        "Konkurencingą atlyginimą 2500-4000 €/mėn.",
-        "Naujausią chirurginę įrangą",
-        "Profesionalią komandą",
-        "Galimybę tobulėti ir dalyvauti tarptautiniuose mokymuose",
-        "Sveikatos draudimą",
-        "Apmokamas atostogas"
-      ],
-      conditions: [
-        "Darbo laikas: 40 val./savaitę",
-        "Budėjimai pagal grafiką",
-        "Pradžia: 2026 m. rugsėjis arba pagal susitarimą"
-      ]
+      about: 'Didelė veterinarijos ligoninė su operaciniu bloku, stacionaru ir pažangia diagnostika.',
+      jobDescription: 'Darbas chirurgijos komandoje su planinėmis ir skubiomis operacijomis.',
+      responsibilities: ['Chirurginės konsultacijos', 'Operacijų atlikimas', 'Pooperacinė priežiūra', 'Jaunesnių kolegų mentorystė'],
+      requirements: ['Veterinarijos gydytojo kvalifikacija', 'Bent 3 metų chirurginė patirtis', 'Savarankiškumas operacinėje'],
+      weOffer: ['3000–4500 € bruto', 'Profesinio tobulėjimo biudžetas', 'Moderni įranga', 'Galimybė auginti specializaciją'],
+      conditions: ['Pilnas etatas', 'Budėjimai pagal grafiką', 'Darbo vieta Kaune']
     }
   },
   {
     id: 3,
-    title: "Veterinarijos gydytojas (-a) praktikai",
-    company: "Klaipėdos Veterinarijos Centras",
-    location: "Klaipėda",
-    address: "Taikos pr. 45",
-    salary: "800-1200 €/mėn.",
-    type: "Praktika",
-    postedDate: "2026-07-24",
-    postedDaysAgo: 7,
-    specialization: "Bendroji praktika",
-    description: "Siūlome praktikos vietą naujai diplomuotiems veterinarijos gydytojams. Mentorystė, mokymasis iš patyrių specialistų, galimybė dirbti su įvairiausiais atvejais.",
-    tags: ["Naujiems specialistams", "Mentorystė", "Bendroji praktika"],
+    title: 'Veterinarijos studentas (-ė) praktikai',
+    company: 'Klaipėdos gyvūnų klinika',
+    location: 'Klaipėda',
+    salary: 'Praktika',
+    type: 'Praktika / stažuotė',
+    postedDate: '2026-08-20',
+    postedDaysAgo: 4,
+    specialization: 'Studentų praktika',
+    sector: 'Veterinarijos klinika',
+    description: 'Priimame veterinarijos studentus 4–6 savaičių praktikai. Praktikos metu studentas dirba kartu su paskirtu mentoriumi.',
+    tags: ['Praktika', 'Mentorystė', 'Studentams'],
     fullDescription: {
-      about: "Klaipėdos Veterinarijos Centras – jaukus ir profesionalus centras pajūryje. Mūsų komanda mielai priima jaunus specialistus ir padeda jiems augti profesionaliai.",
-      jobDescription: "Praktikos programa skirta naujai diplomuotiems veterinarijos gydytojams, norintiems įgyti praktinės patirties ir tobulėti bendroje praktikoje.",
-      responsibilities: [
-        "Dalyvavimas konsultacijose su mentoriumi",
-        "Pagalba atliekant diagnostiką",
-        "Paprastų procedūrų atlikimas",
-        "Medicininės dokumentacijos tvarkymas",
-        "Mokymasis iš patyrių kolegų"
-      ],
-      requirements: [
-        "Veterinarijos gydytojo diplomas",
-        "Noras mokytis ir tobulėti",
-        "Atsakingumas",
-        "Geros komunikacijos įgūdžiai"
-      ],
-      weOffer: [
-        "Mentorystę ir nuolatinį palaikymą",
-        "Atlyginimą 800-1200 €/mėn.",
-        "Galimybę įsitvirtinti klinikoje po praktikos",
-        "Mokymų ir konferencijų finansavimą"
-      ],
-      conditions: [
-        "Praktikos trukmė: 6-12 mėnesių",
-        "Darbo laikas: 40 val./savaitę",
-        "Pradžia: rugpjūtis-rugsėjis 2026"
-      ]
+      about: 'Smulkių gyvūnų klinika, reguliariai priimanti studentus praktikai.',
+      jobDescription: 'Praktika klinikoje su galimybe stebėti konsultacijas, diagnostiką, procedūras ir operacijas.',
+      responsibilities: ['Pagalba komandai', 'Mokymasis praktikos metu', 'Darbo vietos tvarkos laikymasis'],
+      requirements: ['Veterinarijos studijos', 'Motyvacija mokytis', 'Atsakingumas'],
+      weOffer: ['Paskirtą mentorių', 'Praktikos pažymą', 'Galimybę tartis dėl darbo po studijų'],
+      conditions: ['4–6 savaitės', 'Grafikas derinamas individualiai']
     }
   },
   {
     id: 4,
-    title: "Egzotinių gyvūnų veterinarijos gydytojas (-a)",
-    company: "Vilniaus Egzotų Klinika",
-    location: "Vilnius",
-    address: "Kalvarijų g. 125",
-    salary: "2200-3500 €/mėn.",
-    type: "Pilnas etatas",
-    postedDate: "2026-07-28",
-    postedDaysAgo: 3,
-    specialization: "Egzotiniai gyvūnai",
-    description: "Specializuota klinika ieško egzotinių gyvūnų specialisto. Darbas su paukščiais, ropliais, graužikais. Reikalinga specializacija arba noras mokytis.",
-    tags: ["Egzotiniai gyvūnai", "Paukščiai", "Ropliai"],
+    title: 'Key Account Manager – veterinarija',
+    company: 'Baltic Vet Distribution',
+    location: 'Lietuva / hibridinis',
+    salary: '2600–3800 € / mėn.',
+    salaryFrom: 2600,
+    salaryTo: 3800,
+    type: 'Pilnas etatas',
+    postedDate: '2026-08-19',
+    postedDaysAgo: 5,
+    specialization: 'Key Account / pardavimai',
+    sector: 'Didmena / distributorius',
+    description: 'Ieškome Key Account Manager darbui su veterinarijos klinikomis ir pagrindiniais klientais Lietuvoje.',
+    tags: ['Key Account', 'B2B', 'Veterinarijos rinka'],
     fullDescription: {
-      about: "Vilniaus Egzotų Klinika – vienintelė Lietuvoje specializuota egzotinių gyvūnų klinika. Gydome paukščius, roplius, graužikus, žuvynas ir kitus neįprastus augintinus.",
-      jobDescription: "Ieškome specialisto, turinčio patirties arba stipraus noro specializuotis egzotinių gyvūnų medicinoje.",
-      responsibilities: [
-        "Egzotinių gyvūnų konsultacijos ir gydymas",
-        "Diagnostiniai tyrimai",
-        "Chirurgija",
-        "Savininkų švietimas apie egzotų priežiūrą"
-      ],
-      requirements: [
-        "Veterinarijos gydytojo diplomas",
-        "Patirtis su egzotiniais gyvūnais arba noras mokytis",
-        "Anglų kalbos mokėjimas (skaityti literatūrą)",
-        "Smalsumas ir noras tobulėti"
-      ],
-      weOffer: [
-        "Atlyginimą 2200-3500 €/mėn.",
-        "Specializuotą įrangą",
-        "Tarptautinius mokymus",
-        "Unikalią patirtį"
-      ],
-      conditions: [
-        "Darbo laikas: 40 val./savaitę",
-        "Grafikas: 5 darbo dienos",
-        "Pradžia: kuo greičiau"
-      ]
+      about: 'Veterinarinių produktų distributorius, dirbantis su klinikomis ir partneriais Baltijos šalyse.',
+      jobDescription: 'Pagrindinių klientų vystymas, pardavimų planavimas ir ilgalaikių santykių kūrimas.',
+      responsibilities: ['Strateginių klientų valdymas', 'Pardavimų planų vykdymas', 'Derybos', 'Rinkos analizė'],
+      requirements: ['B2B pardavimų patirtis', 'Geri derybų įgūdžiai', 'B kategorijos vairuotojo pažymėjimas'],
+      weOffer: ['2600–3800 € bruto + bonusai', 'Automobilis', 'Hibridinis darbas', 'Mokymai'],
+      conditions: ['Kelionės Lietuvoje', 'Pilnas etatas']
     }
   },
   {
     id: 5,
-    title: "Veterinarijos gydytojas (-a) (dalinis etatas)",
-    company: "Šiaulių Veterinarijos Ambulatorija",
-    location: "Šiauliai",
-    address: "Vilniaus g. 88",
-    salary: "1200-1800 €/mėn.",
-    type: "Dalinis etatas",
-    postedDate: "2026-07-27",
-    postedDaysAgo: 4,
-    specialization: "Bendroji praktika",
-    description: "Ieškome veterinarijos gydytojo dirbti 3-4 dienas per savaitę. Puiki galimybė derinti su kitais projektais ar mokslais. Lanksčus grafikas.",
-    tags: ["Lankstus grafikas", "Bendroji praktika", "Smulkūs gyvūnai"],
+    title: 'Regulatory Affairs specialistas (-ė)',
+    company: 'VetPharma Baltics',
+    location: 'Vilnius / hibridinis',
+    salary: '2800–4200 € / mėn.',
+    salaryFrom: 2800,
+    salaryTo: 4200,
+    type: 'Pilnas etatas',
+    postedDate: '2026-08-16',
+    postedDaysAgo: 8,
+    specialization: 'Regulatory Affairs',
+    sector: 'Farmacinė įmonė',
+    description: 'Darbas su veterinarinių vaistų registracija, dokumentacija ir reguliaciniais projektais Baltijos šalyse.',
+    tags: ['Regulatory Affairs', 'Farmacija', 'Baltijos šalys'],
     fullDescription: {
-      about: "Šiaulių Veterinarijos Ambulatorija – nedidelė, bet jaukus klinika miesto centre.",
-      jobDescription: "Dėl komandos plėtros ieškome gydytojo, galinčio dirbti 3-4 dienas per savaitę.",
-      responsibilities: [
-        "Bendroji praktika",
-        "Konsultacijos",
-        "Paprastos procedūros"
-      ],
-      requirements: [
-        "Veterinarijos gydytojo diplomas",
-        "Bent 1 metų patirtis"
-      ],
-      weOffer: [
-        "Lankstų grafiką",
-        "Atlyginimą 1200-1800 €/mėn.",
-        "Draugišką aplinką"
-      ],
-      conditions: [
-        "Darbo laikas: 24-32 val./savaitę",
-        "Grafikas: derinamas"
-      ]
+      about: 'Tarptautinė veterinarinės farmacijos įmonė.',
+      jobDescription: 'Reguliacinių procesų koordinavimas ir dokumentacijos priežiūra.',
+      responsibilities: ['Registracinių bylų koordinavimas', 'Bendravimas su institucijomis', 'Pokyčių valdymas', 'Dokumentacijos kokybės užtikrinimas'],
+      requirements: ['Aukštasis išsilavinimas gyvybės mokslų srityje', 'Anglų kalba', 'Atidumas detalėms'],
+      weOffer: ['2800–4200 € bruto', 'Hibridinis darbas', 'Tarptautinė komanda'],
+      conditions: ['Pilnas etatas', 'Vilnius / hibridinis']
     }
   },
   {
     id: 6,
-    title: "Veterinarijos odontologas (-ė)",
-    company: "Panevėžio Gyvūnų Klinika",
-    location: "Panevėžys",
-    address: "Respublikos g. 34",
-    salary: "2400-3800 €/mėn.",
-    type: "Pilnas etatas",
-    postedDate: "2026-07-30",
-    postedDaysAgo: 1,
-    specialization: "Odontologija",
-    description: "Plečiame paslaugų spektrą ir ieškome veterinarijos odontologijos specialisto. Investavome į naujausią dentalinę įrangą. Konkurencingas atlyginimas.",
-    tags: ["Odontologija", "Dentalinė chirurgija", "Specializacija"],
+    title: 'Bandos sveikatos veterinarijos gydytojas (-a)',
+    company: 'Žemaitijos pieno ūkis',
+    location: 'Telšių r.',
+    salary: '3000–4000 € / mėn.',
+    salaryFrom: 3000,
+    salaryTo: 4000,
+    type: 'Pilnas etatas',
+    postedDate: '2026-08-15',
+    postedDaysAgo: 9,
+    specialization: 'Galvijų medicina',
+    sector: 'Ūkis / gyvulininkystė',
+    description: 'Ieškome veterinarijos gydytojo bandos sveikatos, reprodukcijos ir profilaktikos programoms.',
+    tags: ['Galvijai', 'Reprodukcija', 'Ūkis'],
     fullDescription: {
-      about: "Panevėžio Gyvūnų Klinika modernizuojasi ir plečia paslaugas. Įsigijome naujausią dentalinę įrangą.",
-      jobDescription: "Ieškome odontologijos specialisto arba bendrąją praktiką dirbančio gydytojo, norinčio specializuotis.",
-      responsibilities: [
-        "Dantų ir burnos ertmės gydymas",
-        "Dentalinė chirurgija",
-        "Profilaktika"
-      ],
-      requirements: [
-        "Veterinarijos gydytojo diplomas",
-        "Odontologijos specializacija arba noras mokytis"
-      ],
-      weOffer: [
-        "Atlyginimą 2400-3800 €/mėn.",
-        "Naujausią dentalinę įrangą",
-        "Mokymus"
-      ],
-      conditions: [
-        "Darbo laikas: 40 val./savaitę",
-        "Pradžia: rugpjūtis 2026"
-      ]
+      about: 'Modernus pieno ūkis, orientuotas į prevencinę mediciną ir duomenimis grįstą bandos valdymą.',
+      jobDescription: 'Bandos sveikatos programų priežiūra ir kasdienė veterinarinė praktika ūkyje.',
+      responsibilities: ['Bandos sveikatos stebėsena', 'Reprodukcija', 'Profilaktikos planai', 'Duomenų analizė'],
+      requirements: ['Veterinarijos gydytojo kvalifikacija', 'Domėjimasis galvijų medicina', 'B kategorija'],
+      weOffer: ['3000–4000 € bruto', 'Tarnybinis automobilis', 'Mokymai'],
+      conditions: ['Pilnas etatas', 'Darbas Telšių rajone']
+    }
+  },
+  {
+    id: 7,
+    title: 'Laboratorinės diagnostikos specialistas (-ė)',
+    company: 'VetLab Lietuva',
+    location: 'Kaunas',
+    salary: '2100–3000 € / mėn.',
+    salaryFrom: 2100,
+    salaryTo: 3000,
+    type: 'Pilnas etatas',
+    postedDate: '2026-08-21',
+    postedDaysAgo: 3,
+    specialization: 'Laboratorinė diagnostika',
+    sector: 'Diagnostikos laboratorija',
+    description: 'Ieškome specialisto klinikinei laboratorinei diagnostikai ir kokybės procesams.',
+    tags: ['Laboratorija', 'Diagnostika', 'Kokybė'],
+    fullDescription: {
+      about: 'Veterinarinės diagnostikos laboratorija, aptarnaujanti klinikas ir ūkius.',
+      jobDescription: 'Darbas su laboratoriniais mėginiais, rezultatų kokybe ir konsultacijomis.',
+      responsibilities: ['Mėginių analizė', 'Kokybės procedūrų laikymasis', 'Rezultatų vertinimas', 'Bendravimas su klientais'],
+      requirements: ['Gyvybės mokslų išsilavinimas', 'Atidumas', 'Darbo laboratorijoje patirtis – privalumas'],
+      weOffer: ['2100–3000 € bruto', 'Mokymai', 'Stabili darbo aplinka'],
+      conditions: ['Pilnas etatas', 'Darbas Kaune']
+    }
+  },
+  {
+    id: 8,
+    title: 'Klinikos administratorius (-ė)',
+    company: 'Šiaulių veterinarijos centras',
+    location: 'Šiauliai',
+    salary: '1500–2100 € / mėn.',
+    salaryFrom: 1500,
+    salaryTo: 2100,
+    type: 'Pilnas etatas',
+    postedDate: '2026-08-22',
+    postedDaysAgo: 2,
+    specialization: 'Administravimas',
+    sector: 'Veterinarijos klinika',
+    description: 'Ieškome komunikabilaus žmogaus registratūrai, klientų aptarnavimui ir klinikos kasdieniams administraciniams procesams.',
+    tags: ['Administravimas', 'Klientų aptarnavimas', 'Klinika'],
+    fullDescription: {
+      about: 'Auganti veterinarijos klinika Šiauliuose.',
+      jobDescription: 'Registratūros ir klientų aptarnavimo koordinavimas.',
+      responsibilities: ['Skambučių ir vizitų registracija', 'Klientų aptarnavimas', 'Dokumentų tvarkymas', 'Komandos koordinacinė pagalba'],
+      requirements: ['Geri komunikacijos įgūdžiai', 'Kompiuterinis raštingumas', 'Atsakingumas'],
+      weOffer: ['1500–2100 € bruto', 'Vidiniai mokymai', 'Stabili komanda'],
+      conditions: ['Pilnas etatas', 'Darbas Šiauliuose']
     }
   }
 ];

@@ -1,53 +1,49 @@
-# VetKarjera – Veterinarijos darbo skelbimai
+# VetKarjera
 
-Moderni platforma, sujungianti veterinarijos gydytojus ir klinikas.
+VetKarjera – veterinarijos darbo ir karjeros platformos MVP.
 
-## Projekto struktūra
+## Kas jau paruošta
 
-```
-vetkarjera/
-├── app/                    # Puslapiai (Next.js App Router)
-│   ├── page.tsx           # Pagrindinis puslapis
-│   ├── skelbimai/         # Darbo skelbimų sąrašas
-│   ├── skelbimas/[id]/    # Vieno skelbimo detalus puslapis
-│   └── darbdavys/         # Darbdavio puslapis
-├── components/            # React komponentai
-│   ├── Navigation.tsx     # Navigacijos baras
-│   └── Footer.tsx         # Footer
-├── data/                  # Pavyzdiniai duomenys
-│   └── jobs.ts           # Darbo skelbimai (ateityje → duomenų bazė)
-└── public/               # Statiniai failai
-```
+- Pagrindinis puslapis ir navigacija
+- Veikianti darbo skelbimų paieška, filtrai ir rūšiavimas
+- Darbo skelbimo detalus puslapis
+- Darbdavio registracija su dinaminiais klausimais pagal organizacijos tipą
+- Specialisto registracija su dinaminiais klausimais pagal profesinę kryptį
+- Darbo skelbimo kūrimo forma
+- Prisijungimo ekranas
+- Privatumo ir taisyklių MVP puslapiai
+- Responsive dizainas telefonui ir kompiuteriui
+- Frontend formų validacija ir demonstraciniai sėkmės ekranai
 
-## Kaip paleisti projektą
+## Svarbi riba
 
-### StackBlitz'e (rekomenduojama)
+Tai **frontend užbaigimo versija**. Tikras backend dar neprijungtas, todėl:
 
-1. Atidaryk projektą StackBlitz platformoje
-2. Palaukti, kol įsidiegs priklausomybės
-3. Projektas automatiškai paleidžiamas
+- registracijos duomenys nėra išsaugomi;
+- vartotojų paskyros realiai nesukuriamos;
+- prisijungimas neveikia kaip autentifikacija;
+- darbo skelbimai nėra įrašomi į duomenų bazę;
+- kandidatavimas ir CV failų saugojimas dar neveikia;
+- nėra saugių vartotojų sesijų ar rolėmis pagrįstos prieigos.
 
-### Lokaliame kompiuteryje
+Toliau žr. `BACKEND_NEXT.md`.
+
+## Paleidimas
 
 ```bash
 npm install
 npm run dev
 ```
 
-Atidaryti naršyklėje: http://localhost:3000
+Build patikra:
 
-## Technologijos
+```bash
+npm run typecheck
+npm run build
+```
 
-- **Next.js 14** – React framework su App Router
-- **TypeScript** – Type-safe JavaScript
-- **CSS** – Švarūs stiliai be framework'ų
+## Siūlomas hostingas
 
-## Būsimi žingsniai
-
-- [ ] Supabase autentifikacija
-- [ ] Duomenų bazės integracija
-- [ ] Registracijos formos
-- [ ] Kandidatavimo sistema
-- [ ] AI matching
-- [ ] Mokėjimai (Stripe)
-- [ ] Vetkarjera OS
+- GitHub – kodui
+- Vercel – Next.js hostingui
+- Supabase – autentifikacijai, PostgreSQL duomenų bazei ir failams

@@ -1,95 +1,37 @@
 import Link from 'next/link';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
-import './darbdavys.css';
 
-export default function Darbdavys() {
+export default function EmployerPage() {
   return (
     <>
       <Navigation />
-      
-      {/* Hero Section */}
-      <section className="hero">
-        <div className="hero-content">
-          <div className="hero-badge">🏥 Veterinarijos klinikoms ir darbdaviams</div>
-          
-          <h1>Raskite geriausius veterinarijos specialistus</h1>
-          
-          <p className="hero-description">
-            Skelbkite darbo pasiūlymus nemokamai ir pasiekite  
-            veterinarijos gydytojus visoje Lietuvoje.
-          </p>
-
-          <button className="btn btn-primary">
-            <span>📝</span>
-            <span>Skelbti darbo pasiūlymą</span>
-          </button>
-        </div>
-      </section>
-
-      {/* Benefits Section */}
-      <section className="benefits">
-        <div className="benefits-container">
-          <h2 className="section-title">Kodėl pasirinkti VetKarjera?</h2>
-          
-          <div className="benefits-grid">
-            <div className="benefit-card">
-              <div className="benefit-icon">🎯</div>
-              <h3 className="benefit-title">Tikslinė auditorija</h3>
-              <p className="benefit-description">
-                Jūsų skelbimus mato tik veterinarijos specialistai – niekas kito. 
-                Taupomos laiką ir gaunate kokybiškas aplikacijas.
-              </p>
-            </div>
-
-            <div className="benefit-card">
-              <div className="benefit-icon">💰</div>
-              <h3 className="benefit-title">Nemokamai pradėti</h3>
-              <p className="benefit-description">
-                Skelbkite darbo pasiūlymus nemokamai. Mokėkite tik už papildomas 
-                funkcijas, jei jų reikia.
-              </p>
-            </div>
-
-            <div className="benefit-card">
-              <div className="benefit-icon">⚡</div>
-              <h3 className="benefit-title">Greitas rezultatas</h3>
-              <p className="benefit-description">
-                Skelbimas publikuojamas iš karto. Pirmąsias aplikacijas gaukite 
-                jau per 24 valandas.
-              </p>
-            </div>
-
-            <div className="benefit-card">
-              <div className="benefit-icon">📊</div>
-              <h3 className="benefit-title">Paprasta valdyti</h3>
-              <p className="benefit-description">
-                Patogi darbdavio panelė leidžia valdyti visus skelbimus ir aplikacijas 
-                vienoje vietoje.
-              </p>
-            </div>
-
-            <div className="benefit-card">
-              <div className="benefit-icon">🤖</div>
-              <h3 className="benefit-title">AI pagalba (netrukus)</h3>
-              <p className="benefit-description">
-                Dirbtinis intelektas padės sukurti patrauklų skelbimą ir surasti 
-                tinkamiausius kandidatus.
-              </p>
-            </div>
-
-            <div className="benefit-card">
-              <div className="benefit-icon">🔒</div>
-              <h3 className="benefit-title">Saugumas ir privatumas</h3>
-              <p className="benefit-description">
-                Visi duomenys saugomi pagal GDPR reikalavimus. Jūsų informacija – 
-                saugi ir konfidenciali.
-              </p>
+      <main>
+        <section className="hero-section hero-compact">
+          <div className="hero-inner">
+            <span className="eyebrow">🏥 Darbdaviams veterinarijos sektoriuje</span>
+            <h1>Raskite žmogų, kuris tinka ne tik CV</h1>
+            <p className="hero-lead">VetKarjera skirta klinikoms, didmenoms, farmacijos įmonėms, ūkiams, laboratorijoms, institucijoms ir kitoms veterinarijos organizacijoms.</p>
+            <div className="hero-actions">
+              <Link href="/registracija/darbdavys" className="btn btn-primary">Registruoti organizaciją</Link>
+              <Link href="/skelbti" className="btn btn-secondary">Peržiūrėti skelbimo formą</Link>
             </div>
           </div>
-        </div>
-      </section>
-
+        </section>
+        <section className="section section-white">
+          <div className="section-container">
+            <div className="section-heading"><span className="eyebrow">Kodėl VetKarjera</span><h2>Sukurta nišinei darbo rinkai</h2></div>
+            <div className="card-grid card-grid-3">
+              <div className="feature-card"><span className="feature-icon">🎯</span><h3>Tikslinė auditorija</h3><p>Darbo pasiūlymus mato žmonės, kuriems veterinarijos sektorius yra aktualus.</p></div>
+              <div className="feature-card"><span className="feature-icon">💶</span><h3>Skelbimai nemokami</h3><p>Bazinį darbo pasiūlymą planuojama leisti skelbti nemokamai ir ateityje.</p></div>
+              <div className="feature-card"><span className="feature-icon">🤖</span><h3>AI atranka – vėliau</h3><p>Surinkti struktūruoti profilių duomenys vėliau leis kurti aiškesnį kandidatų ir pozicijų matching.</p></div>
+              <div className="feature-card"><span className="feature-icon">🧩</span><h3>Skirtingi sektoriai</h3><p>Ne tik klinikos: distribucija, farmacija, ūkiai, institucijos, laboratorijos ir kita.</p></div>
+              <div className="feature-card"><span className="feature-icon">🎓</span><h3>Praktikos vietos</h3><p>Darbdaviai gali komunikuoti ir praktikos ar stažuočių galimybes studentams.</p></div>
+              <div className="feature-card"><span className="feature-icon">🔒</span><h3>Privatumas</h3><p>Backend etape bus diegiama prieigos kontrolė, vartotojų sesijos ir BDAR principus atitinkantis duomenų valdymas.</p></div>
+            </div>
+          </div>
+        </section>
+      </main>
       <Footer />
     </>
   );

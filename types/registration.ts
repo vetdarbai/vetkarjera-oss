@@ -1,5 +1,4 @@
-// Organizacijos tipai
-export type OrgType = 
+export type EmployerOrgType =
   | 'clinic'
   | 'wholesale'
   | 'pharma'
@@ -9,74 +8,87 @@ export type OrgType =
   | 'university'
   | 'laboratory'
   | 'shelter'
+  | 'production'
   | 'other';
 
-// Pagrindinė registracijos forma
-export interface EmployerRegistration {
-  // Žingsnis 1
-  orgType: OrgType | '';
-  
-  // Žingsnis 2 - Organizacijos informacija
-  orgName: string;
-  city: string;
-  website: string;
-  description: string;
-  teamSize: string;
-  
-  // Kontaktinis asmuo
-  firstName: string;
-  lastName: string;
-  position: string;
-  email: string;
-  phone: string;
-  
-  // Paskyra
-  password: string;
-  confirmPassword: string;
-  agreedToTerms: boolean;
-  
-  // Dinaminiai laukai (pagal orgType)
-  additionalData: AdditionalData;
-}
+export type CandidateRoleType =
+  | 'veterinarian'
+  | 'student'
+  | 'assistant'
+  | 'manager'
+  | 'laboratory'
+  | 'farm-specialist'
+  | 'regulatory'
+  | 'administration'
+  | 'other';
 
-// Dinaminiai laukai pagal organizacijos tipą
-export interface AdditionalData {
-  // Klinikoms
+export interface EmployerAdditionalData {
   animalTypes?: string[];
   clinicType?: string;
   vetCount?: string;
   acceptsInterns?: boolean;
   hasMultipleLocations?: boolean;
-  
-  // Didmenai/distributoriui
   mainActivity?: string[];
   operatingTerritory?: string;
   typicalPositions?: string[];
-  
-  // Farmacinei įmonei
   activityArea?: string;
   salesRelated?: boolean;
   hiresVetSpecialists?: boolean;
   workTerritory?: string;
-  
-  // Ūkiui
   animalSpecies?: string[];
   farmSize?: string;
   hasPermanentVet?: boolean;
   acceptsStudents?: boolean;
-  
-  // Valstybinei institucijai
   institutionName?: string;
   region?: string;
   specialistTypes?: string;
   offersInternships?: boolean;
-  
-  // Kitiems
   activityDescription?: string;
 }
 
-// Pradinė būsena
-export const initialFormData: EmployerRegistration = {
+export interface EmployerRegistration {
+  orgType: EmployerOrgType | '';
+  orgName: string;
+  city: string;
+  website: string;
+  description: string;
+  teamSize: string;
+  firstName: string;
+  lastName: string;
+  position: string;
+  email: string;
+  phone: string;
+  password: string;
+  confirmPassword: string;
+  agreedToTerms: boolean;
+  additionalData: EmployerAdditionalData;
+}
+
+export interface CandidateRegistration {
+  roleType: CandidateRoleType | '';
+  roleDetail: string;
+  experienceYears: string;
+  education: string;
+  city: string;
+  preferredLocations: string;
+  employmentTypes: string[];
+  salaryExpectation: string;
+  availability: string;
+  skills: string;
+  languages: string;
+  drivingLicense: boolean;
+  openToTravel: boolean;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  password: string;
+  confirmPassword: string;
+  privacyMode: 'active' | 'open' | 'private';
+  agreedToTerms: boolean;
+}
+
+export const initialEmployerRegistration: EmployerRegistration = {
   orgType: '',
   orgName: '',
   city: '',
@@ -91,5 +103,29 @@ export const initialFormData: EmployerRegistration = {
   password: '',
   confirmPassword: '',
   agreedToTerms: false,
-  additionalData: {}
+  additionalData: {},
+};
+
+export const initialCandidateRegistration: CandidateRegistration = {
+  roleType: '',
+  roleDetail: '',
+  experienceYears: '',
+  education: '',
+  city: '',
+  preferredLocations: '',
+  employmentTypes: [],
+  salaryExpectation: '',
+  availability: '',
+  skills: '',
+  languages: '',
+  drivingLicense: false,
+  openToTravel: false,
+  firstName: '',
+  lastName: '',
+  email: '',
+  phone: '',
+  password: '',
+  confirmPassword: '',
+  privacyMode: 'active',
+  agreedToTerms: false,
 };
