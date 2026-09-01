@@ -1,5 +1,18 @@
 import type { Metadata } from 'next';
+import { Fraunces, Manrope } from 'next/font/google';
 import './globals.css';
+
+const fraunces = Fraunces({
+  subsets: ['latin', 'latin-ext'],
+  variable: '--font-fraunces',
+  display: 'swap',
+});
+
+const manrope = Manrope({
+  subsets: ['latin', 'latin-ext'],
+  variable: '--font-manrope',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: 'VetKarjera – veterinarijos darbo ir karjeros platforma',
@@ -9,7 +22,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="lt">
-      <body>{children}</body>
+      <body className={`${fraunces.variable} ${manrope.variable}`}>{children}</body>
     </html>
   );
 }

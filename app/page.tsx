@@ -1,90 +1,146 @@
-'use client';
-
-import { useState } from 'react';
 import Link from 'next/link';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
-import AuthModal from '@/components/AuthModal';
 import { jobs } from '@/data/jobs';
 
 export default function HomePage() {
-  const [modalType, setModalType] = useState<'candidate' | 'employer'>('candidate');
-  const [modalOpen, setModalOpen] = useState(false);
-
-  const openModal = (type: 'candidate' | 'employer') => {
-    setModalType(type);
-    setModalOpen(true);
-  };
-
   return (
     <>
       <Navigation />
       <main>
-        <section className="hero-section">
-          <div className="hero-inner">
-            <span className="eyebrow">🐾 Veterinarijos profesionalams ir darbdaviams</span>
-            <h1>Rask savo vietą veterinarijos sektoriuje</h1>
-            <p className="hero-lead">
-              Darbo pasiūlymai klinikose, didmenose, farmacinėse įmonėse, ūkiuose, laboratorijose ir kitose veterinarijos organizacijose.
-            </p>
-            <p className="hero-free">Darbo skelbimų talpinimas nemokamas.</p>
-            <div className="hero-actions">
-              <button className="btn btn-primary" onClick={() => openModal('candidate')}>🩺 Ieškau darbo</button>
-              <button className="btn btn-secondary" onClick={() => openModal('employer')}>🏥 Ieškau specialistų</button>
+        <section className="home-hero">
+          <div className="home-hero-grid">
+            <div className="home-hero-copy">
+              <span className="section-kicker">Veterinarijos karjerai Lietuvoje</span>
+              <h1>
+                Darbas, kuriame <em>kompetencija</em> randa savo vietą.
+              </h1>
+              <p>
+                Atrinkti pasiūlymai veterinarijos gydytojams, technikams, studentams ir
+                gyvūnų sveikatos sektoriaus profesionalams — nuo klinikos iki laboratorijos.
+              </p>
+              <div className="hero-primary-action">
+                <Link href="/skelbimai" className="btn btn-primary">
+                  Peržiūrėti darbo skelbimus
+                  <span aria-hidden="true">→</span>
+                </Link>
+                <span>{jobs.length} demonstracinių pozicijų</span>
+              </div>
+            </div>
+
+            <aside className="hero-note" aria-label="Platformos kryptis">
+              <span className="hero-note-index">01 / 03</span>
+              <p>
+                Viena profesinė erdvė visiems, kurie rūpinasi gyvūnų sveikata ir nori
+                kurti atsakingą karjerą.
+              </p>
+              <dl>
+                <div><dt>Kryptys</dt><dd>Klinika · Farmacija · Ūkis</dd></div>
+                <div><dt>Regionas</dt><dd>Visa Lietuva</dd></div>
+              </dl>
+            </aside>
+          </div>
+        </section>
+
+        <section className="paths-section" aria-labelledby="paths-title">
+          <div className="section-container">
+            <div className="editorial-heading">
+              <span className="section-index">02</span>
+              <div>
+                <span className="section-kicker">Dvi aiškios kryptys</span>
+                <h2 id="paths-title">Nuo ko pradedame?</h2>
+              </div>
+            </div>
+
+            <div className="career-paths">
+              <article className="career-path career-path-candidate">
+                <div className="career-path-label">Specialistams</div>
+                <h3>Ieškau darbo</h3>
+                <p>
+                  Peržiūrėkite pozicijas pagal miestą, profesinę kryptį ir sektorių.
+                  Atlygis ir darbo pobūdis matomi dar prieš atidarant skelbimą.
+                </p>
+                <ul>
+                  <li>Viešai matomi aktyvūs skelbimai</li>
+                  <li>Aiškūs filtrai ir darbo sąlygos</li>
+                  <li>Specialisto profilis paruoštas MVP režimu</li>
+                </ul>
+                <div className="career-path-actions">
+                  <Link href="/skelbimai" className="text-link">Rasti poziciją <span>→</span></Link>
+                  <Link href="/registracija/kandidatas" className="quiet-link">Kurti demonstracinį profilį</Link>
+                </div>
+              </article>
+
+              <article className="career-path career-path-employer">
+                <div className="career-path-label">Organizacijoms</div>
+                <h3>Ieškau darbuotojo</h3>
+                <p>
+                  Pristatykite savo organizaciją ir poziciją žmonėms, kurie veterinarijos
+                  rinką supranta ne iš šalies.
+                </p>
+                <ul>
+                  <li>Skelbimų talpinimas MVP etape nemokamas</li>
+                  <li>Veterinarijos rinkai pritaikyta struktūra</li>
+                  <li>Registracijos forma veikia demonstraciniu režimu</li>
+                </ul>
+                <div className="career-path-actions">
+                  <Link href="/darbdavys" className="text-link">Darbdaviams <span>→</span></Link>
+                  <Link href="/registracija/darbdavys" className="quiet-link">Registruoti organizaciją</Link>
+                </div>
+              </article>
             </div>
           </div>
         </section>
 
-        <section className="section section-white">
+        <section className="latest-section" aria-labelledby="latest-title">
           <div className="section-container">
-            <div className="section-heading">
-              <span className="eyebrow">Naujausi pasiūlymai</span>
-              <h2>Aktyvūs darbo skelbimai</h2>
-              <p>Vienoje vietoje – klinikinės, komercinės, laboratorinės ir kitos veterinarijos sektoriaus pozicijos.</p>
+            <div className="editorial-heading editorial-heading-split">
+              <span className="section-index">03</span>
+              <div>
+                <span className="section-kicker">Naujausi pasiūlymai</span>
+                <h2 id="latest-title">Karjeros pulsas</h2>
+              </div>
+              <Link href="/skelbimai" className="text-link all-jobs-link">Visi skelbimai <span>→</span></Link>
             </div>
-            <div className="card-grid card-grid-3">
-              {jobs.slice(0, 6).map((job) => (
-                <Link href={`/skelbimas/${job.id}`} key={job.id} className="job-card compact-job-card">
-                  <div className="job-card-top">
-                    <div>
-                      <h3>{job.title}</h3>
-                      <p className="company-name">{job.company}</p>
-                    </div>
-                    <span className="pill">{job.type}</span>
+
+            <div className="editorial-jobs">
+              {jobs.slice(0, 4).map((job, index) => (
+                <Link href={`/skelbimas/${job.id}`} key={job.id} className="editorial-job">
+                  <span className="job-index">{String(index + 1).padStart(2, '0')}</span>
+                  <div className="job-title-block">
+                    <span>{job.company}</span>
+                    <h3>{job.title}</h3>
                   </div>
-                  <div className="job-meta">
-                    <span>📍 {job.location}</span>
-                    <span>💶 {job.salary}</span>
+                  <div className="job-location">
+                    <span>Vieta</span>
+                    <strong>{job.location}</strong>
                   </div>
-                  <p className="job-summary">{job.description}</p>
-                  <div className="tag-row">
-                    {job.tags.slice(0, 3).map((tag) => <span className="tag" key={tag}>{tag}</span>)}
+                  <div className="job-salary">
+                    <span>Atlygis</span>
+                    <strong>{job.salary}</strong>
                   </div>
+                  <span className="job-arrow" aria-hidden="true">↗</span>
                 </Link>
               ))}
             </div>
-            <div className="center-action">
-              <Link href="/skelbimai" className="btn btn-primary">Žiūrėti visus skelbimus →</Link>
-            </div>
           </div>
         </section>
 
-        <section className="section" id="kaip-veikia">
-          <div className="section-container">
-            <div className="section-heading">
-              <span className="eyebrow">Paprasta pradžia</span>
-              <h2>Kaip veikia VetKarjera</h2>
-            </div>
-            <div className="card-grid card-grid-3">
-              <div className="feature-card"><span className="feature-number">01</span><h3>Susikurkite profilį</h3><p>Specialistas aprašo savo kryptį ir lūkesčius, darbdavys – organizaciją ir veiklos sritį.</p></div>
-              <div className="feature-card"><span className="feature-number">02</span><h3>Raskite tinkamą pasiūlymą</h3><p>Naršykite darbo pasiūlymus arba paskelbkite poziciją veterinarijos sektoriuje.</p></div>
-              <div className="feature-card"><span className="feature-number">03</span><h3>AI matching – vėliau</h3><p>Backend etape profilių duomenys bus naudojami tikslesniam specialistų ir darbo vietų suderinimui.</p></div>
-            </div>
+        <section className="home-manifesto">
+          <div className="section-container manifesto-grid">
+            <span className="section-kicker">Profesinė bendruomenė</span>
+            <blockquote>
+              Veterinarijos karjera nėra vien pareigų pavadinimas. Tai atsakomybė,
+              žinios ir komanda, su kuria norisi augti.
+            </blockquote>
+            <p>
+              „VetKarjera“ kuriama kaip aiški, patikima ir specializuota susitikimo
+              vieta rinkai — be triukšmo ir bendrinių pažadų.
+            </p>
           </div>
         </section>
       </main>
       <Footer />
-      <AuthModal isOpen={modalOpen} onClose={() => setModalOpen(false)} type={modalType} />
     </>
   );
 }
