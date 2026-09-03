@@ -13,7 +13,7 @@ export const candidateRoleOptions: CandidateRoleOption[] = [
   {
     id: 'veterinarian',
     label: 'Veterinarijos gydytojas',
-    icon: '🩺',
+    icon: '',
     description: 'Klinikinė praktika, diagnostika, chirurgija ar kita veterinarijos kryptis',
     detailLabel: 'Kokia jūsų specializacija arba klinikinė kryptis?',
     detailPlaceholder: 'Pvz. bendroji praktika, chirurgija, dermatologija, galvijų medicina...'
@@ -21,7 +21,7 @@ export const candidateRoleOptions: CandidateRoleOption[] = [
   {
     id: 'student',
     label: 'Veterinarijos studentas / praktikantas',
-    icon: '🎓',
+    icon: '',
     description: 'Praktika, vasaros darbas, stažuotė ar pirmoji darbo vieta',
     detailLabel: 'Kokios praktikos ar darbo ieškote?',
     detailPlaceholder: 'Pvz. smulkių gyvūnų klinika Kaune, 2 mėn. vasaros praktika...'
@@ -29,7 +29,7 @@ export const candidateRoleOptions: CandidateRoleOption[] = [
   {
     id: 'assistant',
     label: 'Veterinarijos asistentas / felčeris',
-    icon: '🐾',
+    icon: '',
     description: 'Klinikos, slaugos, operacinės ar klientų aptarnavimo darbas',
     detailLabel: 'Kokios darbo krypties ieškote?',
     detailPlaceholder: 'Pvz. operacinės asistentas, stacionaro priežiūra, registratūra...'
@@ -37,7 +37,7 @@ export const candidateRoleOptions: CandidateRoleOption[] = [
   {
     id: 'manager',
     label: 'Vadybininkas / komercijos specialistas',
-    icon: '💼',
+    icon: '',
     description: 'Pardavimai, produktai, Key Account, pirkimai ar verslo plėtra',
     detailLabel: 'Kokio vadybinio darbo ieškote?',
     detailPlaceholder: 'Pvz. pardavimų vadybininkas, Key Account Manager, produktų vadybininkas, pirkimų vadybininkas...'
@@ -45,7 +45,7 @@ export const candidateRoleOptions: CandidateRoleOption[] = [
   {
     id: 'laboratory',
     label: 'Laboratorijos / diagnostikos specialistas',
-    icon: '🔬',
+    icon: '',
     description: 'Laboratorinė diagnostika, mikrobiologija, patologija ar kokybės kontrolė',
     detailLabel: 'Kokios laboratorinės ar diagnostikos krypties ieškote?',
     detailPlaceholder: 'Pvz. mikrobiologija, klinikinė patologija, laboratorijos vadyba...'
@@ -53,7 +53,7 @@ export const candidateRoleOptions: CandidateRoleOption[] = [
   {
     id: 'farm-specialist',
     label: 'Ūkio / gyvulininkystės specialistas',
-    icon: '🐄',
+    icon: '',
     description: 'Bandos sveikata, gamyba, reprodukcija, zootechnika ar konsultavimas',
     detailLabel: 'Kokio darbo ūkyje ar gyvulininkystėje ieškote?',
     detailPlaceholder: 'Pvz. bandos sveikatos specialistas, reprodukcijos konsultantas...'
@@ -61,7 +61,7 @@ export const candidateRoleOptions: CandidateRoleOption[] = [
   {
     id: 'regulatory',
     label: 'Reguliavimo / kokybės specialistas',
-    icon: '📋',
+    icon: '',
     description: 'Regulatory affairs, kokybė, farmakovigilancija, maisto sauga ar institucinis darbas',
     detailLabel: 'Kokios reguliavimo ar kokybės krypties ieškote?',
     detailPlaceholder: 'Pvz. Regulatory Affairs, QA, farmakovigilancija, VMVT inspektorius...'
@@ -69,7 +69,7 @@ export const candidateRoleOptions: CandidateRoleOption[] = [
   {
     id: 'administration',
     label: 'Administracijos / klientų aptarnavimo specialistas',
-    icon: '☎️',
+    icon: '',
     description: 'Registratūra, administravimas, klientų aptarnavimas ar koordinavimas',
     detailLabel: 'Kokio administracinio darbo ieškote?',
     detailPlaceholder: 'Pvz. klinikos administratorius, registratūros darbuotojas...'
@@ -77,7 +77,7 @@ export const candidateRoleOptions: CandidateRoleOption[] = [
   {
     id: 'other',
     label: 'Kitas veterinarijos sektoriaus specialistas',
-    icon: '✨',
+    icon: '',
     description: 'Kita profesinė kryptis, susijusi su veterinarijos sektoriumi',
     detailLabel: 'Trumpai parašykite, kokio darbo ieškote',
     detailPlaceholder: 'Įrašykite norimos pozicijos ar krypties pavadinimą...'

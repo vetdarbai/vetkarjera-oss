@@ -20,8 +20,8 @@ export default function LoginPage() {
         <div className="auth-card">
           <span className="eyebrow">VetKarjera paskyra</span>
           <h1>Prisijungti</h1>
-          <p className="muted">Prisijungimas vizualiai paruoštas. Tikra autentifikacija bus prijungta backend etape.</p>
-          {submitted && <div className="notice notice-warning"><strong>Backend dar neprijungtas.</strong><span>El. paštas ir slaptažodis niekur nebuvo išsiųsti ar išsaugoti.</span></div>}
+          <p className="muted">Prisijunkite prie savo „VetKarjera“ paskyros.</p>
+          {submitted && <div className="notice notice-info"><strong>Prisijungimo funkcija šiuo metu nepasiekiama.</strong></div>}
           <form onSubmit={submit} className="form-stack">
             <label className="field"><span>El. paštas</span><input type="email" required autoComplete="email" /></label>
             <label className="field"><span>Slaptažodis</span><input type="password" required minLength={8} autoComplete="current-password" /></label>

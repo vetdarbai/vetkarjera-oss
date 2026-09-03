@@ -1,35 +1,22 @@
 'use client';
 
-import { FormEvent, useMemo, useState } from 'react';
+import { FormEvent, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import ProgressBar from '@/components/ProgressBar';
 import { candidateRoleOptions, employmentTypeOptions } from '@/data/candidateRoles';
 import { candidateQuestionnaire, experienceOptions, licensedCandidateRoles } from '@/data/candidateQuestions';
 import { CandidateRegistration, CandidateRoleType, initialCandidateRegistration } from '@/types/registration';
 
-type ProfessionalField =
-  | 'roleDetail'
-  | 'experienceYears'
-  | 'education'
-  | 'city'
-  | 'preferredLocations'
-  | 'employmentTypes'
-  | 'salaryExpectation'
-  | 'availability'
-  | 'skills'
-  | 'languages'
-  | 'drivingLicense'
-  | 'openToTravel';
-
 export default function CandidateQuestionnaire() {
   const [step, setStep] = useState(1);
-  const [validated, setValidated] = useState(false);
+  const [done, setDone] = useState(false);
   const [form, setForm] = useState<CandidateRegistration>(initialCandidateRegistration);
+  const licenseInputRef = useRef<HTMLInputElement>(null);
   const selectedRole = useMemo(() => candidateRoleOptions.find((option) => option.id === form.roleType), [form.roleType]);
   const requiresLicense = form.roleType !== '' && licensedCandidateRoles.includes(form.roleType);
   const questions = candidateQuestionnaire.questions;
 
-  const setField = <K extends ProfessionalField>(field: K, value: CandidateRegistration[K]) => {
+  const setField = <K extends keyof CandidateRegistration>(field: K, value: CandidateRegistration[K]) => {
     setForm((current) => ({ ...current, [field]: value }));
   };
 
@@ -43,34 +30,42 @@ export default function CandidateQuestionnaire() {
       : [...form.employmentTypes, value]);
   };
 
-  const submit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const element = event.currentTarget;
-    if (!element.checkValidity()) {
-      element.reportValidity();
+  const goToStep = (nextStep: number) => {
+    setStep(nextStep);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const continueFromProfile = () => {
+    if (requiresLicense && licenseInputRef.current && !licenseInputRef.current.checkValidity()) {
+      licenseInputRef.current.reportValidity();
       return;
     }
+    goToStep(3);
+  };
 
-    setValidated(true);
+  const submit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (form.password !== form.confirmPassword) {
+      alert('Slaptažodžiai nesutampa.');
+      return;
+    }
+    if (!form.agreedToTerms) {
+      alert('Patvirtinkite taisykles ir privatumo informaciją.');
+      return;
+    }
+    setDone(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const restart = () => {
-    setForm(initialCandidateRegistration);
-    setValidated(false);
-    setStep(1);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  if (validated) {
+  if (done) {
     return (
       <section className="questionnaire-complete">
-        <span className="section-kicker">Anketos patikra baigta</span>
-        <h1>Profesinė informacija užpildyta.</h1>
-        <p>Forma sėkmingai praėjo kliento pusės validaciją. Jokia informacija — įskaitant licencijos numerį — nebuvo išsaugota ar išsiųsta.</p>
+        <span className="section-kicker">Specialisto registracija</span>
+        <h1>Registracijos forma užpildyta</h1>
+        <p>Galite tęsti darbo pasiūlymų peržiūrą.</p>
         <div className="questionnaire-complete-actions">
-          <Link href="/skelbimai" className="btn btn-primary">Peržiūrėti skelbimus <span>→</span></Link>
-          <button type="button" className="btn btn-secondary" onClick={restart}>Pildyti iš naujo</button>
+          <Link href="/skelbimai" className="btn btn-primary">Peržiūrėti darbo skelbimus</Link>
+          <Link href="/" className="btn btn-secondary">Į pagrindinį</Link>
         </div>
       </section>
     );
@@ -81,59 +76,51 @@ export default function CandidateQuestionnaire() {
       <header className="questionnaire-intro">
         <span className="section-kicker">{candidateQuestionnaire.intro.kicker}</span>
         <div className="questionnaire-intro-grid">
-          <h1>{candidateQuestionnaire.intro.title}</h1>
+          <h1>Specialisto registracija</h1>
           <p>{candidateQuestionnaire.intro.description}</p>
         </div>
       </header>
 
       <div className="questionnaire-workspace">
         <aside className="questionnaire-sidebar">
-          <ProgressBar currentStep={step} totalSteps={2} />
+          <ProgressBar currentStep={step} totalSteps={3} />
           <ol>
-            <li className={step === 1 ? 'current' : 'complete'}><span>01</span><div><strong>Profesinė rolė</strong><small>Pasirinkite artimiausią kryptį</small></div></li>
-            <li className={step === 2 ? 'current' : ''}><span>02</span><div><strong>Profesinis profilis</strong><small>Patirtis ir darbo lūkesčiai</small></div></li>
+            <li className={step === 1 ? 'current' : step > 1 ? 'complete' : ''}><span>1</span><div><strong>Profesinė kryptis</strong><small>Pasirinkite artimiausią rolę</small></div></li>
+            <li className={step === 2 ? 'current' : step > 2 ? 'complete' : ''}><span>2</span><div><strong>Profesinis profilis</strong><small>Patirtis ir darbo lūkesčiai</small></div></li>
+            <li className={step === 3 ? 'current' : ''}><span>3</span><div><strong>Kontaktai ir privatumas</strong><small>Paskyros informacija</small></div></li>
           </ol>
-          <p>Anketa yra demonstracinė. Jos duomenys nėra saugomi.</p>
         </aside>
 
         {step === 1 && (
           <section className="questionnaire-card" aria-labelledby="role-step-title">
             <div className="questionnaire-heading">
-              <span>01 / 02</span>
+              <span>1 žingsnis iš 3</span>
               <h2 id="role-step-title">{candidateQuestionnaire.role.title}</h2>
               <p>{candidateQuestionnaire.role.description}</p>
             </div>
             <div className="role-options">
-              {candidateRoleOptions.map((option, index) => (
-                <button
-                  key={option.id}
-                  type="button"
-                  className={`role-option ${form.roleType === option.id ? 'selected' : ''}`}
-                  onClick={() => selectRole(option.id)}
-                  aria-pressed={form.roleType === option.id}
-                >
-                  <span>{String(index + 1).padStart(2, '0')}</span>
+              {candidateRoleOptions.map((option) => (
+                <button key={option.id} type="button" className={`role-option ${form.roleType === option.id ? 'selected' : ''}`} onClick={() => selectRole(option.id)} aria-pressed={form.roleType === option.id}>
                   <div><strong>{option.label}</strong><small>{option.description}</small></div>
-                  <i aria-hidden="true">{form.roleType === option.id ? '✓' : '→'}</i>
                 </button>
               ))}
             </div>
             <div className="questionnaire-actions questionnaire-actions-end">
-              <button type="button" className="btn btn-primary" disabled={!form.roleType} onClick={() => { setStep(2); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Tęsti <span>→</span></button>
+              <button type="button" className="btn btn-primary" disabled={!form.roleType} onClick={() => goToStep(2)}>Tęsti</button>
             </div>
           </section>
         )}
 
         {step === 2 && (
-          <form className="questionnaire-card" onSubmit={submit} noValidate>
+          <section className="questionnaire-card" aria-labelledby="profile-step-title">
             <div className="questionnaire-heading">
-              <span>02 / 02</span>
-              <h2>{candidateQuestionnaire.profile.title}</h2>
+              <span>2 žingsnis iš 3</span>
+              <h2 id="profile-step-title">{candidateQuestionnaire.profile.title}</h2>
               <p>{candidateQuestionnaire.profile.description}</p>
             </div>
 
             <div className="questionnaire-fields">
-              <div className="selected-role-line"><span>Pasirinkta rolė</span><strong>{selectedRole?.label}</strong></div>
+              <div className="selected-role-line"><span>Pasirinkta kryptis</span><strong>{selectedRole?.label}</strong></div>
 
               <label className="field">
                 <span>{selectedRole?.detailLabel || questions.roleDetail.label} *</span>
@@ -143,22 +130,10 @@ export default function CandidateQuestionnaire() {
 
               {requiresLicense && (
                 <div className="license-fieldset">
-                  <div className="license-privacy-note">
-                    <span aria-hidden="true">!</span>
-                    <div><strong>{candidateQuestionnaire.license.privacyTitle}</strong><p>{candidateQuestionnaire.license.privacyText}</p></div>
-                  </div>
+                  <div className="license-privacy-note"><div><strong>{candidateQuestionnaire.license.privacyTitle}</strong><p>{candidateQuestionnaire.license.privacyText}</p></div></div>
                   <label className="field" htmlFor={candidateQuestionnaire.license.id}>
                     <span>{candidateQuestionnaire.license.label} *</span>
-                    <input
-                      id={candidateQuestionnaire.license.id}
-                      type="text"
-                      required
-                      pattern=".*\S.*"
-                      autoComplete="off"
-                      aria-describedby="license-help"
-                      onInvalid={(event) => event.currentTarget.setCustomValidity(candidateQuestionnaire.license.requiredMessage)}
-                      onInput={(event) => event.currentTarget.setCustomValidity('')}
-                    />
+                    <input ref={licenseInputRef} id={candidateQuestionnaire.license.id} type="text" required pattern=".*\S.*" autoComplete="off" aria-describedby="license-help" onInvalid={(event) => event.currentTarget.setCustomValidity(candidateQuestionnaire.license.requiredMessage)} onInput={(event) => event.currentTarget.setCustomValidity('')} />
                     <small id="license-help">{candidateQuestionnaire.license.help}</small>
                   </label>
                 </div>
@@ -183,7 +158,6 @@ export default function CandidateQuestionnaire() {
 
               <label className="field"><span>{questions.skills.label}</span><textarea rows={5} value={form.skills} onChange={(event) => setField('skills', event.target.value)} placeholder={selectedRole?.detailPlaceholder} /></label>
               <label className="field"><span>{questions.languages.label}</span><input value={form.languages} onChange={(event) => setField('languages', event.target.value)} placeholder={questions.languages.placeholder} /></label>
-
               <div className="toggle-grid">
                 <label className="check-line compact"><input type="checkbox" checked={form.drivingLicense} onChange={(event) => setField('drivingLicense', event.target.checked)} /><span>{questions.drivingLicense.label}</span></label>
                 <label className="check-line compact"><input type="checkbox" checked={form.openToTravel} onChange={(event) => setField('openToTravel', event.target.checked)} /><span>{questions.openToTravel.label}</span></label>
@@ -191,8 +165,45 @@ export default function CandidateQuestionnaire() {
             </div>
 
             <div className="questionnaire-actions">
-              <button type="button" className="btn btn-secondary" onClick={() => setStep(1)}>← Atgal</button>
-              <button type="submit" className="btn btn-primary">Patikrinti anketą <span>→</span></button>
+              <button type="button" className="btn btn-secondary" onClick={() => goToStep(1)}>Atgal</button>
+              <button type="button" className="btn btn-primary" disabled={!form.roleDetail} onClick={continueFromProfile}>Tęsti</button>
+            </div>
+          </section>
+        )}
+
+        {step === 3 && (
+          <form className="questionnaire-card" onSubmit={submit}>
+            <div className="questionnaire-heading">
+              <span>3 žingsnis iš 3</span>
+              <h2>Kontaktai ir profilio privatumas</h2>
+              <p>Nurodykite paskyros kontaktus ir pasirinkite profilio matomumą.</p>
+            </div>
+            <div className="questionnaire-fields">
+              <div className="form-grid two">
+                <label className="field"><span>Vardas *</span><input required value={form.firstName} onChange={(event) => setField('firstName', event.target.value)} /></label>
+                <label className="field"><span>Pavardė *</span><input required value={form.lastName} onChange={(event) => setField('lastName', event.target.value)} /></label>
+              </div>
+              <div className="form-grid two">
+                <label className="field"><span>El. paštas *</span><input type="email" required autoComplete="email" value={form.email} onChange={(event) => setField('email', event.target.value)} /></label>
+                <label className="field"><span>Telefonas</span><input type="tel" autoComplete="tel" value={form.phone} onChange={(event) => setField('phone', event.target.value)} /></label>
+              </div>
+              <div className="form-grid two">
+                <label className="field"><span>Slaptažodis *</span><input type="password" minLength={8} required autoComplete="new-password" value={form.password} onChange={(event) => setField('password', event.target.value)} /><small>Mažiausiai 8 simboliai.</small></label>
+                <label className="field"><span>Pakartoti slaptažodį *</span><input type="password" minLength={8} required autoComplete="new-password" value={form.confirmPassword} onChange={(event) => setField('confirmPassword', event.target.value)} /></label>
+              </div>
+
+              <fieldset className="privacy-fieldset">
+                <legend>Kaip norite būti matomas darbdaviams?</legend>
+                <label className={`privacy-option ${form.privacyMode === 'active' ? 'selected' : ''}`}><input type="radio" name="privacy" checked={form.privacyMode === 'active'} onChange={() => setField('privacyMode', 'active')} /><div><strong>Aktyviai ieškau darbo</strong><span>Profilis gali būti rodomas tinkamiems darbdaviams.</span></div></label>
+                <label className={`privacy-option ${form.privacyMode === 'open' ? 'selected' : ''}`}><input type="radio" name="privacy" checked={form.privacyMode === 'open'} onChange={() => setField('privacyMode', 'open')} /><div><strong>Atviras geriems pasiūlymams</strong><span>Noriu gauti rekomendacijas, nors aktyviai neieškau.</span></div></label>
+                <label className={`privacy-option ${form.privacyMode === 'private' ? 'selected' : ''}`}><input type="radio" name="privacy" checked={form.privacyMode === 'private'} onChange={() => setField('privacyMode', 'private')} /><div><strong>Privatus profilis</strong><span>Profilio nerodyti darbdaviams.</span></div></label>
+              </fieldset>
+
+              <label className="check-line"><input type="checkbox" required checked={form.agreedToTerms} onChange={(event) => setField('agreedToTerms', event.target.checked)} /><span>Sutinku su <Link href="/taisykles">naudojimosi taisyklėmis</Link> ir <Link href="/privatumas">privatumo informacija</Link>.</span></label>
+            </div>
+            <div className="questionnaire-actions">
+              <button type="button" className="btn btn-secondary" onClick={() => goToStep(2)}>Atgal</button>
+              <button type="submit" className="btn btn-primary">Užbaigti registraciją</button>
             </div>
           </form>
         )}

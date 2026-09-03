@@ -27,7 +27,6 @@ export default function AuthModal({ isOpen, onClose, type }: AuthModalProps) {
     <div className="modal-overlay" onClick={onClose} role="presentation">
       <div className="modal-card" onClick={(event) => event.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
         <button className="modal-close" onClick={onClose} aria-label="Uždaryti">×</button>
-        <div className="modal-icon">{candidate ? '🩺' : '🏥'}</div>
         <h2 id="auth-modal-title">{candidate ? 'Ieškau darbo' : 'Ieškau specialistų'}</h2>
         <p>
           {candidate
@@ -35,12 +34,12 @@ export default function AuthModal({ isOpen, onClose, type }: AuthModalProps) {
             : 'Prisijunkite arba užregistruokite organizaciją, kad galėtumėte skelbti darbo pasiūlymus ir valdyti atranką.'}
         </p>
         <div className="modal-actions">
-          <Link href="/prisijungti" className="btn btn-primary">🔐 Prisijungti</Link>
+          <Link href="/prisijungti" className="btn btn-primary">Prisijungti</Link>
           <Link href={candidate ? '/registracija/kandidatas' : '/registracija/darbdavys'} className="btn btn-secondary">
-            ✨ {candidate ? 'Registruotis kaip specialistui' : 'Registruotis kaip darbdaviui'}
+            {candidate ? 'Registruotis kaip specialistui' : 'Registruotis kaip darbdaviui'}
           </Link>
         </div>
-        <span className="modal-note">Registracija trunka kelias minutes. Tikras duomenų išsaugojimas bus prijungtas backend etape.</span>
+        <span className="modal-note">Registracija trunka kelias minutes.</span>
       </div>
     </div>
   );

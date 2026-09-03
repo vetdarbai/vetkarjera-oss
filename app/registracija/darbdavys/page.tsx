@@ -68,11 +68,9 @@ export default function EmployerRegistrationPage() {
         <Navigation />
         <main className="success-page">
           <div className="success-card">
-            <div className="success-mark">✓</div>
             <span className="eyebrow">Darbdavio registracija</span>
-            <h1>Forma paruošta</h1>
-            <p>Organizacijos registracijos srautas veikia. Šiame frontend etape duomenys nėra išsaugomi.</p>
-            <div className="notice notice-warning"><strong>Kitas techninis etapas – backend.</strong><span>Reikės autentifikacijos ir duomenų bazės, kad ši registracija sukurtų tikrą paskyrą.</span></div>
+            <h1>Registracijos forma užpildyta</h1>
+            <p>Galite tęsti darbo skelbimo kūrimą arba grįžti į pagrindinį puslapį.</p>
             <div className="success-actions"><Link href="/" className="btn btn-primary">Į pagrindinį</Link><Link href="/skelbti" className="btn btn-secondary">Peržiūrėti skelbimo formą</Link></div>
           </div>
         </main>
@@ -94,17 +92,17 @@ export default function EmployerRegistrationPage() {
               <div className="choice-grid">
                 {orgTypeOptions.map((option) => (
                   <button key={option.id} type="button" className={`choice-card ${form.orgType === option.id ? 'selected' : ''}`} onClick={() => selectOrg(option.id)}>
-                    <span className="choice-icon">{option.icon}</span><strong>{option.label}</strong><small>{option.description}</small>
+                    <strong>{option.label}</strong><small>{option.description}</small>
                   </button>
                 ))}
               </div>
-              <div className="form-actions end"><button className="btn btn-primary" type="button" disabled={!form.orgType} onClick={() => setStep(2)}>Tęsti →</button></div>
+              <div className="form-actions end"><button className="btn btn-primary" type="button" disabled={!form.orgType} onClick={() => setStep(2)}>Tęsti</button></div>
             </section>
           )}
 
           {step === 2 && (
             <section className="registration-card">
-              <div className="form-heading"><span className="eyebrow">{selectedOrg?.icon} {selectedOrg?.label}</span><h1>Apie organizaciją</h1><p>Ši informacija vėliau galės būti naudojama organizacijos profiliui ir tikslesniam matching.</p></div>
+              <div className="form-heading"><span className="eyebrow">{selectedOrg?.label}</span><h1>Apie organizaciją</h1><p>Pateikite pagrindinę informaciją apie organizaciją ir komandą.</p></div>
               <div className="form-stack">
                 <div className="form-grid two"><label className="field"><span>Organizacijos pavadinimas *</span><input required value={form.orgName} onChange={(e) => setField('orgName', e.target.value)} /></label><label className="field"><span>Miestas / vietovė *</span><input required value={form.city} onChange={(e) => setField('city', e.target.value)} /></label></div>
                 <div className="form-grid two"><label className="field"><span>Interneto svetainė</span><input type="url" placeholder="https://" value={form.website} onChange={(e) => setField('website', e.target.value)} /></label><label className="field"><span>Komandos dydis *</span><select required value={form.teamSize} onChange={(e) => setField('teamSize', e.target.value)}><option value="">Pasirinkite</option>{teamSizeOptions.map((item) => <option key={item}>{item}</option>)}</select></label></div>
@@ -122,13 +120,13 @@ export default function EmployerRegistrationPage() {
 
                 {['pharmacy','university','laboratory','shelter','production','other'].includes(form.orgType) && <div className="dynamic-box"><h2>Papildoma informacija</h2><label className="field"><span>Trumpai apibūdinkite veiklos sritį</span><textarea rows={4} value={form.additionalData.activityDescription || ''} onChange={(e) => setAdditional('activityDescription', e.target.value)} placeholder="Ką veikia organizacija ir kokių žmonių dažniausiai ieškote?" /></label></div>}
               </div>
-              <div className="form-actions"><button className="btn btn-secondary" type="button" onClick={() => setStep(1)}>← Atgal</button><button className="btn btn-primary" type="button" disabled={!form.orgName || !form.city || !form.description || !form.teamSize} onClick={() => { setStep(3); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Tęsti →</button></div>
+              <div className="form-actions"><button className="btn btn-secondary" type="button" onClick={() => setStep(1)}>Atgal</button><button className="btn btn-primary" type="button" disabled={!form.orgName || !form.city || !form.description || !form.teamSize} onClick={() => { setStep(3); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Tęsti</button></div>
             </section>
           )}
 
           {step === 3 && (
             <form className="registration-card" onSubmit={submit}>
-              <div className="form-heading"><span className="eyebrow">Paskutinis žingsnis</span><h1>Kontaktinis asmuo ir paskyra</h1><p>Prisijungimo duomenys kol kas nėra siunčiami į serverį.</p></div>
+              <div className="form-heading"><span className="eyebrow">Paskutinis žingsnis</span><h1>Kontaktinis asmuo ir paskyra</h1><p>Nurodykite kontaktinį asmenį ir paskyros duomenis.</p></div>
               <div className="form-stack">
                 <div className="form-grid two"><label className="field"><span>Vardas *</span><input required value={form.firstName} onChange={(e) => setField('firstName', e.target.value)} /></label><label className="field"><span>Pavardė *</span><input required value={form.lastName} onChange={(e) => setField('lastName', e.target.value)} /></label></div>
                 <div className="form-grid two"><label className="field"><span>Pareigos *</span><input required value={form.position} onChange={(e) => setField('position', e.target.value)} placeholder="Pvz. klinikos vadovas" /></label><label className="field"><span>Telefonas</span><input type="tel" value={form.phone} onChange={(e) => setField('phone', e.target.value)} /></label></div>
@@ -136,7 +134,7 @@ export default function EmployerRegistrationPage() {
                 <div className="form-grid two"><label className="field"><span>Slaptažodis *</span><input type="password" minLength={8} required value={form.password} onChange={(e) => setField('password', e.target.value)} /><small>Mažiausiai 8 simboliai.</small></label><label className="field"><span>Pakartoti slaptažodį *</span><input type="password" minLength={8} required value={form.confirmPassword} onChange={(e) => setField('confirmPassword', e.target.value)} /></label></div>
                 <label className="check-line"><input type="checkbox" required checked={form.agreedToTerms} onChange={(e) => setField('agreedToTerms', e.target.checked)} /><span>Sutinku su <Link href="/taisykles">naudojimosi taisyklėmis</Link> ir <Link href="/privatumas">privatumo informacija</Link>.</span></label>
               </div>
-              <div className="form-actions"><button className="btn btn-secondary" type="button" onClick={() => setStep(2)}>← Atgal</button><button className="btn btn-primary" type="submit">Užbaigti registracijos formą</button></div>
+              <div className="form-actions"><button className="btn btn-secondary" type="button" onClick={() => setStep(2)}>Atgal</button><button className="btn btn-primary" type="submit">Užbaigti registraciją</button></div>
             </form>
           )}
         </div>

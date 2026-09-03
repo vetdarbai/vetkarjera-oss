@@ -32,7 +32,7 @@ export default function JobDetailPage({ params }: { params: { id: string } }) {
               </div>
               <span className="section-kicker">{job.sector}</span>
               <h1>{job.title}</h1>
-              <Link href="/darbdavys" className="employer-link">{job.company} <span aria-hidden="true">↗</span></Link>
+              <Link href="/darbdavys" className="employer-link">{job.company}</Link>
             </div>
 
             <dl className="job-detail-facts">
@@ -74,8 +74,8 @@ export default function JobDetailPage({ params }: { params: { id: string } }) {
             <aside className="candidate-panel">
               <span className="candidate-panel-label">Specialistui</span>
               <h2>Domina ši pozicija?</h2>
-              <p>Kandidatavimo ir CV siuntimo funkcija dar neprijungta. Galite susikurti demonstracinį specialisto profilį.</p>
-              <Link href="/registracija/kandidatas" className="btn btn-primary btn-block">Specialisto profilis <span>→</span></Link>
+              <p>Susikurkite specialisto profilį ir aiškiai pateikite savo profesinę kryptį bei darbo lūkesčius.</p>
+              <Link href="/registracija/kandidatas" className="btn btn-primary btn-block">Registruotis specialistui</Link>
               <Link href="/prisijungti" className="quiet-action">Jau turite profilį? Prisijungti</Link>
               <dl>
                 <div><dt>Skelbimo būsena</dt><dd>{isNew ? 'Naujas' : 'Aktyvus'}</dd></div>

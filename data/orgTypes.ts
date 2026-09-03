@@ -8,17 +8,17 @@ export interface OrgTypeOption {
 }
 
 export const orgTypeOptions: OrgTypeOption[] = [
-  { id: 'clinic', label: 'Veterinarijos klinika', icon: '🏥', description: 'Gyvūnų gydymo ir diagnostikos įstaiga' },
-  { id: 'wholesale', label: 'Didmena / distributorius', icon: '📦', description: 'Veterinarinių produktų ir įrangos platinimas' },
-  { id: 'pharma', label: 'Farmacinė įmonė', icon: '💊', description: 'Veterinarinių vaistų ar produktų įmonė' },
-  { id: 'farm', label: 'Ūkis / gyvulininkystės įmonė', icon: '🐄', description: 'Gyvulių auginimas ir gamyba' },
-  { id: 'government', label: 'VMVT / valstybinė institucija', icon: '🏛️', description: 'Valstybinė priežiūra, kontrolė ar administravimas' },
-  { id: 'pharmacy', label: 'Veterinarijos vaistinė', icon: '💉', description: 'Veterinarinių vaistų ir priemonių prekyba' },
-  { id: 'university', label: 'Universitetas / mokymo įstaiga', icon: '🎓', description: 'Studijos, mokslas ir profesinis rengimas' },
-  { id: 'laboratory', label: 'Diagnostikos laboratorija', icon: '🔬', description: 'Laboratorinė ir veterinarinė diagnostika' },
-  { id: 'shelter', label: 'Gyvūnų prieglauda / NVO', icon: '🐾', description: 'Gyvūnų globa ir nevyriausybinė veikla' },
-  { id: 'production', label: 'Gyvūninių produktų / pašarų įmonė', icon: '🏭', description: 'Gamyba, kokybė, pašarai ar maisto grandinė' },
-  { id: 'other', label: 'Kita veterinarijos sektoriaus organizacija', icon: '🏢', description: 'Kita su veterinarija susijusi veikla' },
+  { id: 'clinic', label: 'Veterinarijos klinika', icon: '', description: 'Gyvūnų gydymo ir diagnostikos įstaiga' },
+  { id: 'wholesale', label: 'Didmena / distributorius', icon: '', description: 'Veterinarinių produktų ir įrangos platinimas' },
+  { id: 'pharma', label: 'Farmacinė įmonė', icon: '', description: 'Veterinarinių vaistų ar produktų įmonė' },
+  { id: 'farm', label: 'Ūkis / gyvulininkystės įmonė', icon: '', description: 'Gyvulių auginimas ir gamyba' },
+  { id: 'government', label: 'VMVT / valstybinė institucija', icon: '', description: 'Valstybinė priežiūra, kontrolė ar administravimas' },
+  { id: 'pharmacy', label: 'Veterinarijos vaistinė', icon: '', description: 'Veterinarinių vaistų ir priemonių prekyba' },
+  { id: 'university', label: 'Universitetas / mokymo įstaiga', icon: '', description: 'Studijos, mokslas ir profesinis rengimas' },
+  { id: 'laboratory', label: 'Diagnostikos laboratorija', icon: '', description: 'Laboratorinė ir veterinarinė diagnostika' },
+  { id: 'shelter', label: 'Gyvūnų prieglauda / NVO', icon: '', description: 'Gyvūnų globa ir nevyriausybinė veikla' },
+  { id: 'production', label: 'Gyvūninių produktų / pašarų įmonė', icon: '', description: 'Gamyba, kokybė, pašarai ar maisto grandinė' },
+  { id: 'other', label: 'Kita veterinarijos sektoriaus organizacija', icon: '', description: 'Kita su veterinarija susijusi veikla' },
 ];
 
 export const teamSizeOptions = ['1–5', '6–15', '16–50', '51–200', '200+'];

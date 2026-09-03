@@ -12,7 +12,7 @@ export const candidateQuestionnaire = {
   intro: {
     kicker: 'Kandidato profesinė anketa',
     title: 'Papasakokite, kur jūsų žinios gali būti naudingiausios.',
-    description: 'Anketa padeda aiškiai aprašyti profesinę kryptį ir darbo lūkesčius. Šioje versijoje duomenys nėra siunčiami ar išsaugomi.',
+    description: 'Pateikite profesinę kryptį, patirtį ir darbo lūkesčius.',
   },
   role: {
     title: 'Kokia jūsų profesinė rolė?',
@@ -20,7 +20,7 @@ export const candidateQuestionnaire = {
   },
   profile: {
     title: 'Profesinė kryptis ir lūkesčiai',
-    description: 'Naudojami tik tie profesiniai laukai, kurie jau buvo patvirtinti šiame projekte.',
+    description: 'Nurodykite patirtį, kvalifikaciją ir darbo lūkesčius.',
   },
   questions: {
     roleDetail: { id: 'roleDetail', label: 'Ieškoma profesinė kryptis', help: 'Trumpai ir konkrečiai įvardykite norimą darbo ar praktikos kryptį.', required: true },
@@ -39,9 +39,9 @@ export const candidateQuestionnaire = {
   license: {
     id: 'veterinaryLicense',
     label: 'Veterinarijos praktikos licencijos numeris',
-    help: 'Privalomas šiai profesinei rolei. Numeris nėra viešo profilio dalis ir darbdaviams nerodomas.',
-    privacyTitle: 'Konfidencialus patikros laukas',
-    privacyText: 'Šioje demonstracinėje versijoje numeris tik patikrinamas naršyklėje. Jis niekur nesiunčiamas, neišsaugomas ir nėra įtraukiamas į anketos duomenis.',
+    help: 'Privalomas veterinarijos gydytojo profesinei rolei.',
+    privacyTitle: 'Privati informacija',
+    privacyText: 'Numeris yra privatus ir naudojamas tik paskyrai patikrinti. Jį matys tik „VetKarjera“ administratorius. Darbdaviams, kandidatams ir viešiems lankytojams jis nebus rodomas.',
     requiredMessage: 'Įrašykite veterinarijos praktikos licencijos numerį.',
   },
 };

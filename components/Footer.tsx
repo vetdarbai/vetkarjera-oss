@@ -6,7 +6,6 @@ export default function Footer() {
       <div className="footer-container">
         <div>
           <div className="footer-brand">VetKarjera</div>
-          <p className="footer-text">Veterinarijos darbo ir karjeros platforma Lietuvai.</p>
         </div>
         <div className="footer-links">
           <Link href="/skelbimai">Skelbimai</Link>
@@ -15,7 +14,7 @@ export default function Footer() {
           <Link href="/taisykles">Taisyklės</Link>
         </div>
       </div>
-      <div className="footer-bottom">© 2026 VetKarjera. MVP versija.</div>
+      <div className="footer-bottom">© 2026 VetKarjera</div>
     </footer>
   );
 }

@@ -14,15 +14,14 @@ export default function EmployerPage() {
           <div className="employer-hero-grid">
             <div>
               <span className="section-kicker">Darbdaviams veterinarijos sektoriuje</span>
-              <h1>Komandą augina ne CV kiekis, o <em>tikslus susitikimas.</em></h1>
+              <h1>Darbdaviams</h1>
             </div>
             <div className="employer-hero-aside">
               <p>Pristatykite poziciją žmonėms, kurie supranta veterinarijos darbo rinką, jos atsakomybę ir profesines kryptis.</p>
               <div className="employer-actions">
-                <Link href="/registracija/darbdavys" className="btn btn-primary">Registruoti organizaciją <span>→</span></Link>
-                <Link href="/skelbti" className="employer-form-link">Peržiūrėti demonstracinę skelbimo formą</Link>
+                <Link href="/registracija/darbdavys" className="btn btn-primary">Registruoti organizaciją</Link>
+                <Link href="/skelbti" className="employer-form-link">Paskelbti darbo skelbimą</Link>
               </div>
-              <small>Registracija ir skelbimo forma šiuo metu veikia demonstraciniu režimu.</small>
             </div>
           </div>
         </section>
@@ -36,7 +35,7 @@ export default function EmployerPage() {
             <div className="employer-statements">
               <article><span>01</span><h3>Specializuotas kontekstas</h3><p>Skelbimo laukai pritaikyti klinikiniam, komerciniam, laboratoriniam ir ūkio darbui.</p></article>
               <article><span>02</span><h3>Aiškios darbo sąlygos</h3><p>Kandidatai mato vietą, atlygio intervalą, etatą ir profesinę kryptį dar sąraše.</p></article>
-              <article><span>03</span><h3>Nemokamas MVP etapas</h3><p>Skelbimo talpinimo kelias paruoštas demonstracijai; tikras išsaugojimas bus prijungtas su backend.</p></article>
+              <article><span>03</span><h3>Profesinė auditorija</h3><p>Pasiūlymą mato veterinarijos darbo rinka besidomintys specialistai.</p></article>
             </div>
           </div>
         </section>
@@ -47,8 +46,8 @@ export default function EmployerPage() {
               <span className="section-kicker">Dabartinė pasiūla</span>
               <h2>{jobs.length} pozicijos<br />{sectors.length} sektoriuose</h2>
             </div>
-            <p>Esami demonstraciniai duomenys apima klinikas, laboratorijas, farmaciją, distribuciją ir gyvulininkystę. Vienos įmonės pasikartojančių skelbimų šiuo metu nėra, todėl jų neimituojame.</p>
-            <Link href="/skelbimai" className="text-link">Peržiūrėti darbo rinką <span>→</span></Link>
+            <p>Darbo pasiūlymai apima klinikas, laboratorijas, farmaciją, distribuciją ir gyvulininkystę.</p>
+            <Link href="/skelbimai" className="text-link">Peržiūrėti darbo rinką</Link>
           </div>
         </section>
 

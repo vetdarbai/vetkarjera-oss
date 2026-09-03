@@ -5,7 +5,17 @@ export default function PrivacyPage() {
   return (
     <>
       <Navigation />
-      <main className="legal-page"><article className="legal-card"><span className="eyebrow">MVP dokumentas</span><h1>Privatumo informacija</h1><p><strong>Ši versija yra techninis prototipas.</strong> Registracijos formose įvesti duomenys šiuo metu nėra siunčiami į serverį ir nėra išsaugomi.</p><h2>Prieš viešą paleidimą</h2><p>Prijungus backend turės būti apibrėžti duomenų valdytojas, tvarkymo tikslai, teisiniai pagrindai, saugojimo terminai, duomenų gavėjai, vartotojų teisės, slapukai ir saugumo priemonės.</p><h2>Duomenų kiekio mažinimas</h2><p>VetKarjera turėtų rinkti tik informaciją, reikalingą paskyrai, darbo paieškai, kandidatavimui ir darbdavio funkcijoms. Jautrūs ar pertekliniai duomenys neturėtų būti renkami be būtinybės.</p><div className="notice notice-info">Prieš produkcinį paleidimą šį tekstą turi peržiūrėti teisininkas arba BDAR specialistas.</div></article></main>
+      <main className="legal-page">
+        <article className="legal-card">
+          <span className="eyebrow">VetKarjera</span>
+          <h1>Privatumo informacija</h1>
+          <p>„VetKarjera“ siekia rinkti tik informaciją, reikalingą paskyrai, darbo paieškai, kandidatavimui ir darbdavio funkcijoms.</p>
+          <h2>Duomenų kiekio mažinimas</h2>
+          <p>Jautrūs ar pertekliniai duomenys neturėtų būti renkami be būtinybės. Veterinarijos praktikos licencijos numeris skirtas tik paskyrai patikrinti ir nėra rodomas darbdaviams, kandidatams ar viešiems lankytojams.</p>
+          <h2>Duomenų saugumas</h2>
+          <p>Asmens ir profesinė informacija turi būti tvarkoma tik aiškiai apibrėžtais platformos naudojimo tikslais.</p>
+        </article>
+      </main>
       <Footer />
     </>
   );

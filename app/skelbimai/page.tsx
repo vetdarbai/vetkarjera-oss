@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { jobs } from '@/data/jobs';
@@ -16,9 +17,10 @@ const formatDate = (value: string) => new Intl.DateTimeFormat('lt-LT', {
 const getStatus = (postedDaysAgo: number) => postedDaysAgo <= 3 ? 'Naujas' : 'Aktyvus';
 
 export default function JobsPage() {
-  const [query, setQuery] = useState('');
-  const [location, setLocation] = useState('');
-  const [specialization, setSpecialization] = useState('');
+  const searchParams = useSearchParams();
+  const [query, setQuery] = useState(() => searchParams.get('q') || '');
+  const [location, setLocation] = useState(() => searchParams.get('location') || '');
+  const [specialization, setSpecialization] = useState(() => searchParams.get('specialization') || '');
   const [type, setType] = useState('');
   const [sector, setSector] = useState('');
   const [sort, setSort] = useState('newest');
@@ -67,10 +69,9 @@ export default function JobsPage() {
       <main className="jobs-page">
         <header className="jobs-header">
           <div className="jobs-header-inner">
-            <span className="section-kicker">Veterinarijos darbo rinka</span>
             <div className="jobs-heading-grid">
-              <h1>Raskite darbą,<br /><em>vertą jūsų žinių.</em></h1>
-              <p>Aktyvūs pasiūlymai klinikose, laboratorijose, ūkiuose, farmacijos ir veterinarinės distribucijos įmonėse.</p>
+              <h1>Darbo skelbimai</h1>
+              <p>Veterinarijos darbo pasiūlymai visoje Lietuvoje.</p>
             </div>
           </div>
         </header>
@@ -153,7 +154,7 @@ export default function JobsPage() {
                   <div><dt>Atlygis</dt><dd>{job.salary}</dd></div>
                   <div><dt>Etatas</dt><dd>{job.type}</dd></div>
                 </dl>
-                <span className="job-row-arrow" aria-hidden="true">↗</span>
+                <span className="job-row-arrow" aria-hidden="true">›</span>
               </Link>
             ))}
           </div>
