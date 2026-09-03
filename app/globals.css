@@ -1,8 +1,8 @@
 :root {
   --forest: #2d6cdf;
   --forest-deep: #1e4a8c;
-  --ivory: #f7f3ea;
-  --paper: #fffdf8;
+  --ivory: #fcfaf6;
+  --paper: #ffffff;
   --coral: #2d6cdf;
   --coral-dark: #2d6cdf;
   --sage: #e6f0fb;
@@ -19,7 +19,7 @@
   --primary-dark: #1e4a8c;
   --primary-soft: #e6f0fb;
   --text: #1e293b;
-  --bg: #f7f3ea;
+  --bg: #faf8f4;
   --radius: 6px;
   --shadow-sm: 0 1px 0 rgba(30, 74, 140, 0.06);
   --shadow-md: 0 14px 36px rgba(30, 41, 59, 0.1);
