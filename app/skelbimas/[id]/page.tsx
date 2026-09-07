@@ -11,8 +11,9 @@ const formatDate = (value: string) => new Intl.DateTimeFormat('lt-LT', {
   timeZone: 'UTC',
 }).format(new Date(`${value}T00:00:00Z`));
 
-export default function JobDetailPage({ params }: { params: { id: string } }) {
-  const job = jobs.find((item) => item.id === Number(params.id));
+export default async function JobDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const job = jobs.find((item) => item.id === Number(id));
   if (!job) notFound();
 
   const isNew = job.postedDaysAgo <= 3;
