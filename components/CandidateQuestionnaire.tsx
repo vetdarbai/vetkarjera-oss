@@ -2,6 +2,8 @@
 
 import { FormEvent, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
+import { registerAccount } from '@/app/auth/actions';
+import VerificationNotice from '@/components/VerificationNotice';
 import ProgressBar from '@/components/ProgressBar';
 import { candidateRoleOptions, employmentTypeOptions } from '@/data/candidateRoles';
 import { candidateQuestionnaire, experienceOptions, licensedCandidateRoles } from '@/data/candidateQuestions';
@@ -10,6 +12,8 @@ import { CandidateRegistration, CandidateRoleType, initialCandidateRegistration 
 export default function CandidateQuestionnaire() {
   const [step, setStep] = useState(1);
   const [done, setDone] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [authError, setAuthError] = useState('');
   const [form, setForm] = useState<CandidateRegistration>(initialCandidateRegistration);
   const licenseInputRef = useRef<HTMLInputElement>(null);
   const selectedRole = useMemo(() => candidateRoleOptions.find((option) => option.id === form.roleType), [form.roleType]);
@@ -43,8 +47,9 @@ export default function CandidateQuestionnaire() {
     goToStep(3);
   };
 
-  const submit = (event: FormEvent<HTMLFormElement>) => {
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (pending) return;
     if (form.password !== form.confirmPassword) {
       alert('Slaptažodžiai nesutampa.');
       return;
@@ -53,21 +58,22 @@ export default function CandidateQuestionnaire() {
       alert('Patvirtinkite taisykles ir privatumo informaciją.');
       return;
     }
-    setDone(true);
+    setPending(true);
+    setAuthError('');
+    try {
+      const result = await registerAccount({ email: form.email, password: form.password, confirmPassword: form.confirmPassword, role: 'specialist', agreedToTerms: form.agreedToTerms });
+      if (!result.ok) { setAuthError(result.message || 'Registracijos atlikti nepavyko.'); return; }
+      setField('password', '');
+      setField('confirmPassword', '');
+      setDone(true);
+    } catch { setAuthError('Nepavyko susisiekti. Bandykite dar kartą.'); }
+    finally { setPending(false); }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   if (done) {
     return (
-      <section className="questionnaire-complete">
-        <span className="section-kicker">Specialisto registracija</span>
-        <h1>Registracijos forma užpildyta</h1>
-        <p>Galite tęsti darbo pasiūlymų peržiūrą.</p>
-        <div className="questionnaire-complete-actions">
-          <Link href="/skelbimai" className="btn btn-primary">Peržiūrėti darbo skelbimus</Link>
-          <Link href="/" className="btn btn-secondary">Į pagrindinį</Link>
-        </div>
-      </section>
+      <VerificationNotice email={form.email} />
     );
   }
 
@@ -173,6 +179,7 @@ export default function CandidateQuestionnaire() {
 
         {step === 3 && (
           <form className="questionnaire-card" onSubmit={submit}>
+            {authError && <div className="notice notice-info" role="alert">{authError}</div>}
             <div className="questionnaire-heading">
               <span>3 žingsnis iš 3</span>
               <h2>Kontaktai ir profilio privatumas</h2>
@@ -203,7 +210,7 @@ export default function CandidateQuestionnaire() {
             </div>
             <div className="questionnaire-actions">
               <button type="button" className="btn btn-secondary" onClick={() => goToStep(2)}>Atgal</button>
-              <button type="submit" className="btn btn-primary">Užbaigti registraciją</button>
+              <button type="submit" className="btn btn-primary" disabled={pending}>{pending ? 'Kuriama paskyra…' : 'Užbaigti registraciją'}</button>
             </div>
           </form>
         )}

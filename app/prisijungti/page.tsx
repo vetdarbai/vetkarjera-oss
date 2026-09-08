@@ -1,40 +1,11 @@
-'use client';
+import AuthFrame from '@/components/AuthFrame';
+import LoginForm from '@/components/LoginForm';
+import { getActiveUser } from '@/lib/auth/session';
+import { safeNext } from '@/lib/auth/validation';
 
-import { FormEvent, useState } from 'react';
-import Link from 'next/link';
-import Navigation from '@/components/Navigation';
-import Footer from '@/components/Footer';
+export const dynamic = 'force-dynamic';
 
-export default function LoginPage() {
-  const [submitted, setSubmitted] = useState(false);
-
-  const submit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setSubmitted(true);
-  };
-
-  return (
-    <>
-      <Navigation />
-      <main className="auth-page">
-        <div className="auth-card">
-          <span className="eyebrow">VetKarjera paskyra</span>
-          <h1>Prisijungti</h1>
-          <p className="muted">Prisijunkite prie savo „VetKarjera“ paskyros.</p>
-          {submitted && <div className="notice notice-info"><strong>Prisijungimo funkcija šiuo metu nepasiekiama.</strong></div>}
-          <form onSubmit={submit} className="form-stack">
-            <label className="field"><span>El. paštas</span><input type="email" required autoComplete="email" /></label>
-            <label className="field"><span>Slaptažodis</span><input type="password" required minLength={8} autoComplete="current-password" /></label>
-            <button className="btn btn-primary btn-block" type="submit">Prisijungti</button>
-          </form>
-          <div className="auth-divider"><span>arba</span></div>
-          <div className="choice-actions">
-            <Link href="/registracija/kandidatas" className="btn btn-secondary btn-block">Registruotis kaip specialistui</Link>
-            <Link href="/registracija/darbdavys" className="btn btn-secondary btn-block">Registruotis kaip darbdaviui</Link>
-          </div>
-        </div>
-      </main>
-      <Footer />
-    </>
-  );
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string; password?: string }> }) {
+  const [user, params] = await Promise.all([getActiveUser(), searchParams]);
+  return <AuthFrame><LoginForm signedIn={!!user} next={safeNext(params.next)} passwordChanged={params.password === 'changed'} /></AuthFrame>;
 }

@@ -2,6 +2,8 @@
 
 import { FormEvent, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { registerAccount } from '@/app/auth/actions';
+import VerificationNotice from '@/components/VerificationNotice';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import ProgressBar from '@/components/ProgressBar';
@@ -26,6 +28,8 @@ export default function EmployerRegistrationPage() {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<EmployerRegistration>(initialEmployerRegistration);
   const [done, setDone] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [authError, setAuthError] = useState('');
   const selectedOrg = useMemo(() => orgTypeOptions.find((item) => item.id === form.orgType), [form.orgType]);
 
   const setField = <K extends keyof EmployerRegistration>(field: K, value: EmployerRegistration[K]) => {
@@ -48,8 +52,9 @@ export default function EmployerRegistrationPage() {
     setForm((current) => ({ ...current, orgType, additionalData: {} }));
   };
 
-  const submit = (event: FormEvent<HTMLFormElement>) => {
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (pending) return;
     if (form.password !== form.confirmPassword) {
       alert('Slaptažodžiai nesutampa.');
       return;
@@ -58,7 +63,16 @@ export default function EmployerRegistrationPage() {
       alert('Patvirtinkite, kad sutinkate su taisyklėmis ir privatumo informacija.');
       return;
     }
-    setDone(true);
+    setPending(true);
+    setAuthError('');
+    try {
+      const result = await registerAccount({ email: form.email, password: form.password, confirmPassword: form.confirmPassword, role: 'employer', agreedToTerms: form.agreedToTerms });
+      if (!result.ok) { setAuthError(result.message || 'Registracijos atlikti nepavyko.'); return; }
+      setField('password', '');
+      setField('confirmPassword', '');
+      setDone(true);
+    } catch { setAuthError('Nepavyko susisiekti. Bandykite dar kartą.'); }
+    finally { setPending(false); }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -67,12 +81,7 @@ export default function EmployerRegistrationPage() {
       <>
         <Navigation />
         <main className="success-page">
-          <div className="success-card">
-            <span className="eyebrow">Darbdavio registracija</span>
-            <h1>Registracijos forma užpildyta</h1>
-            <p>Galite tęsti darbo skelbimo kūrimą arba grįžti į pagrindinį puslapį.</p>
-            <div className="success-actions"><Link href="/" className="btn btn-primary">Į pagrindinį</Link><Link href="/skelbti" className="btn btn-secondary">Peržiūrėti skelbimo formą</Link></div>
-          </div>
+          <VerificationNotice email={form.email} />
         </main>
         <Footer />
       </>
@@ -126,6 +135,7 @@ export default function EmployerRegistrationPage() {
 
           {step === 3 && (
             <form className="registration-card" onSubmit={submit}>
+              {authError && <div className="notice notice-info" role="alert">{authError}</div>}
               <div className="form-heading"><span className="eyebrow">Paskutinis žingsnis</span><h1>Kontaktinis asmuo ir paskyra</h1><p>Nurodykite kontaktinį asmenį ir paskyros duomenis.</p></div>
               <div className="form-stack">
                 <div className="form-grid two"><label className="field"><span>Vardas *</span><input required value={form.firstName} onChange={(e) => setField('firstName', e.target.value)} /></label><label className="field"><span>Pavardė *</span><input required value={form.lastName} onChange={(e) => setField('lastName', e.target.value)} /></label></div>
@@ -134,7 +144,7 @@ export default function EmployerRegistrationPage() {
                 <div className="form-grid two"><label className="field"><span>Slaptažodis *</span><input type="password" minLength={8} required value={form.password} onChange={(e) => setField('password', e.target.value)} /><small>Mažiausiai 8 simboliai.</small></label><label className="field"><span>Pakartoti slaptažodį *</span><input type="password" minLength={8} required value={form.confirmPassword} onChange={(e) => setField('confirmPassword', e.target.value)} /></label></div>
                 <label className="check-line"><input type="checkbox" required checked={form.agreedToTerms} onChange={(e) => setField('agreedToTerms', e.target.checked)} /><span>Sutinku su <Link href="/taisykles">naudojimosi taisyklėmis</Link> ir <Link href="/privatumas">privatumo informacija</Link>.</span></label>
               </div>
-              <div className="form-actions"><button className="btn btn-secondary" type="button" onClick={() => setStep(2)}>Atgal</button><button className="btn btn-primary" type="submit">Užbaigti registraciją</button></div>
+              <div className="form-actions"><button className="btn btn-secondary" type="button" onClick={() => setStep(2)}>Atgal</button><button className="btn btn-primary" type="submit" disabled={pending}>{pending ? 'Kuriama paskyra…' : 'Užbaigti registraciją'}</button></div>
             </form>
           )}
         </div>

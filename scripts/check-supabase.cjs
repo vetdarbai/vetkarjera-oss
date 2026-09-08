@@ -6,6 +6,12 @@ const fs = require('node:fs');
 const path = require('node:path');
 const assert = require('node:assert/strict');
 const ts = require('typescript');
+const Module = require('node:module');
+const load = Module._load;
+Module._load = function(id, parent, isMain) {
+  if (id === 'next/headers') return { cookies: async () => ({ getAll: () => [], set() { throw new Error('Anonymous probe must not write auth cookies'); } }) };
+  return load.call(this, id, parent, isMain);
+};
 require('@next/env').loadEnvConfig(process.cwd());
 
 require.extensions['.ts'] = (module, filename) => {
@@ -20,7 +26,7 @@ require.extensions['.ts'] = (module, filename) => {
 async function main() {
   for (const kind of ['server', 'client']) {
     const { createClient } = require(path.resolve(`lib/supabase/${kind}.ts`));
-    const client = createClient();
+    const client = await createClient();
     const { data, error } = await client.from('jobs').select('id').limit(1);
     assert.equal(error, null, `${kind}: ${error?.code || 'request failed'}`);
     assert.deepEqual(data, [], `${kind}: anonymous reads must return no rows`);

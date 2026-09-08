@@ -1,3 +1,8 @@
+# Current Auth implementation
+
+See [Stage 3 checkpoint](../STAGE3_HANDOFF.md) for the current implementation, applied Auth migration, test evidence and unfinished production verification. The Stage 2 notes below are historical: session defaults, signup provisioning and dependencies have since changed. For the current schema use tests/stage3_rls.sql, which includes the Stage 2 baseline tests.
+
+---
 # Stage 2 backend foundation
 
 Existing project: `pirezwaggwlfhwmdzisu` (Vetkarjera, eu-west-1).
