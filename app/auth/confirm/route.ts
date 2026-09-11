@@ -9,6 +9,7 @@ export async function GET(request: NextRequest) {
   const type = request.nextUrl.searchParams.get('type');
   const code = request.nextUrl.searchParams.get('code');
   let destination = '/auth/klaida';
+  let verified = false;
   // Default Supabase templates use PKCE; the verifier is in this browser's cookie.
   // Recovery comes from the SDK's verifier, not an untrusted URL flag.
   if (code && code.length <= 2048) {
@@ -20,7 +21,10 @@ export async function GET(request: NextRequest) {
       });
       try {
         const { error } = await client.auth.exchangeCodeForSession(code);
-        if (!error) destination = recovery ? '/naujas-slaptazodis' : safeNext(request.nextUrl.searchParams.get('next'));
+        if (!error) {
+          destination = recovery ? '/naujas-slaptazodis' : safeNext(request.nextUrl.searchParams.get('next'));
+          verified = !recovery;
+        }
       } finally { subscription.unsubscribe(); }
     } catch { /* A missing verifier or expired code uses the safe error page. */ }
   }
@@ -28,10 +32,14 @@ export async function GET(request: NextRequest) {
     try {
       const client = await createClient();
       const { error } = await client.auth.verifyOtp({ token_hash, type });
-      if (!error) destination = type === 'recovery' ? '/naujas-slaptazodis' : safeNext(request.nextUrl.searchParams.get('next'));
+      if (!error) {
+        destination = type === 'recovery' ? '/naujas-slaptazodis' : safeNext(request.nextUrl.searchParams.get('next'));
+        verified = type !== 'recovery';
+      }
     } catch { /* Show the same safe error for invalid, expired and unavailable links. */ }
   }
   const response = NextResponse.redirect(new URL(destination, SITE_URL), 303);
+  if (verified) response.cookies.set('vk-email-verified', '1', { httpOnly: true, secure: true, sameSite: 'lax', path: '/', maxAge: 120 });
   response.headers.set('Cache-Control', 'private, no-store');
   response.headers.set('Referrer-Policy', 'no-referrer');
   return response;

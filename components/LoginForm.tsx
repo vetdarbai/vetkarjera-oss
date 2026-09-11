@@ -22,14 +22,14 @@ export default function LoginForm({ signedIn, next, passwordChanged }: { signedI
   if (signedIn) return <form onSubmit={submit}>
     <h1 style={{ marginBottom: 0 }}>Esate prisijungęs</h1>
     <button style={{ marginTop: 20 }} className="btn btn-secondary" disabled={pending} type="submit">{pending ? 'Atsijungiama…' : 'Atsijungti'}</button>
-    {error && <div className="notice notice-info" role="alert">{error}</div>}
+    {error && <div className="notice notice-error" role="alert">{error}</div>}
   </form>;
   return <>
     <span className="eyebrow">VetKarjera paskyra</span>
     <h1>Prisijungti</h1>
     <p className="muted">Prisijunkite prie savo „VetKarjera“ paskyros.</p>
-    {passwordChanged && <div className="notice notice-info" role="status">Slaptažodis pakeistas. Prisijunkite su nauju slaptažodžiu.</div>}
-    {error && <div className="notice notice-info" role="alert">{error}</div>}
+    {passwordChanged && <div className="notice notice-success" role="status">Slaptažodis pakeistas. Prisijunkite su nauju slaptažodžiu.</div>}
+    {error && <div className="notice notice-error" role="alert">{error}</div>}
     <form onSubmit={submit} className="form-stack">
       <label className="field"><span>El. paštas</span><input name="email" type="email" required maxLength={254} autoComplete="email" /></label>
       <label className="field"><span>Slaptažodis</span><input name="password" type="password" required maxLength={128} autoComplete="current-password" /></label>

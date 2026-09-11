@@ -17,9 +17,23 @@ export async function middleware(request: NextRequest) {
     },
   });
   // No authorization decision relies on a client-supplied session object.
-  await supabase.auth.getUser();
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (request.nextUrl.pathname === '/profilis') {
+    const profile = !error && user?.email_confirmed_at
+      ? await supabase.from('profiles').select('id').eq('id', user.id).maybeSingle()
+      : null;
+    if (!profile?.data) {
+      const login = new URL('/prisijungti', request.url);
+      login.searchParams.set('next', '/profilis');
+      const denied = NextResponse.redirect(login);
+      response.cookies.getAll().forEach(cookie => denied.cookies.set(cookie));
+      denied.headers.set('Cache-Control', 'private, no-store, max-age=0');
+      denied.headers.set('Referrer-Policy', 'no-referrer');
+      return denied;
+    }
+  }
   if (request.cookies.getAll().some(({ name }) => name.startsWith('sb-')) ||
-      /^\/(auth|prisijungti|registracija|pamirsau-slaptazodi|naujas-slaptazodis)(\/|$)/.test(request.nextUrl.pathname)) {
+      /^\/(auth|profilis|prisijungti|registracija|pamirsau-slaptazodi|naujas-slaptazodis)(\/|$)/.test(request.nextUrl.pathname)) {
     response.headers.set('Cache-Control', 'private, no-store, max-age=0');
   }
   response.headers.set('Referrer-Policy', 'no-referrer');

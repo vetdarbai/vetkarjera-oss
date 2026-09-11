@@ -17,6 +17,13 @@ async function post(name, args, requestOrigin = origin) {
     if (route === '/prisijungti') assert.match(response.headers.get('cache-control'), /no-store/);
   }
   console.log('PASS: HTTP route status and login cache isolation');
+  const profile = await fetch(origin + '/profilis', { redirect: 'manual' });
+  assert.equal(profile.status, 307);
+  const login = new URL(profile.headers.get('location'), origin);
+  assert.equal(login.pathname, '/prisijungti');
+  assert.equal(login.searchParams.get('next'), '/profilis');
+  assert.match(profile.headers.get('cache-control'), /no-store/);
+  console.log('PASS: profile protected with no-store redirect');
   const csrf = await post('registerAccount', [{ role: 'admin' }], 'https://evil.example');
   assert.ok(csrf.status >= 400, 'Cross-origin action must be rejected');
   console.log('PASS: cross-origin Server Action rejected');

@@ -1,15 +1,18 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { cookies } from 'next/headers';
 import { createClient } from '@/lib/supabase/server';
 import { getActiveUser } from '@/lib/auth/session';
-import { isAccountRole, isEmail, isPassword, safeNext, SITE_URL, publicAuthError, type AuthResult } from '@/lib/auth/validation';
+import { isAccountRole, isEmail, isPassword, safeNext, SITE_URL, publicAuthError, registrationErrors, type AuthResult } from '@/lib/auth/validation';
 
-export async function registerAccount(input: { email: string; password: string; confirmPassword: string; role: string; agreedToTerms: boolean }): Promise<AuthResult> {
-  if (!isAccountRole(input?.role) || input.agreedToTerms !== true) {
-    return { ok: false, message: 'Pasirinkite paskyros tipą ir patvirtinkite naudojimosi taisykles.' };
+export async function registerAccount(input: { firstName: string; lastName: string; email: string; password: string; confirmPassword: string; role: string; agreedToTerms: boolean }): Promise<AuthResult> {
+  if (!isAccountRole(input?.role)) {
+    return { ok: false, message: 'Pasirinkite tinkamą registracijos puslapį.' };
   }
   const email = typeof input.email === 'string' ? input.email.trim() : '';
+  const fieldErrors = registrationErrors({ ...input, email });
+  if (Object.keys(fieldErrors).length) return { ok: false, fieldErrors };
   if (!isEmail(email)) return { ok: false, message: 'Įveskite tinkamą el. pašto adresą.' };
   if (!isPassword(input.password)) return { ok: false, message: 'Slaptažodis turi būti nuo 8 iki 128 simbolių.' };
   if (input.password !== input.confirmPassword) return { ok: false, message: 'Slaptažodžiai nesutampa.' };
@@ -17,7 +20,7 @@ export async function registerAccount(input: { email: string; password: string; 
     const client = await createClient();
     const { data, error } = await client.auth.signUp({
       email, password: input.password,
-      options: { data: { account_role: input.role }, emailRedirectTo: SITE_URL + '/auth/confirm' },
+      options: { data: { account_role: input.role, first_name: input.firstName.trim(), last_name: input.lastName.trim(), terms_accepted_at: new Date().toISOString() }, emailRedirectTo: SITE_URL + '/auth/confirm' },
     });
     if (error && error.code !== 'user_already_exists') return publicAuthError(error);
     // Fail closed if confirmation has accidentally been disabled in the dashboard.
@@ -74,8 +77,8 @@ export async function sendAuthEmail(emailInput: string, kind: 'verification' | '
 }
 
 export async function updatePassword(input: { password: string; confirmPassword: string }): Promise<AuthResult> {
-  if (!isPassword(input?.password)) return { ok: false, message: 'Slaptažodis turi būti nuo 8 iki 128 simbolių.' };
-  if (input.password !== input.confirmPassword) return { ok: false, message: 'Slaptažodžiai nesutampa.' };
+  if (!isPassword(input?.password)) return { ok: false, fieldErrors: { password: 'Slaptažodis turi būti nuo 8 iki 128 simbolių.' } };
+  if (input.password !== input.confirmPassword) return { ok: false, fieldErrors: { confirmPassword: 'Slaptažodžiai nesutampa.' } };
   try {
     if (!(await getActiveUser())) return { ok: false, message: 'Nuoroda nebegalioja. Paprašykite naujos slaptažodžio atkūrimo nuorodos.' };
     const client = await createClient();
@@ -86,4 +89,12 @@ export async function updatePassword(input: { password: string; confirmPassword:
     if (logoutError) return { ok: true, message: 'Slaptažodis pakeistas. Atsijunkite prieš prisijungdami iš naujo.' };
     return { ok: true, redirect: '/prisijungti?password=changed' };
   } catch { return publicAuthError(null); }
+}
+
+export async function readActiveAccount() {
+  return getActiveUser();
+}
+
+export async function dismissVerificationSuccess() {
+  (await cookies()).delete('vk-email-verified');
 }

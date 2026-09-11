@@ -1,4 +1,5 @@
 :root {
+  --auth-error: #664717;
   --forest: #2d6cdf;
   --forest-deep: #1e4a8c;
   --ivory: #fcfaf6;
@@ -488,6 +489,17 @@ h1, h2, h3, .logo-copy strong, .footer-brand {
 .notice { display: grid; gap: 4px; padding: 14px 16px; border: 1px solid; border-radius: 2px; }
 .notice-info { border-color: var(--sage); background: var(--sage-pale); color: var(--forest); }
 .notice-warning { border-color: #d9bd8e; background: #f7ead2; color: #664717; }
+.notice-success { border-color: var(--primary); background: var(--primary-soft); color: var(--primary-dark); }
+.notice-error { border-color: var(--warning); background: #f7ead2; color: var(--auth-error); }
+.field .field-error, .field-error { color: var(--auth-error); font-size: 0.82rem; }
+.field [aria-invalid="true"], .check-line [aria-invalid="true"] { border-color: var(--warning); outline-color: var(--warning); }
+.verification-success { padding: 12px 24px; border-bottom: 1px solid var(--primary); font-size: 0.88rem; }
+.profile-link { min-height: 44px; padding: 0 16px; border: 1px solid var(--line); border-radius: 4px; }
+.account-summary { display: grid; gap: 16px; margin: 24px 0; }
+.account-summary dt { color: var(--muted); font-size: 0.82rem; }
+.account-summary dd { overflow-wrap: anywhere; }
+.account-logout { margin-top: 20px; display: grid; justify-items: start; gap: 16px; }
+.auth-card .form-stack { margin-top: 24px; }
 
 .modal-overlay { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 20px; background: rgba(30, 74, 140, 0.78); }
 .modal-card { position: relative; width: min(100%, 500px); padding: 34px; border: 1px solid var(--forest); background: var(--paper); text-align: center; box-shadow: var(--shadow-md); }

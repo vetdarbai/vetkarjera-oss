@@ -9,6 +9,7 @@ const Module = require('node:module');
 const ts = require('typescript');
 const originalLoad = Module._load;
 let responseError = null, confirmed = true, session = false, calls = [], redirectType = null, subscriber = () => {};
+let headerUser = null;
 const client = { auth: {
   onAuthStateChange: fn => { subscriber = fn; return { data: { subscription: { unsubscribe() {} } } }; },
   signUp: async input => { calls.push(['signup', input]); return { data: { session: session ? {} : null }, error: responseError }; },
@@ -25,8 +26,11 @@ require.extensions['.ts'] = (module, filename) => module._compile(ts.transpileMo
 }).outputText, filename);
 Module._load = function(id, parent, isMain) {
   if (id === '@/lib/supabase/server') return { createClient: async () => client };
-  if (id === '@/lib/auth/session') return { getActiveUser: async () => confirmed ? { id: 'test-user', role: 'specialist' } : null };
+  if (id === '@/lib/auth/session') return { getActiveUser: async () => confirmed ? { id: 'test-user', email: 'test@example.com', role: 'specialist' } : null };
+  if (id === '@/components/AuthSession') return { useAuthSession: () => ({ user: headerUser, verified: false }) };
+  if (id === 'next/navigation') return { redirect: target => { throw new Error('REDIRECT:' + target); } };
   if (id === 'next/cache') return { revalidatePath: () => {} };
+  if (id === 'next/headers') return { cookies: async () => ({ delete() {} }) };
   if (id.startsWith('@/')) return originalLoad.call(this, path.resolve(id.slice(2)), parent, isMain);
   return originalLoad.call(this, id, parent, isMain);
 };
@@ -38,10 +42,11 @@ require.extensions['.tsx'] = (module, filename) => module._compile(ts.transpileM
 const { GET } = require('../app/auth/confirm/route.ts');
 const tests = [];
 function test(name, fn) { tests.push({ name, fn }); }
-const valid = () => ({ email: 'test@example.com', password: 'Test-password-123', confirmPassword: 'Test-password-123', agreedToTerms: true, role: 'specialist', extraPrivateProfile: 'must never be sent' });
+const valid = () => ({ firstName: 'Test', lastName: 'User', email: 'test@example.com', password: 'Test-password-123', confirmPassword: 'Test-password-123', agreedToTerms: true, role: 'specialist', extraPrivateProfile: 'must never be sent' });
 test('redirect attacks are rejected; internal route is preserved', () => {
   for (const value of ['https://evil.test', '//evil.test', '/\\evil.test', '/%2f%2fevil.test', '/auth/confirm', '/skelbti?next=https://evil.test', '/skelbti\n', null, ['/skelbti']]) assert.equal(safeNext(value), '/');
   assert.equal(safeNext('/skelbimas/1'), '/skelbimas/1');
+  assert.equal(safeNext('/profilis'), '/profilis');
   assert.equal(safeNext('/skelbimai?sort=newest'), '/skelbimai?sort=newest');
 });
 test('roles, email, and password bounds', () => {
@@ -60,7 +65,9 @@ test('signed-in UI contains only the approved title and secondary logout button'
 });
 for (const role of ['specialist', 'employer']) test(role + ' signup only transmits basic fields', async () => {
   assert.equal((await actions.registerAccount({ ...valid(), role })).ok, true);
-  assert.deepEqual(calls[0][1], { email: 'test@example.com', password: 'Test-password-123', options: { data: { account_role: role }, emailRedirectTo: 'https://www.vetkarjera.lt/auth/confirm' } });
+  const sent = calls[0][1];
+  assert.ok(!Number.isNaN(Date.parse(sent.options.data.terms_accepted_at)));
+  assert.deepEqual(sent, { email: 'test@example.com', password: 'Test-password-123', options: { data: { account_role: role, first_name: 'Test', last_name: 'User', terms_accepted_at: sent.options.data.terms_accepted_at }, emailRedirectTo: 'https://www.vetkarjera.lt/auth/confirm' } });
 });
 for (const input of [{ role: 'admin' }, { role: 'unknown' }, { email: 'bad' }, { password: 'short' }, { confirmPassword: 'different' }, { agreedToTerms: false }]) {
   test('invalid signup ' + Object.keys(input)[0] + ':' + String(Object.values(input)[0]), async () => {
@@ -116,11 +123,96 @@ test('PKCE confirmation, recovery, invalid and expired links', async () => {
     const r = await GET({ nextUrl: new URL('https://www.vetkarjera.lt/auth/confirm?code=test-code&next=//evil.test') });
     assert.equal(r.headers.get('location'), 'https://www.vetkarjera.lt' + (kind ? '/naujas-slaptazodis' : '/'));
     assert.match(r.headers.get('cache-control'), /no-store/);
+    if (!kind) assert.match(r.headers.get('set-cookie'), /vk-email-verified=1.*HttpOnly/i);
+    else assert.equal(r.headers.get('set-cookie'), null);
   }
   responseError = { code: 'flow_state_expired' };
   const r = await GET({ nextUrl: new URL('https://www.vetkarjera.lt/auth/confirm?code=expired') });
   assert.equal(r.headers.get('location'), 'https://www.vetkarjera.lt/auth/klaida');
   assert.equal((await GET({ nextUrl: new URL('https://www.vetkarjera.lt/auth/confirm?token_hash=bad&type=admin') })).headers.get('location'), 'https://www.vetkarjera.lt/auth/klaida');
+});
+test('account fields validate inline and names are trimmed before storage', async () => {
+  const invalid = await actions.registerAccount({ ...valid(), firstName: '', lastName: '', agreedToTerms: false, confirmPassword: 'mismatch' });
+  for (const field of ['firstName', 'lastName', 'agreedToTerms', 'confirmPassword']) assert.ok(invalid.fieldErrors[field]);
+  assert.equal(calls.length, 0);
+  await actions.registerAccount({ ...valid(), firstName: '  Test  ', lastName: ' User ' });
+  assert.equal(calls[0][1].options.data.first_name, 'Test');
+});
+test('desktop/mobile header uses real account prop and exposes profile directly', () => {
+  const React = require('react');
+  const { renderToStaticMarkup } = require('react-dom/server');
+  const Navigation = require('../components/Navigation.tsx').default;
+  headerUser = null;
+  const out = renderToStaticMarkup(React.createElement(Navigation));
+  assert.match(out, /Prisijungti/); assert.match(out, /Registruotis/);
+  headerUser = { role: 'specialist' };
+  const loggedIn = renderToStaticMarkup(React.createElement(Navigation));
+  assert.doesNotMatch(loggedIn, /Prisijungti|Registruotis/);
+  assert.equal((loggedIn.match(/href="\/profilis"/g) || []).length, 2);
+  assert.match(loggedIn, /mobile-login profile-link/);
+  headerUser = null;
+});
+test('both basic registration forms have exactly six required controls', () => {
+  const React = require('react');
+  const { renderToStaticMarkup } = require('react-dom/server');
+  const Registration = require('../components/RegistrationForm.tsx').default;
+  for (const role of ['specialist', 'employer']) {
+    const html = renderToStaticMarkup(React.createElement(Registration, { role }));
+    assert.equal((html.match(/<input/g) || []).length, 6);
+    assert.doesNotMatch(html, /license|privacyMode|orgType|employmentTypes|Profesinė kryptis|organizacijos pavadinimas/i);
+  }
+});
+test('profile denies anonymous access and only renders account basics', async () => {
+  const React = require('react');
+  const { renderToStaticMarkup } = require('react-dom/server');
+  const Profile = require('../app/profilis/page.tsx').default;
+  confirmed = false;
+  await assert.rejects(Profile(), /REDIRECT:\/prisijungti\?next=\/profilis/);
+  confirmed = true;
+  const html = renderToStaticMarkup(await Profile());
+  assert.match(html, /test@example.com/); assert.match(html, /Specialistas/); assert.match(html, /Atsijungti/);
+  assert.doesNotMatch(html, /license|organization|dashboard/i);
+});
+test('token-hash verification sets one-time flag; errors and recovery do not', async () => {
+  for (const type of ['email', 'signup', 'recovery']) {
+    const r = await GET({ nextUrl: new URL('https://www.vetkarjera.lt/auth/confirm?token_hash=test&type=' + type) });
+    assert.equal(!!r.headers.get('set-cookie'), type !== 'recovery');
+  }
+  responseError = { code: 'otp_expired' };
+  const failed = await GET({ nextUrl: new URL('https://www.vetkarjera.lt/auth/confirm?token_hash=test&type=signup') });
+  assert.equal(failed.headers.get('set-cookie'), null);
+});
+test('server rejects malformed names without creating an account', async () => {
+  for (const firstName of [null, 123, [], 'x'.repeat(101)]) assert.equal((await actions.registerAccount({ ...valid(), firstName })).ok, false);
+  assert.equal(calls.length, 0);
+});
+test('resend 429 message counts down in place and enables the button at zero', async () => {
+  const React = require('react');
+  const EmailForm = require('../components/AuthEmailForm.tsx').default;
+  const originals = { state: React.useState, effect: React.useEffect, now: Date.now, interval: global.setInterval, clear: global.clearInterval };
+  const states = []; let cursor = 0, effects = [], tick = () => {}, now = 100000;
+  React.useState = initial => { const index = cursor++; if (!(index in states)) states[index] = initial; return [states[index], value => { states[index] = typeof value === 'function' ? value(states[index]) : value; }]; };
+  React.useEffect = effect => { effects.push(effect); };
+  Date.now = () => now;
+  global.setInterval = callback => { tick = callback; return 1; }; global.clearInterval = () => {};
+  const render = () => { cursor = 0; effects = []; const tree = EmailForm({ kind: 'verification', initialEmail: 'test@example.com' }); effects.forEach(effect => effect()); return tree; };
+  const children = tree => React.Children.toArray(tree.props.children);
+  try {
+    responseError = { status: 429 };
+    await render().props.onSubmit({ preventDefault() {} });
+    let tree = render();
+    assert.equal(children(tree).find(child => child.type === 'button').props.disabled, true);
+    assert.equal(children(tree).find(child => child.type === 'div').props.children, 'Per daug bandymų. Siųsti dar kartą galėsite po 60 s.');
+    assert.equal(children(tree).find(child => child.type === 'div').props.role, 'alert');
+    now += 17000; tick(); tree = render();
+    assert.match(children(tree).find(child => child.type === 'div').props.children, /43 s/);
+    now += 43000; tick(); tree = render();
+    assert.equal(children(tree).find(child => child.type === 'button').props.disabled, false);
+    assert.equal(children(tree).find(child => child.type === 'div').props.role, 'status');
+  } finally {
+    React.useState = originals.state; React.useEffect = originals.effect; Date.now = originals.now;
+    global.setInterval = originals.interval; global.clearInterval = originals.clear;
+  }
 });
 (async () => {
   for (const { name, fn } of tests) {
