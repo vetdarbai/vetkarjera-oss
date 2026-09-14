@@ -27,7 +27,7 @@ export default function RegistrationForm({ role }: { role: AccountRole }) {
     } catch { setMessage('Nepavyko susisiekti. Bandykite dar kartą.'); }
     finally { setPending(false); }
   }
-  if (email !== null) return <><h1>Patvirtinkite el. paštą</h1><div className="notice notice-success" role="status">Registracijos užklausa priimta. Patikrinkite el. paštą ir paspauskite patvirtinimo nuorodą.</div><AuthEmailForm kind="verification" initialEmail={email} initialCooldown={60} /></>;
+  if (email !== null) return <><h1>Patikrinkite el. paštą arba prisijunkite</h1><div className="notice notice-info" role="status">Jei paskyra su šiuo el. paštu jau egzistuoja, prisijunkite. Jei registruojatės pirmą kartą, patikrinkite el. paštą ir patvirtinkite registraciją.</div><div className="form-stack"><Link className="btn btn-primary" href="/prisijungti">Prisijungti</Link><Link href="/pamirsau-slaptazodi">Pamiršau slaptažodį</Link><p className="muted">Jei registruojatės pirmą kartą ir patvirtinimo laiško negavote, galite jį siųsti dar kartą.</p></div><AuthEmailForm kind="verification" initialEmail={email} initialCooldown={60} /></>;
   const fields: { name: Exclude<AuthField, 'agreedToTerms'>; label: string; type: string; autoComplete: string; maxLength: number }[] = [
     { name: 'firstName', label: role === 'employer' ? 'Kontaktinio asmens vardas' : 'Vardas', type: 'text', autoComplete: 'given-name', maxLength: 100 },
     { name: 'lastName', label: 'Pavardė', type: 'text', autoComplete: 'family-name', maxLength: 100 },

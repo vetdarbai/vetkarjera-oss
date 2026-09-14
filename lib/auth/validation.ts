@@ -1,5 +1,8 @@
 export const SITE_URL = 'https://www.vetkarjera.lt';
 export const EMAIL_COOLDOWN_SECONDS = 60;
+// Matches the production Auth minimum, verified against Supabase on 2026-09-14.
+export const PASSWORD_MIN_LENGTH = 8;
+export const PASSWORD_MAX_LENGTH = 128;
 export type AccountRole = 'specialist' | 'employer';
 
 export function isAccountRole(value: unknown): value is AccountRole {
@@ -12,7 +15,24 @@ export function isEmail(value: unknown): value is string {
 }
 
 export function isPassword(value: unknown): value is string {
-  return typeof value === 'string' && value.length >= 8 && value.length <= 128;
+  return typeof value === 'string' && !passwordValidationError(value);
+}
+
+export function passwordValidationError(value: unknown): string | undefined {
+  if (typeof value !== 'string' || value.length < PASSWORD_MIN_LENGTH) return `Slaptažodis per trumpas. Įveskite bent ${PASSWORD_MIN_LENGTH} simbolius.`;
+  if (value.length > PASSWORD_MAX_LENGTH) return `Slaptažodis per ilgas. Įveskite ne daugiau kaip ${PASSWORD_MAX_LENGTH} simbolius.`;
+}
+
+export function passwordProviderError(error: { code?: string; message?: string; reasons?: string[] }): string | undefined {
+  if (error.code === 'same_password') return 'Naujas slaptažodis turi skirtis nuo dabartinio.';
+  if (error.code !== 'weak_password') return;
+  if (error.reasons?.includes('length')) {
+    // Use only the numeric minimum from the known provider message, never raw error text.
+    const minimum = error.message?.match(/^Password should be at least (\d+) characters\.?$/)?.[1];
+    if (minimum) return `Slaptažodis per trumpas. Įveskite bent ${minimum} simbolius.`;
+  }
+  if (error.reasons?.includes('pwned')) return 'Šis slaptažodis rastas nutekintų slaptažodžių sąraše. Pasirinkite kitą.';
+  return 'Slaptažodis neatitinka saugumo reikalavimų. Pasirinkite kitą slaptažodį.';
 }
 
 /** Only known internal product routes can be return destinations. */

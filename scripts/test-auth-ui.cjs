@@ -15,6 +15,12 @@ for (const width of [1440, 390]) {
     run('open', origin + route);
     const page = evaluate(`({title:document.querySelector('h1')?.textContent,overflow:document.documentElement.scrollWidth>document.documentElement.clientWidth,profile:!!document.querySelector('nav a[href="/profilis"]')})`);
     assert.ok(page.title, route); assert.equal(page.overflow, false, route); assert.equal(page.profile, false);
+    if (route === '/naujas-slaptazodis') {
+      assert.equal(page.title, 'Nuoroda nebegalioja');
+      assert.equal(evaluate('document.querySelectorAll("main input[type=password]").length'), 0);
+      assert.equal(evaluate('Array.from(document.querySelectorAll("main a")).some(a => a.getAttribute("href") === "/pamirsau-slaptazodi")'), true);
+      console.log(`PASS: ${width}px reset requires an authenticated recovery session`);
+    }
     if (route.startsWith('/registracija/')) {
       assert.equal(evaluate('document.querySelectorAll("main input").length'), 6);
       run('click', 'main button[type="submit"]');

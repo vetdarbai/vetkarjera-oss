@@ -35,6 +35,9 @@ async function post(name, args, requestOrigin = origin) {
   const unauth = await post('updatePassword', [{ password: 'example-test-password', confirmPassword: 'example-test-password' }]);
   assert.match(await unauth.text(), /"ok":false/);
   console.log('PASS: unauthenticated password update rejected');
+  const shortPassword = await post('updatePassword', [{ password: 'short', confirmPassword: 'short' }]);
+  assert.match(await shortPassword.text(), /Slaptažodis per trumpas\. Įveskite bent 8 simbolius\./);
+  console.log('PASS: short password returns a specific server-side inline error');
   for (const suffix of ['', '?code=expired', '?token_hash=invalid&type=admin']) {
     const response = await fetch(origin + '/auth/confirm' + suffix, { redirect: 'manual' });
     assert.equal(response.status, 303);

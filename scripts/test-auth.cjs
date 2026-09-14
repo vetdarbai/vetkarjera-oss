@@ -9,10 +9,10 @@ const Module = require('node:module');
 const ts = require('typescript');
 const originalLoad = Module._load;
 let responseError = null, confirmed = true, session = false, calls = [], redirectType = null, subscriber = () => {};
-let headerUser = null;
+let headerUser = null, signupUser = null;
 const client = { auth: {
   onAuthStateChange: fn => { subscriber = fn; return { data: { subscription: { unsubscribe() {} } } }; },
-  signUp: async input => { calls.push(['signup', input]); return { data: { session: session ? {} : null }, error: responseError }; },
+  signUp: async input => { calls.push(['signup', input]); return { data: { user: signupUser, session: session ? {} : null }, error: responseError }; },
   signInWithPassword: async input => { calls.push(['login', input]); return { error: responseError }; },
   signOut: async input => { calls.push(['logout', input]); return { error: responseError }; },
   resend: async input => { calls.push(['resend', input]); return { error: responseError }; },
@@ -75,8 +75,93 @@ for (const input of [{ role: 'admin' }, { role: 'unknown' }, { email: 'bad' }, {
   });
 }
 test('duplicate signup returns same public result', async () => {
-  const fresh = await actions.registerAccount(valid()); responseError = { code: 'user_already_exists', status: 422 };
+  signupUser = { id: 'new-user', identities: [{ id: 'new-identity' }] };
+  const fresh = await actions.registerAccount(valid());
+  signupUser = { id: 'obfuscated-user', identities: [] };
   assert.deepEqual(await actions.registerAccount(valid()), fresh);
+  responseError = { code: 'user_already_exists', status: 422 };
+  assert.deepEqual(await actions.registerAccount(valid()), fresh);
+});
+
+test('reset password minimum is shared and short input never reaches Auth', async () => {
+  const { PASSWORD_MIN_LENGTH, PASSWORD_MAX_LENGTH, passwordValidationError } = require('../lib/auth/validation.ts');
+  assert.equal(PASSWORD_MIN_LENGTH, 8);
+  for (const password of ['', 'x'.repeat(PASSWORD_MIN_LENGTH - 1)]) {
+    const result = await actions.updatePassword({ password, confirmPassword: password });
+    assert.equal(result.fieldErrors.password, `Slaptažodis per trumpas. Įveskite bent ${PASSWORD_MIN_LENGTH} simbolius.`);
+    assert.equal(calls.length, 0);
+  }
+  assert.match(passwordValidationError('x'.repeat(PASSWORD_MAX_LENGTH + 1)), /per ilgas/);
+  const password = 'x'.repeat(PASSWORD_MIN_LENGTH);
+  assert.equal((await actions.updatePassword({ password, confirmPassword: password })).ok, true);
+  assert.equal(calls[0][0], 'update');
+});
+
+test('known provider password failures stay inline, unknown failures stay generic', async () => {
+  const cases = [
+    [{ code: 'weak_password', message: 'Password should be at least 8 characters.', reasons: ['length'] }, 'Slaptažodis per trumpas. Įveskite bent 8 simbolius.'],
+    [{ code: 'weak_password', message: 'Password should be at least 12 characters.', reasons: ['length'] }, 'Slaptažodis per trumpas. Įveskite bent 12 simbolius.'],
+    [{ code: 'same_password' }, 'Naujas slaptažodis turi skirtis nuo dabartinio.'],
+    [{ code: 'weak_password', reasons: ['pwned'] }, 'Šis slaptažodis rastas nutekintų slaptažodžių sąraše. Pasirinkite kitą.'],
+    [{ code: 'weak_password', reasons: ['characters'], message: 'private provider details' }, 'Slaptažodis neatitinka saugumo reikalavimų. Pasirinkite kitą slaptažodį.'],
+  ];
+  for (const [error, expected] of cases) {
+    calls = []; responseError = error;
+    const result = await actions.updatePassword(valid());
+    assert.equal(result.ok, false); assert.equal(result.fieldErrors.password, expected);
+    assert.deepEqual(calls.map(call => call[0]), ['update']);
+  }
+  responseError = { code: 'unexpected_failure', message: 'private provider details' };
+  const unknown = await actions.updatePassword(valid());
+  assert.equal(unknown.fieldErrors, undefined); assert.doesNotMatch(unknown.message, /private provider/);
+});
+
+test('reset component shows short-password error inline and preserves valid submission', async () => {
+  const React = require('react');
+  const Form = require('../components/NewPasswordForm.tsx').default;
+  const { renderToStaticMarkup } = require('react-dom/server');
+  const original = { state: React.useState, formData: global.FormData, window: global.window };
+  const states = []; let cursor = 0, focused, destination;
+  let values = { password: 'short', confirmPassword: 'short' };
+  React.useState = initial => { const index = cursor++; if (!(index in states)) states[index] = initial; return [states[index], value => { states[index] = typeof value === 'function' ? value(states[index]) : value; }]; };
+  global.FormData = class { get(name) { return values[name]; } };
+  global.window = { location: { assign(value) { destination = value; } } };
+  const render = () => { cursor = 0; return Form(); };
+  const event = { preventDefault() {}, currentTarget: { elements: { namedItem(name) { return { focus() { focused = name; } }; } } } };
+  try {
+    await render().props.onSubmit(event);
+    const html = renderToStaticMarkup(render());
+    assert.match(html, /Slaptažodis per trumpas\. Įveskite bent 8 simbolius\./);
+    assert.match(html, /aria-invalid="true" aria-describedby="password-help"/);
+    assert.match(html, /id="password-help" class="field-error" role="alert"/);
+    assert.equal(focused, 'password'); assert.equal(calls.length, 0);
+    values = { password: valid().password, confirmPassword: valid().password };
+    await render().props.onSubmit(event);
+    assert.deepEqual(calls.map(call => call[0]), ['update', 'logout']);
+    assert.equal(destination, '/prisijungti?password=changed');
+  } finally {
+    React.useState = original.state; global.FormData = original.formData;
+    if (original.window === undefined) delete global.window; else global.window = original.window;
+  }
+});
+
+test('both signup result screens explain both outcomes without revealing account existence', () => {
+  const React = require('react');
+  const { renderToStaticMarkup } = require('react-dom/server');
+  const Registration = require('../components/RegistrationForm.tsx').default;
+  for (const role of ['specialist', 'employer']) {
+    const original = React.useState; let index = 0, tree;
+    try {
+      React.useState = initial => [index++ === 1 ? 'test@example.com' : initial, () => {}];
+      tree = Registration({ role });
+    } finally { React.useState = original; }
+    const html = renderToStaticMarkup(tree);
+    assert.match(html, /Jei paskyra su šiuo el. paštu jau egzistuoja, prisijunkite/);
+    assert.match(html, /Jei registruojatės pirmą kartą/);
+    assert.match(html, /href="\/prisijungti"/); assert.match(html, /href="\/pamirsau-slaptazodi"/);
+    assert.match(html, /Siųsti dar kartą/); assert.match(html, /disabled=""/);
+    assert.doesNotMatch(html, /Registracijos užklausa priimta|Šis el. paštas jau užregistruotas/);
+  }
 });
 test('confirmation accidentally disabled fails closed and signs out', async () => {
   session = true; assert.equal((await actions.registerAccount(valid())).ok, false); assert.equal(calls[1][0], 'logout');
@@ -216,7 +301,7 @@ test('resend 429 message counts down in place and enables the button at zero', a
 });
 (async () => {
   for (const { name, fn } of tests) {
-    responseError = null; confirmed = true; session = false; calls = []; redirectType = null;
+    responseError = null; confirmed = true; session = false; calls = []; redirectType = null; signupUser = null;
     await fn(); console.log('PASS: ' + name);
   }
   console.log(tests.length + ' deterministic auth tests passed (mocked Auth transport).');

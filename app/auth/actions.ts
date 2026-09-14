@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 import { createClient } from '@/lib/supabase/server';
 import { getActiveUser } from '@/lib/auth/session';
-import { isAccountRole, isEmail, isPassword, safeNext, SITE_URL, publicAuthError, registrationErrors, type AuthResult } from '@/lib/auth/validation';
+import { isAccountRole, isEmail, isPassword, safeNext, SITE_URL, publicAuthError, registrationErrors, passwordValidationError, passwordProviderError, type AuthResult } from '@/lib/auth/validation';
 
 export async function registerAccount(input: { firstName: string; lastName: string; email: string; password: string; confirmPassword: string; role: string; agreedToTerms: boolean }): Promise<AuthResult> {
   if (!isAccountRole(input?.role)) {
@@ -77,13 +77,17 @@ export async function sendAuthEmail(emailInput: string, kind: 'verification' | '
 }
 
 export async function updatePassword(input: { password: string; confirmPassword: string }): Promise<AuthResult> {
-  if (!isPassword(input?.password)) return { ok: false, fieldErrors: { password: 'Slaptažodis turi būti nuo 8 iki 128 simbolių.' } };
+  const passwordError = passwordValidationError(input?.password);
+  if (passwordError) return { ok: false, fieldErrors: { password: passwordError } };
   if (input.password !== input.confirmPassword) return { ok: false, fieldErrors: { confirmPassword: 'Slaptažodžiai nesutampa.' } };
   try {
     if (!(await getActiveUser())) return { ok: false, message: 'Nuoroda nebegalioja. Paprašykite naujos slaptažodžio atkūrimo nuorodos.' };
     const client = await createClient();
     const { error } = await client.auth.updateUser({ password: input.password });
-    if (error) return publicAuthError(error);
+    if (error) {
+      const fieldError = passwordProviderError(error);
+      return fieldError ? { ok: false, fieldErrors: { password: fieldError } } : publicAuthError(error);
+    }
     const { error: logoutError } = await client.auth.signOut({ scope: 'global' });
     revalidatePath('/', 'layout');
     if (logoutError) return { ok: true, message: 'Slaptažodis pakeistas. Atsijunkite prieš prisijungdami iš naujo.' };
