@@ -41,6 +41,12 @@ require.extensions['.tsx'] = (module, filename) => module._compile(ts.transpileM
 }).outputText, filename);
 const { GET } = require('../app/auth/confirm/route.ts');
 const tests = [];
+const visualFixtures = {};
+function captureFixture(name, tree) {
+  const React = require('react');
+  const Frame = require('../components/AuthFrame.tsx').default;
+  visualFixtures[name] = require('react-dom/server').renderToStaticMarkup(React.createElement(Frame, null, tree));
+}
 function test(name, fn) { tests.push({ name, fn }); }
 const valid = () => ({ firstName: 'Test', lastName: 'User', email: 'test@example.com', password: 'Test-password-123', confirmPassword: 'Test-password-123', agreedToTerms: true, role: 'specialist', extraPrivateProfile: 'must never be sent' });
 test('redirect attacks are rejected; internal route is preserved', () => {
@@ -133,9 +139,16 @@ test('reset component shows short-password error inline and preserves valid subm
     const html = renderToStaticMarkup(render());
     assert.match(html, /Slaptažodis per trumpas\. Įveskite bent 8 simbolius\./);
     assert.match(html, /aria-invalid="true" aria-describedby="password-help"/);
-    assert.match(html, /id="password-help" class="field-error" role="alert"/);
+    assert.match(html, /id="password-help" class="password-error" role="alert"/);
+    captureFixture('password-short', render());
     assert.equal(focused, 'password'); assert.equal(calls.length, 0);
     values = { password: valid().password, confirmPassword: valid().password };
+    responseError = { code: 'same_password' };
+    await render().props.onSubmit(event);
+    const sameHtml = renderToStaticMarkup(render());
+    assert.match(sameHtml, /id="password-help" class="password-error" role="alert">Naujas slaptažodis turi skirtis nuo dabartinio\./);
+    captureFixture('password-same', render());
+    responseError = null; calls = [];
     await render().props.onSubmit(event);
     assert.deepEqual(calls.map(call => call[0]), ['update', 'logout']);
     assert.equal(destination, '/prisijungti?password=changed');
@@ -152,15 +165,32 @@ test('both signup result screens explain both outcomes without revealing account
   for (const role of ['specialist', 'employer']) {
     const original = React.useState; let index = 0, tree;
     try {
-      React.useState = initial => [index++ === 1 ? 'test@example.com' : initial, () => {}];
+      React.useState = initial => [index++ === 1 ? true : initial, () => {}];
       tree = Registration({ role });
     } finally { React.useState = original; }
     const html = renderToStaticMarkup(tree);
     assert.match(html, /Jei paskyra su šiuo el. paštu jau egzistuoja, prisijunkite/);
     assert.match(html, /Jei registruojatės pirmą kartą/);
     assert.match(html, /href="\/prisijungti"/); assert.match(html, /href="\/pamirsau-slaptazodi"/);
-    assert.match(html, /Siųsti dar kartą/); assert.match(html, /disabled=""/);
+    assert.match(html, /href="\/patvirtinti-pasta"/); assert.match(html, /Negavau patvirtinimo laiško\?/);
+    assert.doesNotMatch(html, /<input|<form|test@example.com|Siųsti dar kartą|60 s|disabled=""/);
     assert.doesNotMatch(html, /Registracijos užklausa priimta|Šis el. paštas jau užregistruotas/);
+    captureFixture('signup-' + role, tree);
+  }
+});
+
+test('explicit verification page starts blank without countdown; resend stays neutral', async () => {
+  const React = require('react');
+  const Page = require('../app/patvirtinti-pasta/page.tsx').default;
+  const html = require('react-dom/server').renderToStaticMarkup(React.createElement(Page));
+  assert.match(html, /type="email"[^>]*value=""/);
+  assert.match(html, /Siųsti dar kartą/); assert.doesNotMatch(html, /60 s|disabled=""/);
+  const sent = await actions.sendAuthEmail('test@example.com', 'verification');
+  assert.equal(sent.ok, true); assert.equal(sent.retryAfter, 60);
+  assert.match(sent.message, /^Jei /);
+  for (const code of ['user_not_found', 'email_not_confirmed', 'email_exists']) {
+    responseError = { code };
+    assert.deepEqual(await actions.sendAuthEmail('test@example.com', 'verification'), sent);
   }
 });
 test('confirmation accidentally disabled fails closed and signs out', async () => {
@@ -305,4 +335,15 @@ test('resend 429 message counts down in place and enables the button at zero', a
     await fn(); console.log('PASS: ' + name);
   }
   console.log(tests.length + ' deterministic auth tests passed (mocked Auth transport).');
+  // Optional static visual fixtures of real components, not public app routes or fake sessions.
+  if (process.env.AUTH_FIXTURE_DIR) {
+    const page = await (await fetch('http://127.0.0.1:4320/prisijungti')).text();
+    const styles = (page.match(/<link[^>]*rel="stylesheet"[^>]*>/g) || []).join('');
+    const bodyClass = page.match(/<body class="([^"]*)"/)?.[1] || '';
+    fs.mkdirSync(process.env.AUTH_FIXTURE_DIR, { recursive: true });
+    for (const [name, html] of Object.entries(visualFixtures)) {
+      fs.writeFileSync(path.join(process.env.AUTH_FIXTURE_DIR, name + '.html'), `<!doctype html><html lang="lt"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><base href="http://127.0.0.1:4320">${styles}</head><body class="${bodyClass}">${html}</body></html>`);
+    }
+    console.log('Static visual fixtures exported for the two UX states.');
+  }
 })().catch(error => { console.error(error.message); process.exitCode = 1; });
