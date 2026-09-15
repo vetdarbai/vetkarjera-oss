@@ -1,296 +1,879 @@
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
-
-export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "14.5"
-  }
-  public: {
-    Tables: {
-      employer_profiles: {
-        Row: {
-          created_at: string
-          organization_id: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          organization_id: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          organization_id?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "employer_profiles_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "employer_profiles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      jobs: {
-        Row: {
-          created_at: string
-          created_by: string
-          id: string
-          organization_id: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          created_by: string
-          id?: string
-          organization_id: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string
-          id?: string
-          organization_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "jobs_created_by_organization_id_fkey"
-            columns: ["created_by", "organization_id"]
-            isOneToOne: false
-            referencedRelation: "employer_profiles"
-            referencedColumns: ["user_id", "organization_id"]
-          },
-          {
-            foreignKeyName: "jobs_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      organizations: {
-        Row: {
-          created_at: string
-          id: string
-          name: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          name: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          name?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      profiles: {
-        Row: {
-          created_at: string
-          id: string
-          role: Database["public"]["Enums"]["profile_role"]
-        }
-        Insert: {
-          created_at?: string
-          id: string
-          role: Database["public"]["Enums"]["profile_role"]
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          role?: Database["public"]["Enums"]["profile_role"]
-        }
-        Relationships: []
-      }
-      specialist_profiles: {
-        Row: {
-          created_at: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "specialist_profiles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      [_ in never]: never
-    }
-    Enums: {
-      profile_role: "specialist" | "employer" | "admin"
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
-}
-
-type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
-
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
-
-export type Tables<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never) = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R
-    }
-    ? R
-    : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R
-      }
-      ? R
-      : never
-    : never
-
-export type TablesInsert<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never) = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
-    }
-    ? I
-    : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I
-      }
-      ? I
-      : never
-    : never
-
-export type TablesUpdate<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never) = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
-    }
-    ? U
-    : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U
-      }
-      ? U
-      : never
-    : never
-
-export type Enums<
-  DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
-    | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never) = never,
-> = DefaultSchemaEnumNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
-
-export type CompositeTypes<
-  PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never) = never,
-> = PublicCompositeTypeNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
-
-export const Constants = {
-  public: {
-    Enums: {
-      profile_role: ["specialist", "employer", "admin"],
-    },
-  },
-} as const
+// Generated by scripts/generate-profile-types.cjs from isolated migrated PostgreSQL.
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
+export type Database = { public: { Tables: {
+"activity_areas": {
+Row: {
+"code": string;
+"label_lt": string;
+"sort_order": number;
+"is_active": boolean;
+};
+Insert: {
+"code": string;
+"label_lt": string;
+"sort_order": number;
+"is_active"?: boolean;
+};
+Update: {
+"code"?: string;
+"label_lt"?: string;
+"sort_order"?: number;
+"is_active"?: boolean;
+};
+Relationships: [];
+};
+"animal_groups": {
+Row: {
+"code": string;
+"label_lt": string;
+"sort_order": number;
+"is_active": boolean;
+};
+Insert: {
+"code": string;
+"label_lt": string;
+"sort_order": number;
+"is_active"?: boolean;
+};
+Update: {
+"code"?: string;
+"label_lt"?: string;
+"sort_order"?: number;
+"is_active"?: boolean;
+};
+Relationships: [];
+};
+"autonomy_options": {
+Row: {
+"professional_role_code": string;
+"code": string;
+"label_lt": string;
+"is_active": boolean;
+};
+Insert: {
+"professional_role_code": string;
+"code": string;
+"label_lt": string;
+"is_active"?: boolean;
+};
+Update: {
+"professional_role_code"?: string;
+"code"?: string;
+"label_lt"?: string;
+"is_active"?: boolean;
+};
+Relationships: [{ foreignKeyName: "autonomy_options_professional_role_code_fkey"; columns: ["professional_role_code"]; isOneToOne: false; referencedRelation: "professional_roles"; referencedColumns: ["code"] }];
+};
+"competencies": {
+Row: {
+"professional_role_code": string;
+"code": string;
+"label_lt": string;
+"category": string;
+"sort_order": number;
+"is_active": boolean;
+};
+Insert: {
+"professional_role_code": string;
+"code": string;
+"label_lt": string;
+"category": string;
+"sort_order": number;
+"is_active"?: boolean;
+};
+Update: {
+"professional_role_code"?: string;
+"code"?: string;
+"label_lt"?: string;
+"category"?: string;
+"sort_order"?: number;
+"is_active"?: boolean;
+};
+Relationships: [{ foreignKeyName: "competencies_professional_role_code_fkey"; columns: ["professional_role_code"]; isOneToOne: false; referencedRelation: "professional_roles"; referencedColumns: ["code"] }];
+};
+"development_areas": {
+Row: {
+"professional_role_code": string;
+"code": string;
+"label_lt": string;
+"is_active": boolean;
+};
+Insert: {
+"professional_role_code": string;
+"code": string;
+"label_lt": string;
+"is_active"?: boolean;
+};
+Update: {
+"professional_role_code"?: string;
+"code"?: string;
+"label_lt"?: string;
+"is_active"?: boolean;
+};
+Relationships: [{ foreignKeyName: "development_areas_professional_role_code_fkey"; columns: ["professional_role_code"]; isOneToOne: false; referencedRelation: "professional_roles"; referencedColumns: ["code"] }];
+};
+"employer_profiles": {
+Row: {
+"user_id": string;
+"organization_id": string | null;
+"created_at": string;
+"updated_at": string;
+"organization_name_input": string | null;
+"organization_type_code": string | null;
+"organization_type_other": string | null;
+};
+Insert: {
+"user_id": string;
+"organization_id"?: string | null;
+"created_at"?: string;
+"updated_at"?: string;
+"organization_name_input"?: string | null;
+"organization_type_code"?: string | null;
+"organization_type_other"?: string | null;
+};
+Update: {
+"user_id"?: string;
+"organization_id"?: string | null;
+"created_at"?: string;
+"updated_at"?: string;
+"organization_name_input"?: string | null;
+"organization_type_code"?: string | null;
+"organization_type_other"?: string | null;
+};
+Relationships: [{ foreignKeyName: "employer_profiles_user_id_fkey"; columns: ["user_id"]; isOneToOne: true; referencedRelation: "profiles"; referencedColumns: ["id"] },{ foreignKeyName: "employer_profiles_organization_id_fkey"; columns: ["organization_id"]; isOneToOne: false; referencedRelation: "organizations"; referencedColumns: ["id"] },{ foreignKeyName: "employer_profiles_organization_type_code_fkey"; columns: ["organization_type_code"]; isOneToOne: false; referencedRelation: "organization_types"; referencedColumns: ["code"] }];
+};
+"experience_bands": {
+Row: {
+"code": string;
+"label_lt": string;
+"sort_order": number;
+"is_active": boolean;
+};
+Insert: {
+"code": string;
+"label_lt": string;
+"sort_order": number;
+"is_active"?: boolean;
+};
+Update: {
+"code"?: string;
+"label_lt"?: string;
+"sort_order"?: number;
+"is_active"?: boolean;
+};
+Relationships: [];
+};
+"job_search_statuses": {
+Row: {
+"code": string;
+"label_lt": string;
+"sort_order": number;
+"is_active": boolean;
+};
+Insert: {
+"code": string;
+"label_lt": string;
+"sort_order": number;
+"is_active"?: boolean;
+};
+Update: {
+"code"?: string;
+"label_lt"?: string;
+"sort_order"?: number;
+"is_active"?: boolean;
+};
+Relationships: [];
+};
+"jobs": {
+Row: {
+"id": string;
+"organization_id": string;
+"created_by": string;
+"created_at": string;
+"updated_at": string;
+};
+Insert: {
+"id"?: string;
+"organization_id": string;
+"created_by": string;
+"created_at"?: string;
+"updated_at"?: string;
+};
+Update: {
+"id"?: string;
+"organization_id"?: string;
+"created_by"?: string;
+"created_at"?: string;
+"updated_at"?: string;
+};
+Relationships: [{ foreignKeyName: "jobs_organization_id_fkey"; columns: ["organization_id"]; isOneToOne: false; referencedRelation: "organizations"; referencedColumns: ["id"] },{ foreignKeyName: "jobs_membership_fkey"; columns: ["created_by","organization_id"]; isOneToOne: false; referencedRelation: "organization_memberships"; referencedColumns: ["user_id","organization_id"] }];
+};
+"language_levels": {
+Row: {
+"code": string;
+"label_lt": string;
+"sort_order": number;
+"is_active": boolean;
+};
+Insert: {
+"code": string;
+"label_lt": string;
+"sort_order": number;
+"is_active"?: boolean;
+};
+Update: {
+"code"?: string;
+"label_lt"?: string;
+"sort_order"?: number;
+"is_active"?: boolean;
+};
+Relationships: [];
+};
+"languages": {
+Row: {
+"code": string;
+"label_lt": string;
+"sort_order": number;
+"is_active": boolean;
+};
+Insert: {
+"code": string;
+"label_lt": string;
+"sort_order": number;
+"is_active"?: boolean;
+};
+Update: {
+"code"?: string;
+"label_lt"?: string;
+"sort_order"?: number;
+"is_active"?: boolean;
+};
+Relationships: [];
+};
+"locations": {
+Row: {
+"code": string;
+"label_lt": string;
+"kind": string;
+"is_active": boolean;
+};
+Insert: {
+"code": string;
+"label_lt": string;
+"kind": string;
+"is_active"?: boolean;
+};
+Update: {
+"code"?: string;
+"label_lt"?: string;
+"kind"?: string;
+"is_active"?: boolean;
+};
+Relationships: [];
+};
+"mobility_options": {
+Row: {
+"code": string;
+"label_lt": string;
+"sort_order": number;
+"is_active": boolean;
+};
+Insert: {
+"code": string;
+"label_lt": string;
+"sort_order": number;
+"is_active"?: boolean;
+};
+Update: {
+"code"?: string;
+"label_lt"?: string;
+"sort_order"?: number;
+"is_active"?: boolean;
+};
+Relationships: [];
+};
+"organization_memberships": {
+Row: {
+"user_id": string;
+"organization_id": string;
+"created_at": string;
+"revoked_at": string | null;
+};
+Insert: {
+"user_id": string;
+"organization_id": string;
+"created_at"?: string;
+"revoked_at"?: string | null;
+};
+Update: {
+"user_id"?: string;
+"organization_id"?: string;
+"created_at"?: string;
+"revoked_at"?: string | null;
+};
+Relationships: [{ foreignKeyName: "organization_memberships_user_id_fkey"; columns: ["user_id"]; isOneToOne: false; referencedRelation: "employer_profiles"; referencedColumns: ["user_id"] },{ foreignKeyName: "organization_memberships_organization_id_fkey"; columns: ["organization_id"]; isOneToOne: false; referencedRelation: "organizations"; referencedColumns: ["id"] }];
+};
+"organization_types": {
+Row: {
+"code": string;
+"label_lt": string;
+"sort_order": number;
+"is_active": boolean;
+};
+Insert: {
+"code": string;
+"label_lt": string;
+"sort_order": number;
+"is_active"?: boolean;
+};
+Update: {
+"code"?: string;
+"label_lt"?: string;
+"sort_order"?: number;
+"is_active"?: boolean;
+};
+Relationships: [];
+};
+"organizations": {
+Row: {
+"id": string;
+"name": string;
+"created_at": string;
+"updated_at": string;
+};
+Insert: {
+"id"?: string;
+"name": string;
+"created_at"?: string;
+"updated_at"?: string;
+};
+Update: {
+"id"?: string;
+"name"?: string;
+"created_at"?: string;
+"updated_at"?: string;
+};
+Relationships: [];
+};
+"professional_interests": {
+Row: {
+"code": string;
+"label_lt": string;
+"sort_order": number;
+"is_active": boolean;
+};
+Insert: {
+"code": string;
+"label_lt": string;
+"sort_order": number;
+"is_active"?: boolean;
+};
+Update: {
+"code"?: string;
+"label_lt"?: string;
+"sort_order"?: number;
+"is_active"?: boolean;
+};
+Relationships: [];
+};
+"professional_role_interests": {
+Row: {
+"professional_role_code": string;
+"interest_code": string;
+};
+Insert: {
+"professional_role_code": string;
+"interest_code": string;
+};
+Update: {
+"professional_role_code"?: string;
+"interest_code"?: string;
+};
+Relationships: [{ foreignKeyName: "professional_role_interests_professional_role_code_fkey"; columns: ["professional_role_code"]; isOneToOne: false; referencedRelation: "professional_roles"; referencedColumns: ["code"] },{ foreignKeyName: "professional_role_interests_interest_code_fkey"; columns: ["interest_code"]; isOneToOne: false; referencedRelation: "professional_interests"; referencedColumns: ["code"] }];
+};
+"professional_roles": {
+Row: {
+"code": string;
+"label_lt": string;
+"sort_order": number;
+"is_active": boolean;
+};
+Insert: {
+"code": string;
+"label_lt": string;
+"sort_order": number;
+"is_active"?: boolean;
+};
+Update: {
+"code"?: string;
+"label_lt"?: string;
+"sort_order"?: number;
+"is_active"?: boolean;
+};
+Relationships: [];
+};
+"profiles": {
+Row: {
+"id": string;
+"role": Database['public']['Enums']["profile_role"];
+"created_at": string;
+"updated_at": string;
+};
+Insert: {
+"id": string;
+"role": Database['public']['Enums']["profile_role"];
+"created_at"?: string;
+"updated_at"?: string;
+};
+Update: {
+"id"?: string;
+"role"?: Database['public']['Enums']["profile_role"];
+"created_at"?: string;
+"updated_at"?: string;
+};
+Relationships: [{ foreignKeyName: "profiles_id_fkey"; columns: ["id"]; isOneToOne: true; referencedRelation: "users"; referencedColumns: ["id"] }];
+};
+"schedules": {
+Row: {
+"code": string;
+"label_lt": string;
+"sort_order": number;
+"is_active": boolean;
+};
+Insert: {
+"code": string;
+"label_lt": string;
+"sort_order": number;
+"is_active"?: boolean;
+};
+Update: {
+"code"?: string;
+"label_lt"?: string;
+"sort_order"?: number;
+"is_active"?: boolean;
+};
+Relationships: [];
+};
+"specialist_activity_areas": {
+Row: {
+"user_id": string;
+"activity_area_code": string;
+};
+Insert: {
+"user_id": string;
+"activity_area_code": string;
+};
+Update: {
+"user_id"?: string;
+"activity_area_code"?: string;
+};
+Relationships: [{ foreignKeyName: "specialist_activity_areas_user_id_fkey"; columns: ["user_id"]; isOneToOne: false; referencedRelation: "specialist_profiles"; referencedColumns: ["user_id"] },{ foreignKeyName: "specialist_activity_areas_activity_area_code_fkey"; columns: ["activity_area_code"]; isOneToOne: false; referencedRelation: "activity_areas"; referencedColumns: ["code"] }];
+};
+"specialist_animal_groups": {
+Row: {
+"user_id": string;
+"animal_group_code": string;
+};
+Insert: {
+"user_id": string;
+"animal_group_code": string;
+};
+Update: {
+"user_id"?: string;
+"animal_group_code"?: string;
+};
+Relationships: [{ foreignKeyName: "specialist_animal_groups_user_id_fkey"; columns: ["user_id"]; isOneToOne: false; referencedRelation: "specialist_profiles"; referencedColumns: ["user_id"] },{ foreignKeyName: "specialist_animal_groups_animal_group_code_fkey"; columns: ["animal_group_code"]; isOneToOne: false; referencedRelation: "animal_groups"; referencedColumns: ["code"] }];
+};
+"specialist_autonomy": {
+Row: {
+"user_id": string;
+"professional_role_code": string;
+"autonomy_code": string;
+};
+Insert: {
+"user_id": string;
+"professional_role_code": string;
+"autonomy_code": string;
+};
+Update: {
+"user_id"?: string;
+"professional_role_code"?: string;
+"autonomy_code"?: string;
+};
+Relationships: [{ foreignKeyName: "specialist_autonomy_user_id_fkey"; columns: ["user_id"]; isOneToOne: false; referencedRelation: "specialist_profiles"; referencedColumns: ["user_id"] },{ foreignKeyName: "specialist_autonomy_professional_role_code_autonomy_code_fkey"; columns: ["professional_role_code","autonomy_code"]; isOneToOne: false; referencedRelation: "autonomy_options"; referencedColumns: ["professional_role_code","code"] }];
+};
+"specialist_competencies": {
+Row: {
+"user_id": string;
+"professional_role_code": string;
+"competency_code": string;
+"level": string;
+};
+Insert: {
+"user_id": string;
+"professional_role_code": string;
+"competency_code": string;
+"level": string;
+};
+Update: {
+"user_id"?: string;
+"professional_role_code"?: string;
+"competency_code"?: string;
+"level"?: string;
+};
+Relationships: [{ foreignKeyName: "specialist_competencies_user_id_fkey"; columns: ["user_id"]; isOneToOne: false; referencedRelation: "specialist_profiles"; referencedColumns: ["user_id"] },{ foreignKeyName: "specialist_competencies_professional_role_code_competency__fkey"; columns: ["professional_role_code","competency_code"]; isOneToOne: false; referencedRelation: "competencies"; referencedColumns: ["professional_role_code","code"] }];
+};
+"specialist_custom_competencies": {
+Row: {
+"user_id": string;
+"professional_role_code": string;
+"slot": number;
+"name": string;
+"level": string;
+};
+Insert: {
+"user_id": string;
+"professional_role_code"?: string;
+"slot": number;
+"name": string;
+"level": string;
+};
+Update: {
+"user_id"?: string;
+"professional_role_code"?: string;
+"slot"?: number;
+"name"?: string;
+"level"?: string;
+};
+Relationships: [{ foreignKeyName: "specialist_custom_competencies_user_id_fkey"; columns: ["user_id"]; isOneToOne: false; referencedRelation: "specialist_profiles"; referencedColumns: ["user_id"] },{ foreignKeyName: "specialist_custom_competencies_professional_role_code_fkey"; columns: ["professional_role_code"]; isOneToOne: false; referencedRelation: "professional_roles"; referencedColumns: ["code"] }];
+};
+"specialist_custom_development": {
+Row: {
+"user_id": string;
+"professional_role_code": string;
+"name": string;
+};
+Insert: {
+"user_id": string;
+"professional_role_code"?: string;
+"name": string;
+};
+Update: {
+"user_id"?: string;
+"professional_role_code"?: string;
+"name"?: string;
+};
+Relationships: [{ foreignKeyName: "specialist_custom_development_user_id_fkey"; columns: ["user_id"]; isOneToOne: false; referencedRelation: "specialist_profiles"; referencedColumns: ["user_id"] },{ foreignKeyName: "specialist_custom_development_professional_role_code_fkey"; columns: ["professional_role_code"]; isOneToOne: false; referencedRelation: "professional_roles"; referencedColumns: ["code"] }];
+};
+"specialist_development_areas": {
+Row: {
+"user_id": string;
+"professional_role_code": string;
+"area_code": string;
+};
+Insert: {
+"user_id": string;
+"professional_role_code": string;
+"area_code": string;
+};
+Update: {
+"user_id"?: string;
+"professional_role_code"?: string;
+"area_code"?: string;
+};
+Relationships: [{ foreignKeyName: "specialist_development_areas_user_id_fkey"; columns: ["user_id"]; isOneToOne: false; referencedRelation: "specialist_profiles"; referencedColumns: ["user_id"] },{ foreignKeyName: "specialist_development_areas_professional_role_code_area_c_fkey"; columns: ["professional_role_code","area_code"]; isOneToOne: false; referencedRelation: "development_areas"; referencedColumns: ["professional_role_code","code"] }];
+};
+"specialist_education": {
+Row: {
+"user_id": string;
+"professional_role_code": string;
+"institution_code": string | null;
+"institution_name": string | null;
+"country": string | null;
+"program_or_qualification": string | null;
+"graduation_year": number | null;
+"current_course": number | null;
+"current_course_or_study_year": string | null;
+"updated_at": string;
+};
+Insert: {
+"user_id": string;
+"professional_role_code": string;
+"institution_code"?: string | null;
+"institution_name"?: string | null;
+"country"?: string | null;
+"program_or_qualification"?: string | null;
+"graduation_year"?: number | null;
+"current_course"?: number | null;
+"current_course_or_study_year"?: string | null;
+"updated_at"?: string;
+};
+Update: {
+"user_id"?: string;
+"professional_role_code"?: string;
+"institution_code"?: string | null;
+"institution_name"?: string | null;
+"country"?: string | null;
+"program_or_qualification"?: string | null;
+"graduation_year"?: number | null;
+"current_course"?: number | null;
+"current_course_or_study_year"?: string | null;
+"updated_at"?: string;
+};
+Relationships: [{ foreignKeyName: "specialist_education_user_id_fkey"; columns: ["user_id"]; isOneToOne: false; referencedRelation: "specialist_profiles"; referencedColumns: ["user_id"] },{ foreignKeyName: "specialist_education_professional_role_code_fkey"; columns: ["professional_role_code"]; isOneToOne: false; referencedRelation: "professional_roles"; referencedColumns: ["code"] }];
+};
+"specialist_interests": {
+Row: {
+"user_id": string;
+"professional_role_code": string;
+"interest_code": string;
+};
+Insert: {
+"user_id": string;
+"professional_role_code": string;
+"interest_code": string;
+};
+Update: {
+"user_id"?: string;
+"professional_role_code"?: string;
+"interest_code"?: string;
+};
+Relationships: [{ foreignKeyName: "specialist_interests_user_id_fkey"; columns: ["user_id"]; isOneToOne: false; referencedRelation: "specialist_profiles"; referencedColumns: ["user_id"] },{ foreignKeyName: "specialist_interests_professional_role_code_interest_code_fkey"; columns: ["professional_role_code","interest_code"]; isOneToOne: false; referencedRelation: "professional_role_interests"; referencedColumns: ["professional_role_code","interest_code"] }];
+};
+"specialist_languages": {
+Row: {
+"user_id": string;
+"language_code": string;
+"proficiency_code": string;
+"language_name": string | null;
+};
+Insert: {
+"user_id": string;
+"language_code": string;
+"proficiency_code": string;
+"language_name"?: string | null;
+};
+Update: {
+"user_id"?: string;
+"language_code"?: string;
+"proficiency_code"?: string;
+"language_name"?: string | null;
+};
+Relationships: [{ foreignKeyName: "specialist_languages_user_id_fkey"; columns: ["user_id"]; isOneToOne: false; referencedRelation: "specialist_profiles"; referencedColumns: ["user_id"] },{ foreignKeyName: "specialist_languages_language_code_fkey"; columns: ["language_code"]; isOneToOne: false; referencedRelation: "languages"; referencedColumns: ["code"] },{ foreignKeyName: "specialist_languages_proficiency_code_fkey"; columns: ["proficiency_code"]; isOneToOne: false; referencedRelation: "language_levels"; referencedColumns: ["code"] }];
+};
+"specialist_profiles": {
+Row: {
+"user_id": string;
+"created_at": string;
+"updated_at": string;
+"first_name": string | null;
+"last_name": string | null;
+"professional_role_code": string | null;
+"specialty_free_text": string | null;
+"home_location_code": string | null;
+"home_country": string | null;
+"home_city": string | null;
+"experience_band_code": string | null;
+"about_me": string | null;
+"job_search_status_code": string | null;
+"mobility_code": string | null;
+"start_option_code": string | null;
+"start_date": string | null;
+"work_model_code": string | null;
+"can_work_weekends": boolean | null;
+"can_work_nights": boolean | null;
+"can_be_on_call": boolean | null;
+"profile_visibility": string;
+};
+Insert: {
+"user_id": string;
+"created_at"?: string;
+"updated_at"?: string;
+"first_name"?: string | null;
+"last_name"?: string | null;
+"professional_role_code"?: string | null;
+"specialty_free_text"?: string | null;
+"home_location_code"?: string | null;
+"home_country"?: string | null;
+"home_city"?: string | null;
+"experience_band_code"?: string | null;
+"about_me"?: string | null;
+"job_search_status_code"?: string | null;
+"mobility_code"?: string | null;
+"start_option_code"?: string | null;
+"start_date"?: string | null;
+"work_model_code"?: string | null;
+"can_work_weekends"?: boolean | null;
+"can_work_nights"?: boolean | null;
+"can_be_on_call"?: boolean | null;
+"profile_visibility"?: string;
+};
+Update: {
+"user_id"?: string;
+"created_at"?: string;
+"updated_at"?: string;
+"first_name"?: string | null;
+"last_name"?: string | null;
+"professional_role_code"?: string | null;
+"specialty_free_text"?: string | null;
+"home_location_code"?: string | null;
+"home_country"?: string | null;
+"home_city"?: string | null;
+"experience_band_code"?: string | null;
+"about_me"?: string | null;
+"job_search_status_code"?: string | null;
+"mobility_code"?: string | null;
+"start_option_code"?: string | null;
+"start_date"?: string | null;
+"work_model_code"?: string | null;
+"can_work_weekends"?: boolean | null;
+"can_work_nights"?: boolean | null;
+"can_be_on_call"?: boolean | null;
+"profile_visibility"?: string;
+};
+Relationships: [{ foreignKeyName: "specialist_profiles_user_id_fkey"; columns: ["user_id"]; isOneToOne: true; referencedRelation: "profiles"; referencedColumns: ["id"] },{ foreignKeyName: "specialist_profiles_professional_role_code_fkey"; columns: ["professional_role_code"]; isOneToOne: false; referencedRelation: "professional_roles"; referencedColumns: ["code"] },{ foreignKeyName: "specialist_profiles_home_location_code_fkey"; columns: ["home_location_code"]; isOneToOne: false; referencedRelation: "locations"; referencedColumns: ["code"] },{ foreignKeyName: "specialist_profiles_experience_band_code_fkey"; columns: ["experience_band_code"]; isOneToOne: false; referencedRelation: "experience_bands"; referencedColumns: ["code"] },{ foreignKeyName: "specialist_profiles_job_search_status_code_fkey"; columns: ["job_search_status_code"]; isOneToOne: false; referencedRelation: "job_search_statuses"; referencedColumns: ["code"] },{ foreignKeyName: "specialist_profiles_mobility_code_fkey"; columns: ["mobility_code"]; isOneToOne: false; referencedRelation: "mobility_options"; referencedColumns: ["code"] },{ foreignKeyName: "specialist_profiles_start_option_code_fkey"; columns: ["start_option_code"]; isOneToOne: false; referencedRelation: "start_options"; referencedColumns: ["code"] },{ foreignKeyName: "specialist_profiles_work_model_code_fkey"; columns: ["work_model_code"]; isOneToOne: false; referencedRelation: "work_models"; referencedColumns: ["code"] },{ foreignKeyName: "specialist_profiles_profile_visibility_fkey"; columns: ["profile_visibility"]; isOneToOne: false; referencedRelation: "visibility_options"; referencedColumns: ["code"] }];
+};
+"specialist_schedules": {
+Row: {
+"user_id": string;
+"schedule_code": string;
+};
+Insert: {
+"user_id": string;
+"schedule_code": string;
+};
+Update: {
+"user_id"?: string;
+"schedule_code"?: string;
+};
+Relationships: [{ foreignKeyName: "specialist_schedules_user_id_fkey"; columns: ["user_id"]; isOneToOne: false; referencedRelation: "specialist_profiles"; referencedColumns: ["user_id"] },{ foreignKeyName: "specialist_schedules_schedule_code_fkey"; columns: ["schedule_code"]; isOneToOne: false; referencedRelation: "schedules"; referencedColumns: ["code"] }];
+};
+"specialist_work_locations": {
+Row: {
+"user_id": string;
+"location_code": string;
+};
+Insert: {
+"user_id": string;
+"location_code": string;
+};
+Update: {
+"user_id"?: string;
+"location_code"?: string;
+};
+Relationships: [{ foreignKeyName: "specialist_work_locations_user_id_fkey"; columns: ["user_id"]; isOneToOne: false; referencedRelation: "specialist_profiles"; referencedColumns: ["user_id"] },{ foreignKeyName: "specialist_work_locations_location_code_fkey"; columns: ["location_code"]; isOneToOne: false; referencedRelation: "locations"; referencedColumns: ["code"] }];
+};
+"specialist_workloads": {
+Row: {
+"user_id": string;
+"workload_code": string;
+};
+Insert: {
+"user_id": string;
+"workload_code": string;
+};
+Update: {
+"user_id"?: string;
+"workload_code"?: string;
+};
+Relationships: [{ foreignKeyName: "specialist_workloads_user_id_fkey"; columns: ["user_id"]; isOneToOne: false; referencedRelation: "specialist_profiles"; referencedColumns: ["user_id"] },{ foreignKeyName: "specialist_workloads_workload_code_fkey"; columns: ["workload_code"]; isOneToOne: false; referencedRelation: "workloads"; referencedColumns: ["code"] }];
+};
+"start_options": {
+Row: {
+"code": string;
+"label_lt": string;
+"sort_order": number;
+"is_active": boolean;
+};
+Insert: {
+"code": string;
+"label_lt": string;
+"sort_order": number;
+"is_active"?: boolean;
+};
+Update: {
+"code"?: string;
+"label_lt"?: string;
+"sort_order"?: number;
+"is_active"?: boolean;
+};
+Relationships: [];
+};
+"visibility_options": {
+Row: {
+"code": string;
+"label_lt": string;
+"sort_order": number;
+"is_active": boolean;
+};
+Insert: {
+"code": string;
+"label_lt": string;
+"sort_order": number;
+"is_active"?: boolean;
+};
+Update: {
+"code"?: string;
+"label_lt"?: string;
+"sort_order"?: number;
+"is_active"?: boolean;
+};
+Relationships: [];
+};
+"work_models": {
+Row: {
+"code": string;
+"label_lt": string;
+"sort_order": number;
+"is_active": boolean;
+};
+Insert: {
+"code": string;
+"label_lt": string;
+"sort_order": number;
+"is_active"?: boolean;
+};
+Update: {
+"code"?: string;
+"label_lt"?: string;
+"sort_order"?: number;
+"is_active"?: boolean;
+};
+Relationships: [];
+};
+"workloads": {
+Row: {
+"code": string;
+"label_lt": string;
+"sort_order": number;
+"is_active": boolean;
+};
+Insert: {
+"code": string;
+"label_lt": string;
+"sort_order": number;
+"is_active"?: boolean;
+};
+Update: {
+"code"?: string;
+"label_lt"?: string;
+"sort_order"?: number;
+"is_active"?: boolean;
+};
+Relationships: [];
+};
+}; Views: { [_ in never]: never }; Functions: {
+"account_capabilities": { Args: {  }; Returns: Json };
+"create_second_profile": { Args: { "kind": string;"payload": Json }; Returns: undefined };
+"profile_completeness": { Args: {  }; Returns: Json };
+"read_license": { Args: { "target_user_id": string }; Returns: Json };
+"review_license": { Args: { "target_user_id": string;"expected_revision": number;"decision": string }; Returns: undefined };
+"save_education": { Args: { "payload": Json }; Returns: undefined };
+"save_employer_step1": { Args: { "payload": Json }; Returns: undefined };
+"save_license": { Args: { "number_input": string }; Returns: undefined };
+"save_specialist_step1": { Args: { "payload": Json }; Returns: undefined };
+"save_specialist_step2": { Args: { "payload": Json }; Returns: undefined };
+"save_specialist_step3": { Args: { "payload": Json }; Returns: undefined };
+}; Enums: {
+"profile_role": "specialist" | "employer" | "admin";
+}; CompositeTypes: { [_ in never]: never }; }; };

@@ -1,0 +1,1090 @@
+{
+  "catalogs": {
+    "professional_roles": [
+      [
+        "veterinarian",
+        "Veterinarijos gydytojas"
+      ],
+      [
+        "veterinary_student",
+        "Veterinarijos studentas"
+      ],
+      [
+        "veterinary_assistant",
+        "Veterinarijos felčeris / gydytojo asistentas"
+      ],
+      [
+        "veterinary_pharmacy",
+        "Veterinarijos vaistininkas / farmacininkas"
+      ],
+      [
+        "animal_health_commerce",
+        "Veterinarijos / gyvūnų sveikatos komercijos specialistas"
+      ],
+      [
+        "other_veterinary_specialty",
+        "Kita veterinarijos / gyvūnų sveikatos specialybė"
+      ]
+    ],
+    "organization_types": [
+      [
+        "veterinary_clinic",
+        "Veterinarijos klinika / gydykla / ligoninė"
+      ],
+      [
+        "veterinary_retail_pharmacy",
+        "Veterinarijos vaistinė / veterinarinė mažmena"
+      ],
+      [
+        "veterinary_wholesale_distributor",
+        "Veterinarijos didmena / distributorius"
+      ],
+      [
+        "animal_health_pharma_products",
+        "Gyvūnų sveikatos / farmacijos / veterinarinių produktų įmonė"
+      ],
+      [
+        "farm_livestock_poultry",
+        "Ūkis / gyvulininkystės / paukštininkystės įmonė"
+      ],
+      [
+        "laboratory_diagnostics",
+        "Laboratorija / diagnostika"
+      ],
+      [
+        "university_research_education",
+        "Universitetas / mokymo ar mokslo įstaiga"
+      ],
+      [
+        "public_institution",
+        "Valstybinė / viešoji institucija"
+      ],
+      [
+        "shelter_ngo",
+        "Gyvūnų prieglauda / NVO"
+      ],
+      [
+        "other",
+        "Kita"
+      ]
+    ],
+    "experience_bands": [
+      [
+        "no_experience",
+        "Neturiu profesinės patirties"
+      ],
+      [
+        "under_1_year",
+        "Iki 1 metų"
+      ],
+      [
+        "1_2_years",
+        "1–2 metai"
+      ],
+      [
+        "3_5_years",
+        "3–5 metai"
+      ],
+      [
+        "6_10_years",
+        "6–10 metų"
+      ],
+      [
+        "10_plus_years",
+        "10+ metų"
+      ]
+    ],
+    "animal_groups": [
+      [
+        "small_animals",
+        "Smulkieji gyvūnai"
+      ],
+      [
+        "cattle",
+        "Galvijai"
+      ],
+      [
+        "pigs",
+        "Kiaulės"
+      ],
+      [
+        "poultry",
+        "Paukščiai"
+      ],
+      [
+        "horses",
+        "Arkliai"
+      ],
+      [
+        "exotic",
+        "Egzotiniai gyvūnai"
+      ],
+      [
+        "other_farm",
+        "Kiti ūkiniai gyvūnai"
+      ]
+    ],
+    "activity_areas": [
+      [
+        "clinical",
+        "Klinikinė praktika"
+      ],
+      [
+        "farm",
+        "Ūkinių gyvūnų medicina"
+      ],
+      [
+        "public_veterinary",
+        "Valstybinė veterinarija / kontrolė"
+      ],
+      [
+        "laboratory",
+        "Laboratorija / diagnostika"
+      ],
+      [
+        "pharmacy",
+        "Veterinarinė farmacija"
+      ],
+      [
+        "commerce",
+        "Gyvūnų sveikatos / produktų komercija"
+      ],
+      [
+        "science",
+        "Mokslas / akademinė veikla"
+      ],
+      [
+        "other",
+        "Kita"
+      ]
+    ],
+    "professional_interests": [
+      [
+        "general",
+        "Bendroji praktika"
+      ],
+      [
+        "internal",
+        "Vidaus ligos"
+      ],
+      [
+        "dermatology",
+        "Dermatologija"
+      ],
+      [
+        "surgery",
+        "Chirurgija"
+      ],
+      [
+        "orthopedics",
+        "Ortopedija"
+      ],
+      [
+        "neurology",
+        "Neurologija"
+      ],
+      [
+        "dentistry",
+        "Odontologija"
+      ],
+      [
+        "anesthesia",
+        "Anesteziologija"
+      ],
+      [
+        "emergency",
+        "Skubi pagalba / intensyvi terapija"
+      ],
+      [
+        "reproduction",
+        "Reprodukcija"
+      ],
+      [
+        "exotic",
+        "Egzotinių gyvūnų medicina"
+      ]
+    ],
+    "job_search_statuses": [
+      [
+        "actively_looking",
+        "Aktyviai ieškau darbo"
+      ],
+      [
+        "open_to_offers",
+        "Atviras pasiūlymams"
+      ],
+      [
+        "not_looking",
+        "Šiuo metu darbo neieškau"
+      ]
+    ],
+    "workloads": [
+      [
+        "full_time",
+        "Pilnas etatas"
+      ],
+      [
+        "part_time",
+        "Dalinis etatas"
+      ],
+      [
+        "flexible",
+        "Lankstus darbo krūvis"
+      ]
+    ],
+    "schedules": [
+      [
+        "regular",
+        "Įprastas darbo laikas"
+      ],
+      [
+        "shifts",
+        "Pamaininis darbas"
+      ],
+      [
+        "flexible",
+        "Lankstus grafikas"
+      ]
+    ],
+    "mobility_options": [
+      [
+        "selected_locations",
+        "Dirbu tik pasirinktose vietovėse"
+      ],
+      [
+        "commute",
+        "Galiu reguliariai važinėti į kitą miestą / regioną"
+      ],
+      [
+        "relocate",
+        "Esu pasirengęs persikelti"
+      ],
+      [
+        "nationwide",
+        "Darbas visoje Lietuvoje tinka"
+      ]
+    ],
+    "start_options": [
+      [
+        "immediately",
+        "Iš karto"
+      ],
+      [
+        "two_weeks",
+        "Per 2 savaites"
+      ],
+      [
+        "one_month",
+        "Per 1 mėnesį"
+      ],
+      [
+        "two_three_months",
+        "Per 2–3 mėnesius"
+      ],
+      [
+        "specific_date",
+        "Konkreti data / vėliau"
+      ]
+    ],
+    "work_models": [
+      [
+        "on_site",
+        "Darbo vietoje"
+      ],
+      [
+        "hybrid",
+        "Hibridinis"
+      ],
+      [
+        "remote",
+        "Nuotolinis"
+      ]
+    ],
+    "languages": [
+      [
+        "lt",
+        "Lietuvių"
+      ],
+      [
+        "en",
+        "Anglų"
+      ],
+      [
+        "ru",
+        "Rusų"
+      ],
+      [
+        "pl",
+        "Lenkų"
+      ],
+      [
+        "lv",
+        "Latvių"
+      ],
+      [
+        "et",
+        "Estų"
+      ],
+      [
+        "de",
+        "Vokiečių"
+      ],
+      [
+        "other",
+        "Kita"
+      ]
+    ],
+    "language_levels": [
+      [
+        "basic",
+        "Pagrindai"
+      ],
+      [
+        "intermediate",
+        "Vidutinis"
+      ],
+      [
+        "good",
+        "Geras"
+      ],
+      [
+        "very_good",
+        "Labai geras"
+      ],
+      [
+        "native",
+        "Gimtoji"
+      ]
+    ],
+    "visibility_options": [
+      [
+        "registered_employers",
+        "Matomas registruotiems darbdaviams"
+      ],
+      [
+        "application_only",
+        "Matomas tik kai kandidatuoju"
+      ],
+      [
+        "hidden",
+        "Paslėptas"
+      ]
+    ]
+  },
+  "competencies": [
+    {
+      "role": "veterinarian",
+      "code": "veterinarian_01",
+      "label_lt": "IV kateterio įvedimas",
+      "group": "procedures"
+    },
+    {
+      "role": "veterinarian",
+      "code": "veterinarian_02",
+      "label_lt": "Žaizdų sutvarkymas ir siuvimas",
+      "group": "procedures"
+    },
+    {
+      "role": "veterinarian",
+      "code": "veterinarian_03",
+      "label_lt": "Kraujo tyrimų interpretacija",
+      "group": "lab_diagnostics"
+    },
+    {
+      "role": "veterinarian",
+      "code": "veterinarian_04",
+      "label_lt": "Šlapimo tyrimų vertinimas",
+      "group": "lab_diagnostics"
+    },
+    {
+      "role": "veterinarian",
+      "code": "veterinarian_05",
+      "label_lt": "Hormoninių tyrimų interpretacija",
+      "group": "lab_diagnostics"
+    },
+    {
+      "role": "veterinarian",
+      "code": "veterinarian_06",
+      "label_lt": "Citologinių mėginių vertinimas",
+      "group": "lab_diagnostics"
+    },
+    {
+      "role": "veterinarian",
+      "code": "veterinarian_07",
+      "label_lt": "Rentgenografija / rentgenogramų vertinimas",
+      "group": "lab_diagnostics"
+    },
+    {
+      "role": "veterinarian",
+      "code": "veterinarian_08",
+      "label_lt": "Ultragarsinis tyrimas",
+      "group": "lab_diagnostics"
+    },
+    {
+      "role": "veterinarian",
+      "code": "veterinarian_09",
+      "label_lt": "Kompiuterinė tomografija (KT)",
+      "group": "lab_diagnostics"
+    },
+    {
+      "role": "veterinarian",
+      "code": "veterinarian_10",
+      "label_lt": "Magnetinis rezonansas (MRT)",
+      "group": "lab_diagnostics"
+    },
+    {
+      "role": "veterinarian",
+      "code": "veterinarian_11",
+      "label_lt": "Anestezijos valdymas ir monitoringas",
+      "group": "anesthesia_surgery"
+    },
+    {
+      "role": "veterinarian",
+      "code": "veterinarian_12",
+      "label_lt": "Minkštųjų audinių chirurgija",
+      "group": "anesthesia_surgery"
+    },
+    {
+      "role": "veterinarian",
+      "code": "veterinarian_13",
+      "label_lt": "Ortopedinė chirurgija / procedūros",
+      "group": "anesthesia_surgery"
+    },
+    {
+      "role": "veterinarian",
+      "code": "veterinarian_14",
+      "label_lt": "Bendroji praktika",
+      "group": "clinical_areas"
+    },
+    {
+      "role": "veterinarian",
+      "code": "veterinarian_15",
+      "label_lt": "Vidaus ligos",
+      "group": "clinical_areas"
+    },
+    {
+      "role": "veterinarian",
+      "code": "veterinarian_16",
+      "label_lt": "Dermatologija",
+      "group": "clinical_areas"
+    },
+    {
+      "role": "veterinarian",
+      "code": "veterinarian_17",
+      "label_lt": "Chirurgija",
+      "group": "clinical_areas"
+    },
+    {
+      "role": "veterinarian",
+      "code": "veterinarian_18",
+      "label_lt": "Ortopedija",
+      "group": "clinical_areas"
+    },
+    {
+      "role": "veterinarian",
+      "code": "veterinarian_19",
+      "label_lt": "Neurologija",
+      "group": "clinical_areas"
+    },
+    {
+      "role": "veterinarian",
+      "code": "veterinarian_20",
+      "label_lt": "Odontologija",
+      "group": "clinical_areas"
+    },
+    {
+      "role": "veterinarian",
+      "code": "veterinarian_21",
+      "label_lt": "Anesteziologija",
+      "group": "clinical_areas"
+    },
+    {
+      "role": "veterinarian",
+      "code": "veterinarian_22",
+      "label_lt": "Skubi pagalba / intensyvi terapija",
+      "group": "clinical_areas"
+    },
+    {
+      "role": "veterinarian",
+      "code": "veterinarian_23",
+      "label_lt": "Reprodukcija",
+      "group": "clinical_areas"
+    },
+    {
+      "role": "veterinarian",
+      "code": "veterinarian_24",
+      "label_lt": "Egzotinių gyvūnų medicina",
+      "group": "clinical_areas"
+    },
+    {
+      "role": "veterinary_assistant",
+      "code": "veterinary_assistant_01",
+      "label_lt": "Paciento paruošimas konsultacijai / procedūrai",
+      "group": "patient_care"
+    },
+    {
+      "role": "veterinary_assistant",
+      "code": "veterinary_assistant_02",
+      "label_lt": "Stacionaro pacientų priežiūra",
+      "group": "patient_care"
+    },
+    {
+      "role": "veterinary_assistant",
+      "code": "veterinary_assistant_03",
+      "label_lt": "Pooperacinė priežiūra",
+      "group": "patient_care"
+    },
+    {
+      "role": "veterinary_assistant",
+      "code": "veterinary_assistant_04",
+      "label_lt": "Paciento būklės stebėjimas ir pokyčių atpažinimas",
+      "group": "patient_care"
+    },
+    {
+      "role": "veterinary_assistant",
+      "code": "veterinary_assistant_05",
+      "label_lt": "Gyvybinių rodiklių matavimas",
+      "group": "patient_care"
+    },
+    {
+      "role": "veterinary_assistant",
+      "code": "veterinary_assistant_06",
+      "label_lt": "Injekcijų atlikimas",
+      "group": "procedures"
+    },
+    {
+      "role": "veterinary_assistant",
+      "code": "veterinary_assistant_07",
+      "label_lt": "IV kateterio įvedimas",
+      "group": "procedures"
+    },
+    {
+      "role": "veterinary_assistant",
+      "code": "veterinary_assistant_08",
+      "label_lt": "Kraujo paėmimas",
+      "group": "procedures"
+    },
+    {
+      "role": "veterinary_assistant",
+      "code": "veterinary_assistant_09",
+      "label_lt": "Mėginių paėmimas laboratoriniams tyrimams",
+      "group": "procedures"
+    },
+    {
+      "role": "veterinary_assistant",
+      "code": "veterinary_assistant_10",
+      "label_lt": "Žaizdų priežiūra ir tvarsčių keitimas",
+      "group": "procedures"
+    },
+    {
+      "role": "veterinary_assistant",
+      "code": "veterinary_assistant_11",
+      "label_lt": "Paciento fiksavimas procedūroms",
+      "group": "procedures"
+    },
+    {
+      "role": "veterinary_assistant",
+      "code": "veterinary_assistant_12",
+      "label_lt": "Paciento paruošimas anestezijai",
+      "group": "anesthesia_operating_room"
+    },
+    {
+      "role": "veterinary_assistant",
+      "code": "veterinary_assistant_13",
+      "label_lt": "Anestezijos monitoringo atlikimas prižiūrint gydytojui",
+      "group": "anesthesia_operating_room"
+    },
+    {
+      "role": "veterinary_assistant",
+      "code": "veterinary_assistant_14",
+      "label_lt": "Paciento priežiūra pabudimo metu",
+      "group": "anesthesia_operating_room"
+    },
+    {
+      "role": "veterinary_assistant",
+      "code": "veterinary_assistant_15",
+      "label_lt": "Operacinės ir instrumentų paruošimas",
+      "group": "anesthesia_operating_room"
+    },
+    {
+      "role": "veterinary_assistant",
+      "code": "veterinary_assistant_16",
+      "label_lt": "Instrumentų sterilizacija",
+      "group": "anesthesia_operating_room"
+    },
+    {
+      "role": "veterinary_assistant",
+      "code": "veterinary_assistant_17",
+      "label_lt": "Asistavimas operacijos metu",
+      "group": "anesthesia_operating_room"
+    },
+    {
+      "role": "veterinary_assistant",
+      "code": "veterinary_assistant_18",
+      "label_lt": "Pagalba atliekant rentgenografiją",
+      "group": "diagnostic_support"
+    },
+    {
+      "role": "veterinary_assistant",
+      "code": "veterinary_assistant_19",
+      "label_lt": "Pagalba atliekant ultragarsinį tyrimą",
+      "group": "diagnostic_support"
+    },
+    {
+      "role": "veterinary_assistant",
+      "code": "veterinary_assistant_20",
+      "label_lt": "Laboratorinės įrangos / analizatorių naudojimas",
+      "group": "diagnostic_support"
+    },
+    {
+      "role": "veterinary_assistant",
+      "code": "veterinary_assistant_21",
+      "label_lt": "Medicininės dokumentacijos pildymas",
+      "group": "clinic_operations"
+    },
+    {
+      "role": "veterinary_assistant",
+      "code": "veterinary_assistant_22",
+      "label_lt": "Vaistų ir priemonių paruošimas pagal gydytojo nurodymą",
+      "group": "clinic_operations"
+    },
+    {
+      "role": "veterinary_assistant",
+      "code": "veterinary_assistant_23",
+      "label_lt": "Klientų konsultavimas dėl gydytojo paskirto gydymo / priežiūros",
+      "group": "clinic_operations"
+    },
+    {
+      "role": "veterinary_assistant",
+      "code": "veterinary_assistant_24",
+      "label_lt": "Registratūros / klientų aptarnavimo darbai",
+      "group": "clinic_operations"
+    },
+    {
+      "role": "veterinary_student",
+      "code": "veterinary_student_01",
+      "label_lt": "Paciento fiksavimas ir paruošimas apžiūrai",
+      "group": "basic_clinical"
+    },
+    {
+      "role": "veterinary_student",
+      "code": "veterinary_student_02",
+      "label_lt": "Anamnezės surinkimas prižiūrint gydytojui",
+      "group": "basic_clinical"
+    },
+    {
+      "role": "veterinary_student",
+      "code": "veterinary_student_03",
+      "label_lt": "Klinikinės apžiūros atlikimas prižiūrint gydytojui",
+      "group": "basic_clinical"
+    },
+    {
+      "role": "veterinary_student",
+      "code": "veterinary_student_04",
+      "label_lt": "Gyvybinių rodiklių vertinimas",
+      "group": "basic_clinical"
+    },
+    {
+      "role": "veterinary_student",
+      "code": "veterinary_student_05",
+      "label_lt": "Injekcijų atlikimas",
+      "group": "procedures"
+    },
+    {
+      "role": "veterinary_student",
+      "code": "veterinary_student_06",
+      "label_lt": "IV kateterio įvedimas",
+      "group": "procedures"
+    },
+    {
+      "role": "veterinary_student",
+      "code": "veterinary_student_07",
+      "label_lt": "Kraujo paėmimas",
+      "group": "procedures"
+    },
+    {
+      "role": "veterinary_student",
+      "code": "veterinary_student_08",
+      "label_lt": "Mėginių paėmimas laboratoriniams tyrimams",
+      "group": "procedures"
+    },
+    {
+      "role": "veterinary_student",
+      "code": "veterinary_student_09",
+      "label_lt": "Žaizdų priežiūra / tvarsčių keitimas",
+      "group": "procedures"
+    },
+    {
+      "role": "veterinary_student",
+      "code": "veterinary_student_10",
+      "label_lt": "Kraujo tyrimų bazinis vertinimas",
+      "group": "diagnostics"
+    },
+    {
+      "role": "veterinary_student",
+      "code": "veterinary_student_11",
+      "label_lt": "Šlapimo tyrimų bazinis vertinimas",
+      "group": "diagnostics"
+    },
+    {
+      "role": "veterinary_student",
+      "code": "veterinary_student_12",
+      "label_lt": "Pagalba atliekant rentgenografiją",
+      "group": "diagnostics"
+    },
+    {
+      "role": "veterinary_student",
+      "code": "veterinary_student_13",
+      "label_lt": "Pagalba atliekant ultragarsinį tyrimą",
+      "group": "diagnostics"
+    },
+    {
+      "role": "veterinary_student",
+      "code": "veterinary_student_14",
+      "label_lt": "Citologinių mėginių paruošimas / bazinis vertinimas",
+      "group": "diagnostics"
+    },
+    {
+      "role": "veterinary_student",
+      "code": "veterinary_student_15",
+      "label_lt": "Paciento paruošimas anestezijai",
+      "group": "anesthesia_surgery"
+    },
+    {
+      "role": "veterinary_student",
+      "code": "veterinary_student_16",
+      "label_lt": "Anestezijos monitoringo pagrindai",
+      "group": "anesthesia_surgery"
+    },
+    {
+      "role": "veterinary_student",
+      "code": "veterinary_student_17",
+      "label_lt": "Asistavimas operacijos metu",
+      "group": "anesthesia_surgery"
+    },
+    {
+      "role": "veterinary_student",
+      "code": "veterinary_student_18",
+      "label_lt": "Operacinės ir instrumentų paruošimas",
+      "group": "anesthesia_surgery"
+    },
+    {
+      "role": "veterinary_student",
+      "code": "veterinary_student_19",
+      "label_lt": "Stacionaro pacientų priežiūra",
+      "group": "patient_care"
+    },
+    {
+      "role": "veterinary_student",
+      "code": "veterinary_student_20",
+      "label_lt": "Pooperacinė priežiūra",
+      "group": "patient_care"
+    },
+    {
+      "role": "veterinary_student",
+      "code": "veterinary_student_21",
+      "label_lt": "Paciento būklės pokyčių atpažinimas",
+      "group": "patient_care"
+    },
+    {
+      "role": "veterinary_student",
+      "code": "veterinary_student_22",
+      "label_lt": "Medicininės dokumentacijos pildymas prižiūrint gydytojui",
+      "group": "communication_documentation"
+    },
+    {
+      "role": "veterinary_student",
+      "code": "veterinary_student_23",
+      "label_lt": "Bendravimas su gyvūno savininku klinikinėje aplinkoje",
+      "group": "communication_documentation"
+    },
+    {
+      "role": "veterinary_pharmacy",
+      "code": "veterinary_pharmacy_01",
+      "label_lt": "Veterinarinių vaistų grupių ir jų paskirties išmanymas",
+      "group": "veterinary_medicines"
+    },
+    {
+      "role": "veterinary_pharmacy",
+      "code": "veterinary_pharmacy_02",
+      "label_lt": "Veterinarinių vaistų išdavimas pagal nustatytą tvarką",
+      "group": "veterinary_medicines"
+    },
+    {
+      "role": "veterinary_pharmacy",
+      "code": "veterinary_pharmacy_03",
+      "label_lt": "Receptų / paskyrimų supratimas ir vykdymas",
+      "group": "veterinary_medicines"
+    },
+    {
+      "role": "veterinary_pharmacy",
+      "code": "veterinary_pharmacy_04",
+      "label_lt": "Vaistų dozių ir vartojimo instrukcijų supratimas",
+      "group": "veterinary_medicines"
+    },
+    {
+      "role": "veterinary_pharmacy",
+      "code": "veterinary_pharmacy_05",
+      "label_lt": "Kontraindikacijų, atsargumo priemonių ir galimų nepageidaujamų reakcijų supratimas",
+      "group": "veterinary_medicines"
+    },
+    {
+      "role": "veterinary_pharmacy",
+      "code": "veterinary_pharmacy_06",
+      "label_lt": "Gyvūno savininko konsultavimas dėl veterinarinių preparatų naudojimo",
+      "group": "customer_consulting"
+    },
+    {
+      "role": "veterinary_pharmacy",
+      "code": "veterinary_pharmacy_07",
+      "label_lt": "Antiparazitinių preparatų konsultacija pagal indikacijas",
+      "group": "customer_consulting"
+    },
+    {
+      "role": "veterinary_pharmacy",
+      "code": "veterinary_pharmacy_08",
+      "label_lt": "Odos / ausų priežiūros produktų konsultacija",
+      "group": "customer_consulting"
+    },
+    {
+      "role": "veterinary_pharmacy",
+      "code": "veterinary_pharmacy_09",
+      "label_lt": "Papildų / gyvūnų sveikatos produktų konsultacija",
+      "group": "customer_consulting"
+    },
+    {
+      "role": "veterinary_pharmacy",
+      "code": "veterinary_pharmacy_10",
+      "label_lt": "Atpažinimas, kada klientą būtina nukreipti pas veterinarijos gydytoją",
+      "group": "customer_consulting"
+    },
+    {
+      "role": "veterinary_pharmacy",
+      "code": "veterinary_pharmacy_11",
+      "label_lt": "Veterinarinių vaistų saugojimo reikalavimų laikymasis",
+      "group": "pharmacy_operations"
+    },
+    {
+      "role": "veterinary_pharmacy",
+      "code": "veterinary_pharmacy_12",
+      "label_lt": "Temperatūros / šaldymo grandinės kontrolė",
+      "group": "pharmacy_operations"
+    },
+    {
+      "role": "veterinary_pharmacy",
+      "code": "veterinary_pharmacy_13",
+      "label_lt": "Galiojimo terminų kontrolė",
+      "group": "pharmacy_operations"
+    },
+    {
+      "role": "veterinary_pharmacy",
+      "code": "veterinary_pharmacy_14",
+      "label_lt": "Atsargų ir užsakymų valdymas",
+      "group": "pharmacy_operations"
+    },
+    {
+      "role": "veterinary_pharmacy",
+      "code": "veterinary_pharmacy_15",
+      "label_lt": "Prekių priėmimas ir apskaita",
+      "group": "pharmacy_operations"
+    },
+    {
+      "role": "veterinary_pharmacy",
+      "code": "veterinary_pharmacy_16",
+      "label_lt": "Privalomos veterinarinių vaistų dokumentacijos tvarkymas",
+      "group": "documentation_safety"
+    },
+    {
+      "role": "veterinary_pharmacy",
+      "code": "veterinary_pharmacy_17",
+      "label_lt": "Receptinių preparatų apskaitos procesai",
+      "group": "documentation_safety"
+    },
+    {
+      "role": "veterinary_pharmacy",
+      "code": "veterinary_pharmacy_18",
+      "label_lt": "Nepageidaujamų reakcijų / farmakologinio budrumo informacijos atpažinimas ir perdavimas",
+      "group": "documentation_safety"
+    },
+    {
+      "role": "veterinary_pharmacy",
+      "code": "veterinary_pharmacy_19",
+      "label_lt": "Klientų aptarnavimas",
+      "group": "commercial"
+    },
+    {
+      "role": "veterinary_pharmacy",
+      "code": "veterinary_pharmacy_20",
+      "label_lt": "Produktų pristatymas ir rekomendavimas pagal kliento poreikį",
+      "group": "commercial"
+    },
+    {
+      "role": "veterinary_pharmacy",
+      "code": "veterinary_pharmacy_21",
+      "label_lt": "Darbas su vaistinės asortimentu",
+      "group": "commercial"
+    },
+    {
+      "role": "animal_health_commerce",
+      "code": "animal_health_commerce_01",
+      "label_lt": "B2B pardavimai",
+      "group": "sales_clients"
+    },
+    {
+      "role": "animal_health_commerce",
+      "code": "animal_health_commerce_02",
+      "label_lt": "Aktyvi naujų klientų paieška",
+      "group": "sales_clients"
+    },
+    {
+      "role": "animal_health_commerce",
+      "code": "animal_health_commerce_03",
+      "label_lt": "Esamų klientų portfelio valdymas",
+      "group": "sales_clients"
+    },
+    {
+      "role": "animal_health_commerce",
+      "code": "animal_health_commerce_04",
+      "label_lt": "Kliento poreikių išgryninimas",
+      "group": "sales_clients"
+    },
+    {
+      "role": "animal_health_commerce",
+      "code": "animal_health_commerce_05",
+      "label_lt": "Komercinių pasiūlymų rengimas",
+      "group": "sales_clients"
+    },
+    {
+      "role": "animal_health_commerce",
+      "code": "animal_health_commerce_06",
+      "label_lt": "Derybų vedimas",
+      "group": "sales_clients"
+    },
+    {
+      "role": "animal_health_commerce",
+      "code": "animal_health_commerce_07",
+      "label_lt": "Pardavimo uždarymas",
+      "group": "sales_clients"
+    },
+    {
+      "role": "animal_health_commerce",
+      "code": "animal_health_commerce_08",
+      "label_lt": "Darbas su veterinarijos klinikomis",
+      "group": "market_clients"
+    },
+    {
+      "role": "animal_health_commerce",
+      "code": "animal_health_commerce_09",
+      "label_lt": "Darbas su veterinarijos vaistinėmis",
+      "group": "market_clients"
+    },
+    {
+      "role": "animal_health_commerce",
+      "code": "animal_health_commerce_10",
+      "label_lt": "Darbas su ūkiais / gyvulininkystės įmonėmis",
+      "group": "market_clients"
+    },
+    {
+      "role": "animal_health_commerce",
+      "code": "animal_health_commerce_11",
+      "label_lt": "Darbas su distributoriais / didmena",
+      "group": "market_clients"
+    },
+    {
+      "role": "animal_health_commerce",
+      "code": "animal_health_commerce_12",
+      "label_lt": "Veterinarinių vaistų / gyvūnų sveikatos produktų pristatymas",
+      "group": "product_technical"
+    },
+    {
+      "role": "animal_health_commerce",
+      "code": "animal_health_commerce_13",
+      "label_lt": "Produkto indikacijų ir pagrindinių savybių paaiškinimas",
+      "group": "product_technical"
+    },
+    {
+      "role": "animal_health_commerce",
+      "code": "animal_health_commerce_14",
+      "label_lt": "Konkurentų produktų ir rinkos išmanymas",
+      "group": "product_technical"
+    },
+    {
+      "role": "animal_health_commerce",
+      "code": "animal_health_commerce_15",
+      "label_lt": "Mokslinės / techninės informacijos pristatymas klientui",
+      "group": "product_technical"
+    },
+    {
+      "role": "animal_health_commerce",
+      "code": "animal_health_commerce_16",
+      "label_lt": "Produktų prezentacijų vedimas",
+      "group": "presentations_training"
+    },
+    {
+      "role": "animal_health_commerce",
+      "code": "animal_health_commerce_17",
+      "label_lt": "Klientų mokymų vedimas",
+      "group": "presentations_training"
+    },
+    {
+      "role": "animal_health_commerce",
+      "code": "animal_health_commerce_18",
+      "label_lt": "Seminarų / renginių vedimas",
+      "group": "presentations_training"
+    },
+    {
+      "role": "animal_health_commerce",
+      "code": "animal_health_commerce_19",
+      "label_lt": "Viešas kalbėjimas",
+      "group": "presentations_training"
+    },
+    {
+      "role": "animal_health_commerce",
+      "code": "animal_health_commerce_20",
+      "label_lt": "Key Account Management",
+      "group": "account_management"
+    },
+    {
+      "role": "animal_health_commerce",
+      "code": "animal_health_commerce_21",
+      "label_lt": "Santykių su sprendimų priėmėjais kūrimas",
+      "group": "account_management"
+    },
+    {
+      "role": "animal_health_commerce",
+      "code": "animal_health_commerce_22",
+      "label_lt": "Kliento potencialo ir pardavimo galimybių vertinimas",
+      "group": "account_management"
+    },
+    {
+      "role": "animal_health_commerce",
+      "code": "animal_health_commerce_23",
+      "label_lt": "Pardavimo plano / teritorijos planavimas",
+      "group": "account_management"
+    },
+    {
+      "role": "animal_health_commerce",
+      "code": "animal_health_commerce_24",
+      "label_lt": "Savarankiškas vizitų planavimas",
+      "group": "work_organization"
+    },
+    {
+      "role": "animal_health_commerce",
+      "code": "animal_health_commerce_25",
+      "label_lt": "CRM / klientų duomenų valdymas",
+      "group": "work_organization"
+    },
+    {
+      "role": "animal_health_commerce",
+      "code": "animal_health_commerce_26",
+      "label_lt": "Darbas pagal pardavimo tikslus / KPI",
+      "group": "work_organization"
+    },
+    {
+      "role": "animal_health_commerce",
+      "code": "animal_health_commerce_27",
+      "label_lt": "Reguliarus keliavimas darbo tikslais",
+      "group": "work_organization"
+    }
+  ]
+}

@@ -26,7 +26,7 @@ require.extensions['.ts'] = (module, filename) => module._compile(ts.transpileMo
 }).outputText, filename);
 Module._load = function(id, parent, isMain) {
   if (id === '@/lib/supabase/server') return { createClient: async () => client };
-  if (id === '@/lib/auth/session') return { getActiveUser: async () => confirmed ? { id: 'test-user', email: 'test@example.com', role: 'specialist' } : null };
+  if (id === '@/lib/auth/session') return { getActiveUser: async () => confirmed ? { id: 'test-user', email: 'test@example.com', hasSpecialistProfile: true, hasEmployerProfile: false, isAdmin: false } : null };
   if (id === '@/components/AuthSession') return { useAuthSession: () => ({ user: headerUser, verified: false }) };
   if (id === 'next/navigation') return { redirect: target => { throw new Error('REDIRECT:' + target); } };
   if (id === 'next/cache') return { revalidatePath: () => {} };

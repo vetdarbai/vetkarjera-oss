@@ -1,0 +1,246 @@
+{
+  "source": "https://www.lsa.lt/nariai-savivaldybes/",
+  "accessed": "2026-09-15",
+  "municipalities": [
+    [
+      "lt_akmenes_r",
+      "Akmenės r. sav."
+    ],
+    [
+      "lt_alytaus_m",
+      "Alytaus m. sav."
+    ],
+    [
+      "lt_alytaus_r",
+      "Alytaus r. sav."
+    ],
+    [
+      "lt_anyksciu_r",
+      "Anykščių r. sav."
+    ],
+    [
+      "lt_birstono",
+      "Birštono sav."
+    ],
+    [
+      "lt_birzu_r",
+      "Biržų r. sav."
+    ],
+    [
+      "lt_druskininku",
+      "Druskininkų sav."
+    ],
+    [
+      "lt_elektrenu",
+      "Elektrėnų sav."
+    ],
+    [
+      "lt_ignalinos_r",
+      "Ignalinos r. sav."
+    ],
+    [
+      "lt_jonavos_r",
+      "Jonavos r. sav."
+    ],
+    [
+      "lt_joniskio_r",
+      "Joniškio r. sav."
+    ],
+    [
+      "lt_jurbarko_r",
+      "Jurbarko r. sav."
+    ],
+    [
+      "lt_kaisiadoriu_r",
+      "Kaišiadorių r. sav."
+    ],
+    [
+      "lt_kalvarijos",
+      "Kalvarijos sav."
+    ],
+    [
+      "lt_kauno_m",
+      "Kauno m. sav."
+    ],
+    [
+      "lt_kauno_r",
+      "Kauno r. sav."
+    ],
+    [
+      "lt_kazlu_rudos",
+      "Kazlų Rūdos sav."
+    ],
+    [
+      "lt_kelmes_r",
+      "Kelmės r. sav."
+    ],
+    [
+      "lt_kedainiu_r",
+      "Kėdainių r. sav."
+    ],
+    [
+      "lt_klaipedos_m",
+      "Klaipėdos m. sav."
+    ],
+    [
+      "lt_klaipedos_r",
+      "Klaipėdos r. sav."
+    ],
+    [
+      "lt_kretingos_r",
+      "Kretingos r. sav."
+    ],
+    [
+      "lt_kupiskio_r",
+      "Kupiškio r. sav."
+    ],
+    [
+      "lt_lazdiju_r",
+      "Lazdijų r. sav."
+    ],
+    [
+      "lt_marijampoles",
+      "Marijampolės sav."
+    ],
+    [
+      "lt_mazeikiu_r",
+      "Mažeikių r. sav."
+    ],
+    [
+      "lt_moletu_r",
+      "Molėtų r. sav."
+    ],
+    [
+      "lt_neringos",
+      "Neringos sav."
+    ],
+    [
+      "lt_pagegiu",
+      "Pagėgių sav."
+    ],
+    [
+      "lt_pakruojo_r",
+      "Pakruojo r. sav."
+    ],
+    [
+      "lt_palangos_m",
+      "Palangos m. sav."
+    ],
+    [
+      "lt_panevezio_m",
+      "Panevėžio m. sav."
+    ],
+    [
+      "lt_panevezio_r",
+      "Panevėžio r. sav."
+    ],
+    [
+      "lt_pasvalio_r",
+      "Pasvalio r. sav."
+    ],
+    [
+      "lt_plunges_r",
+      "Plungės r. sav."
+    ],
+    [
+      "lt_prienu_r",
+      "Prienų r. sav."
+    ],
+    [
+      "lt_radviliskio_r",
+      "Radviliškio r. sav."
+    ],
+    [
+      "lt_raseiniu_r",
+      "Raseinių r. sav."
+    ],
+    [
+      "lt_rietavo",
+      "Rietavo sav."
+    ],
+    [
+      "lt_rokiskio_r",
+      "Rokiškio r. sav."
+    ],
+    [
+      "lt_skuodo_r",
+      "Skuodo r. sav."
+    ],
+    [
+      "lt_sakiu_r",
+      "Šakių r. sav."
+    ],
+    [
+      "lt_salcininku_r",
+      "Šalčininkų r. sav."
+    ],
+    [
+      "lt_siauliu_m",
+      "Šiaulių m. sav."
+    ],
+    [
+      "lt_siauliu_r",
+      "Šiaulių r. sav."
+    ],
+    [
+      "lt_silales_r",
+      "Šilalės r. sav."
+    ],
+    [
+      "lt_silutes_r",
+      "Šilutės r. sav."
+    ],
+    [
+      "lt_sirvintu_r",
+      "Širvintų r. sav."
+    ],
+    [
+      "lt_svencioniu_r",
+      "Švenčionių r. sav."
+    ],
+    [
+      "lt_taurages_r",
+      "Tauragės r. sav."
+    ],
+    [
+      "lt_telsiu_r",
+      "Telšių r. sav."
+    ],
+    [
+      "lt_traku_r",
+      "Trakų r. sav."
+    ],
+    [
+      "lt_ukmerges_r",
+      "Ukmergės r. sav."
+    ],
+    [
+      "lt_utenos_r",
+      "Utenos r. sav."
+    ],
+    [
+      "lt_varenos_r",
+      "Varėnos r. sav."
+    ],
+    [
+      "lt_vilkaviskio_r",
+      "Vilkaviškio r. sav."
+    ],
+    [
+      "lt_vilniaus_m",
+      "Vilniaus m. sav."
+    ],
+    [
+      "lt_vilniaus_r",
+      "Vilniaus r. sav."
+    ],
+    [
+      "lt_visagino_m",
+      "Visagino m. sav."
+    ],
+    [
+      "lt_zarasu_r",
+      "Zarasų r. sav."
+    ]
+  ]
+}
