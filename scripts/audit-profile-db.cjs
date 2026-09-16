@@ -18,8 +18,10 @@ async function run(){
    console.log(name,rows.length?JSON.stringify(rows):'PASS');
    if(rows.length)failed=true;
   }
-  const migrations=fs.readFileSync('supabase/migrations/20260915162557_stage4_3_profiles.sql','utf8');
-  if(!migrations.startsWith('begin;') || !migrations.trim().endsWith('commit;'))throw new Error('Migration must be atomic');
+  for(const name of fs.readdirSync('supabase/migrations').filter(name=>name.includes('stage4_3') && name.endsWith('.sql'))){
+   const migration=fs.readFileSync(`supabase/migrations/${name}`,'utf8').replace(/^\s*--[^\n]*(?:\n|$)/gm,'').trim();
+   if(!migration.startsWith('begin;') || !migration.endsWith('commit;'))throw new Error(`Migration must be atomic: ${name}`);
+  }
   if(failed)process.exitCode=1;
  }finally{await db.close();}
 }

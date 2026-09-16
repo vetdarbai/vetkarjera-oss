@@ -18,7 +18,7 @@ async function rejected(fn,code) {
 function equal(a,b) { assert.deepEqual(a,b); checks++; }
 const step1 = role => ({first_name:'Testas',last_name:'Pavardė',professional_role_code:role,...(role==='other_veterinary_specialty'?{specialty_free_text:'Specialybė'}:{})});
 const employer = {organization_name_input:'Deklaruota klinika',organization_type_code:'veterinary_clinic'};
-const step2 = () => ({home_location_code:'lt_vilniaus_m',experience_band_code:'no_experience',job_search_status_code:'actively_looking',start_option_code:'immediately',profile_visibility:'application_only',work_locations:['lt_vilniaus_m'],workloads:['full_time'],languages:[{language_code:'lt',proficiency_code:'native'}]});
+const step2 = () => ({home_location_code:'lt_vilniaus_m',experience_band_code:'no_experience',job_search_status_code:'actively_looking',start_option_code:'immediately',profile_visibility:'application_only',animal_groups:['small_animals'],activity_areas:['clinical'],work_locations:['lt_vilniaus_m'],workloads:['full_time'],languages:[{language_code:'lt',proficiency_code:'native'}]});
 async function fixture(n,role='specialist',confirmed=true,extra={}) {
   await q(`insert into auth.users(id,email,encrypted_password,raw_user_meta_data,email_confirmed_at) values($1,$2,'unchanged-fixture-hash',$3,$4)`,[id(n),`fixture-${n}@example.invalid`,JSON.stringify({account_role:role,...extra}),confirmed?'2026-01-01':null]);
   await q('insert into auth.sessions(id,user_id) values($1,$1)',[id(n)]);
@@ -36,6 +36,11 @@ async function run() {
   const before=(await q('select * from auth.users order by id')).rows;
   const migration=fs.readFileSync('supabase/migrations/20260915162557_stage4_3_profiles.sql','utf8');
   await db.exec(migration);
+  const unchangedOptions=(await q("select 'autonomy' as kind,* from public.autonomy_options where professional_role_code='veterinarian' union all select 'development' as kind,* from public.development_areas where professional_role_code in ('veterinarian','veterinary_student') order by kind,professional_role_code,code")).rows;
+  for(const file of fs.readdirSync('supabase/migrations').filter(f=>f.includes('stage4_3') && f>'20260915162557_stage4_3_profiles.sql').sort()) {
+    await db.exec(fs.readFileSync('supabase/migrations/'+file,'utf8'));
+  }
+  equal((await q("select 'autonomy' as kind,* from public.autonomy_options where professional_role_code='veterinarian' union all select 'development' as kind,* from public.development_areas where professional_role_code in ('veterinarian','veterinary_student') order by kind,professional_role_code,code")).rows,unchangedOptions);
   equal((await q('select * from auth.users order by id')).rows,before);
   equal((await q('select count(*)::int n from auth.sessions')).rows[0].n,9);
   equal((await q('select count(*)::int n from private.account_admins')).rows[0].n,1);
@@ -104,6 +109,17 @@ async function run() {
   await rpc('review_license',[id(1),2,'verified']);
   await as(1); await rpc('save_specialist_step2',[step2()]);
   equal((await rpc('profile_completeness')).total,70);
+  // Required multi-selects are independent of optional interests. Missing and empty
+  // payloads fail atomically; pre-existing incomplete data cannot earn STEP 2's 50%.
+  for(const field of ['animal_groups','activity_areas']) {
+    for(const empty of [[],undefined]) {
+      await rejected(()=>rpc('save_specialist_step2',[{...step2(),[field]:empty}]),'22023');
+      equal((await rpc('profile_completeness')).step2,50);
+    }
+    await root(); await q(`delete from public.specialist_${field} where user_id=$1`,[id(1)]);
+    await as(1); equal((await rpc('profile_completeness')).step2,0);
+    await rpc('save_specialist_step2',[step2()]); equal((await rpc('profile_completeness')).step2,50);
+  }
   equal((await q('select can_work_nights,profile_visibility from public.specialist_profiles')).rows[0],{can_work_nights:null,profile_visibility:'application_only'});
   const valid2=step2();
   for(const patch of [{workloads:[]},{workloads:['full_time','full_time']},{work_locations:['abroad']},{work_locations:['invalid']},{about_me:'a'.repeat(501)},{can_work_nights:'false'},{languages:[{language_code:'other',proficiency_code:'good'}]},{home_location_code:'abroad'},{start_option_code:'specific_date'},{profile_visibility:'public'}, {isAdmin:true}]) await rejected(()=>rpc('save_specialist_step2',[{...valid2,...patch}]));
@@ -134,7 +150,13 @@ async function run() {
   equal((await rpc('read_license',[id(1)])).verification_status,'verified');
   await rpc('save_specialist_step1',[step1('other_veterinary_specialty')]);
   await rpc('save_specialist_step3',[{custom_competencies:[{name:'Mano kompetencija',level:'independent'}]}]);
-  equal((await rpc('profile_completeness')).step3,6);
+  equal((await rpc('profile_completeness')).step3,10);
+  for(let count=0;count<=5;count++) {
+    await rpc('save_specialist_step3',[{custom_competencies:Array.from({length:count},(_,n)=>({name:'Kompetencija '+n,level:'with_assistance'}))}]);
+    equal((await rpc('profile_completeness')).step3,Math.min(count,3)*10);
+    equal((await rpc('profile_completeness')).filledCompetencies,count);
+    equal((await rpc('profile_completeness')).total,70+Math.min(count,3)*10);
+  }
   await rejected(()=>rpc('save_specialist_step3',[{custom_competencies:Array.from({length:6},(_,n)=>({name:'Sritis '+n,level:'independent'}))}]));
   // Optional education and optional STEP 2 fields do not block 70%.
   await as(5); await rpc('save_specialist_step2',[step2()]); equal((await rpc('profile_completeness')).total,70);
@@ -156,7 +178,37 @@ async function run() {
   await rejected(()=>rpc('review_license',[id(7),1,'verified']),'42501');
   await root(); await q('delete from auth.sessions where id=$1',[id(7)]);
   await as(7); await rejected(()=>rpc('read_license',[id(1)]),'42501');
+  // Approved role-scoped choices persist through role changes. No invented
+  // autonomy values are accepted for student, pharmacy or commerce.
+  const options=require('../lib/profiles/step3-options.json');
+  await as(5);
+  for(const [role,choices] of Object.entries(options.autonomy)) {
+    await rpc('save_specialist_step1',[step1(role)]);
+    for(const [code] of choices) {
+      await rpc('save_specialist_step3',[{autonomy_code:code}]);
+      equal((await q('select autonomy_code from public.specialist_autonomy where professional_role_code=$1',[role])).rows[0].autonomy_code,code);
+    }
+  }
+  for(const [role,choices] of Object.entries(options.development)) {
+    await rpc('save_specialist_step1',[step1(role)]);
+    await rpc('save_specialist_step3',[{development_areas:choices.map(([code])=>code)}]);
+    equal((await q('select count(*)::int n from public.specialist_development_areas where professional_role_code=$1',[role])).rows[0].n,choices.length);
+  }
+  for(const role of ['veterinary_student','veterinary_pharmacy','animal_health_commerce']) {
+    await rpc('save_specialist_step1',[step1(role)]);
+    equal((await q('select count(*)::int n from public.autonomy_options where professional_role_code=$1',[role])).rows[0].n,0);
+    await rejected(()=>rpc('save_specialist_step3',[{autonomy_code:'independent'}]),'23503');
+  }
+  await rpc('save_specialist_step1',[step1('veterinary_assistant')]);
+  equal((await q("select count(*)::int n from public.specialist_development_areas where professional_role_code='veterinary_assistant'")).rows[0].n,8);
+  await rpc('save_specialist_step1',[step1('other_veterinary_specialty')]);
+  equal((await q("select autonomy_code from public.specialist_autonomy where professional_role_code='other_veterinary_specialty'")).rows[0].autonomy_code,'mentor');
+  await rpc('save_specialist_step3',[{autonomy_code:'mentor',custom_development:['Individuali tobulėjimo sritis']}]);
+  equal((await q('select name from public.specialist_custom_development')).rows[0].name,'Individuali tobulėjimo sritis');
   await root();
+  for(const [table,source] of [['autonomy_options',options.autonomy],['development_areas',options.development]]) {
+    for(const [role,choices] of Object.entries(source)) equal((await q(`select code,label_lt from public.${table} where professional_role_code=$1 order by code`,[role])).rows,choices.map(([code,label_lt])=>({code,label_lt})).sort((a,b)=>a.code.localeCompare(b.code)));
+  }
   const requiredCatalogs=require('../lib/profiles/catalogs.json');
   for(const [table,entries] of Object.entries(requiredCatalogs.catalogs)) equal((await q(`select code,label_lt from public.${table} order by sort_order`)).rows,entries.map(([code,label_lt])=>({code,label_lt})));
   equal((await q('select count(*)::int n from public.competencies')).rows[0].n,119);

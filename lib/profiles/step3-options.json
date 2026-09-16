@@ -1,0 +1,160 @@
+{
+  "autonomy": {
+    "veterinary_assistant": [
+      [
+        "frequent_supervision",
+        "Reikalinga dažna priežiūra"
+      ],
+      [
+        "minimal_help",
+        "Daugumą užduočių atlieku su minimalia pagalba"
+      ],
+      [
+        "independent",
+        "Daugumą įprastų užduočių atlieku savarankiškai"
+      ],
+      [
+        "can_train",
+        "Galiu apmokyti kitus komandos narius"
+      ]
+    ],
+    "other_veterinary_specialty": [
+      [
+        "frequent_help",
+        "Reikalinga dažnesnė kolegų pagalba"
+      ],
+      [
+        "independent",
+        "Daugumą įprastų užduočių atlieku savarankiškai"
+      ],
+      [
+        "complex_independent",
+        "Savarankiškai sprendžiu ir sudėtingesnes užduotis"
+      ],
+      [
+        "mentor",
+        "Galiu konsultuoti / mokyti kitus"
+      ]
+    ]
+  },
+  "development": {
+    "veterinary_assistant": [
+      [
+        "inpatient_care",
+        "Stacionaro priežiūra"
+      ],
+      [
+        "anesthesia",
+        "Anestezija"
+      ],
+      [
+        "surgical_assistance",
+        "Operacinė / chirurginis asistavimas"
+      ],
+      [
+        "laboratory",
+        "Laboratorija"
+      ],
+      [
+        "diagnostic_procedures",
+        "Diagnostikos procedūros"
+      ],
+      [
+        "client_communication",
+        "Klientų komunikacija"
+      ],
+      [
+        "emergency",
+        "Skubi pagalba"
+      ],
+      [
+        "other",
+        "Kita"
+      ]
+    ],
+    "veterinary_pharmacy": [
+      [
+        "veterinary_medicines",
+        "Veterinarinių vaistų žinios"
+      ],
+      [
+        "antiparasitics",
+        "Antiparazitiniai preparatai"
+      ],
+      [
+        "dermatology_products",
+        "Dermatologijos produktai"
+      ],
+      [
+        "nutrition_supplements",
+        "Gyvūnų mityba / papildai"
+      ],
+      [
+        "pharmacovigilance",
+        "Farmakologinis budrumas"
+      ],
+      [
+        "pharmacy_processes",
+        "Vaistinės procesai ir dokumentacija"
+      ],
+      [
+        "client_consulting",
+        "Klientų konsultavimas"
+      ],
+      [
+        "sales_commerce",
+        "Pardavimai / komercija"
+      ],
+      [
+        "other",
+        "Kita"
+      ]
+    ],
+    "animal_health_commerce": [
+      [
+        "b2b_sales",
+        "B2B pardavimai"
+      ],
+      [
+        "negotiation",
+        "Derybos"
+      ],
+      [
+        "key_account_management",
+        "Key Account Management"
+      ],
+      [
+        "technical_products",
+        "Veterinarinių produktų techninės žinios"
+      ],
+      [
+        "presentations",
+        "Prezentacijos / viešas kalbėjimas"
+      ],
+      [
+        "training",
+        "Mokymų vedimas"
+      ],
+      [
+        "market_analysis",
+        "Rinkos analizė"
+      ],
+      [
+        "clinic_clients",
+        "Darbas su klinikomis"
+      ],
+      [
+        "farm_clients",
+        "Darbas su ūkiais"
+      ],
+      [
+        "team_management",
+        "Vadovavimas / komandos valdymas"
+      ],
+      [
+        "other",
+        "Kita"
+      ]
+    ]
+  }
+}

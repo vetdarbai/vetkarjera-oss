@@ -16,7 +16,7 @@ export type SpecialistStep2 = {
   work_model_code?: 'on_site' | 'hybrid' | 'remote' | null;
   can_work_weekends?: boolean | null; can_work_nights?: boolean | null; can_be_on_call?: boolean | null;
   profile_visibility: 'registered_employers' | 'application_only' | 'hidden';
-  animal_groups?: string[]; activity_areas?: string[]; interests?: string[];
+  animal_groups: string[]; activity_areas: string[]; interests?: string[];
   work_locations: string[]; workloads: string[]; schedules?: string[];
   languages: { language_code: string; proficiency_code: string; language_name?: string | null }[];
 };

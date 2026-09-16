@@ -1,10 +1,10 @@
 # VetKarjera Stage 4.3 backend peržiūra
 
-Data: 2026-09-15. Bazė: `eb2d12baf72ba3a986782eb6d44725da63433ce2`.
+Atnaujinta: 2026-09-16. Bazė: `eb2d12baf72ba3a986782eb6d44725da63433ce2`.
 
 **Verdict: STAGE 4.3 BACKEND BLOCKED.**
 
-Pagrindinė realizacija ir žemiau aprašyti izoliuoti testai paruošti. Pilno etapo parengties production migracijai netvirtinu: trūksta dalies STEP 3 patvirtintų pasirinkimų; taip pat dar neatlikta pilno Supabase staging integracija su GoTrue, PostgREST ir tikromis lygiagrečiomis DB jungtimis. Production DB nemigruota. Į main nepushinta ir production nedeployinta.
+Pagrindinė realizacija ir žemiau aprašyti izoliuoti testai paruošti. Pilno etapo parengties production migracijai netvirtinu: visi trys CEO nurodyti product-contract blockeriai ištaisyti, tačiau dar neatlikta pilno Supabase PostgreSQL 17 staging integracija su GoTrue, PostgREST ir tikromis lygiagrečiomis DB jungtimis. Production DB nemigruota. Į main nepushinta ir production nedeployinta.
 
 ## 1 Kas implementuota
 
@@ -40,7 +40,8 @@ Gauta 39 public lentelių, įskaitant 5 ankstesnes; private dalyje pridėtos 3 l
 
 1. `supabase/migrations/20260905075153_stage2_backend_foundation.sql` – tiksli repo istorinio `supabase/sql/stage2_backend_foundation.sql` kopija clean install grandinei. Production ši versija jau pritaikyta; jos antrą kartą vykdyti negalima.
 2. `supabase/migrations/20260915162557_stage4_3_profiles.sql` – nauja Stage 4.3 migracija. Failą inicijavo Supabase CLI `migration new`.
-3. Stage 3 failas `20260908142249_stage3_auth_accounts.sql` nekeistas.
+3. `supabase/migrations/20260915210103_stage4_3_product_contract_fixes.sql` – atskira patvirtintų STEP 3 žodynų, STEP 2 privalomumo ir completeness korekcijų migracija.
+4. Stage 3 failas `20260908142249_stage3_auth_accounts.sql` nekeistas.
 
 ## 4 Šešių legacy paskyrų perkėlimas
 
@@ -74,13 +75,13 @@ Vienas įrašas vienai profesijai. Veterinarui ir studentui palaikomas LSMU / Ki
 
 Gyvenamoji vieta atskirta nuo norimų darbo vietų. Paruošta 60 Lietuvos savivaldybių iš LSA sąrašo, Užsienis ir Visa Lietuva. Kodai yra lokalūs programos kodai, ne oficialūs registro ID. Užsieniui reikia šalies ir miesto; Visa Lietuva negali būti gyvenamoji vieta. [LSA šaltinis](https://www.lsa.lt/nariai-savivaldybes/), tikrinta 2026-09-15.
 
-Darbo krūvis / vietos ir kalbos privalomi; grafikas, mobilumas, work model optional. Savaitgaliai, naktys ir budėjimai išlaiko NULL / true / false. Konkrečiai starto datai būtinas date. Aprašymas iki 500 simbolių, be minimumo. `save_specialist_step2` išsaugo pilną STEP 2 duomenų rinkinį vienoje transakcijoje; optional praleisti pasirinkimai išvalomi. Klaidingas pasirinkimas atšaukia ir child lentelių pakeitimus.
+Gyvūnų grupės ir veiklos sritys privalomos (bent po vieną validų pasirinkimą), kaip ir darbo krūvis / vietos bei kalbos; grafikas, mobilumas, work model optional. Savaitgaliai, naktys ir budėjimai išlaiko NULL / true / false. Konkrečiai starto datai būtinas date. Aprašymas iki 500 simbolių, be minimumo. `save_specialist_step2` išsaugo pilną STEP 2 duomenų rinkinį vienoje transakcijoje; optional praleisti pasirinkimai išvalomi. Klaidingas pasirinkimas atšaukia ir child lentelių pakeitimus.
 
 ## 10 STEP 3 competencies
 
 Įkelta 119 tik užduotyje pateiktų kompetencijų penkioms konkrečioms profesijoms. Veterinarui neįtraukti drausti slaugos / injekcijų blokai. Studentas turi atskirą skalę; kitoms profesijoms – standartinę. NULL lygis reiškia Nenurodyta ir įrašas nekuriamas.
 
-Kitai specialybei galima iki 5 vardinių kompetencijų, su standartine skale. Yra modelis savarankiškumo ir tobulėjimo sričių pasirinkimams. Veterinaro savarankiškumas, veterinaro ir studento tobulėjimo sritys įkeltos pagal pateiktus sąrašus. Kitų profesijų trūkstami sąrašai nebuvo išgalvoti.
+Kitai specialybei galima iki 5 vardinių kompetencijų, su standartine skale. Yra modelis savarankiškumo ir tobulėjimo sričių pasirinkimams. Veterinaro savarankiškumas, veterinaro ir studento tobulėjimo sritys įkeltos pagal pateiktus sąrašus. Pagal CEO patvirtinimą pridėtos 4 asistento ir 4 kitos specialybės savarankiškumo reikšmės bei 8 asistento, 9 vaistininko ir 11 komercijos specialisto tobulėjimo sričių. Studentui, vaistininkui ir komercijos specialistui autonomy nėra. Veterinaro pasirinkimai ir studento tobulėjimo sritys nepasikeitė; tai tikrina regresijos testas. Kitos specialybės tobulėjimo sritys lieka laisvas tekstas.
 
 ## 11 License privacy
 
@@ -96,7 +97,7 @@ Default `application_only`. `actively_looking` viešumo nekeičia. Net `register
 
 Vienas DB helperis: STEP 1 užbaigimas +20, visi required STEP 2 laukai +50, dabartinės profesijos užpildyta competency dalis iki +30. Optional STEP 2 laukai neblokuoja 70 %. Patikrintas 70 % profilis be optional laukų ir 100 % su visomis applicable kompetencijomis. Seni kitos profesijos įrašai procento nedidina.
 
-Techninis pasirinkimas peržiūrai: STEP 1 / STEP 2 procentai skiriami už užbaigtą žingsnį, be neišgalvotų dalinių svorių; kitos specialybės STEP 3 vardiklis yra 5 leidžiami slotai, todėl vienas užpildytas įrašas duoda +6 %. Jei CEO numato kitą laisvų kompetencijų vardiklį, jį reikia patvirtinti prieš production. Pilnumas nenaudojamas prisijungimo ar kitų teisių suteikimui.
+STEP 1 / STEP 2 procentai skiriami už užbaigtą žingsnį. Patvirtinta kitos specialybės taisyklė: 1 kompetencija +10 %, 2 +20 %, 3–5 +30 %. Leidžiami iki 5 įrašų; 4 ir 5 procento nedidina. STEP 2 negauna 50 %, jei trūksta gyvūnų grupės arba veiklos srities, įskaitant anksčiau išsaugotas nepilnas eilutes. Interesai neprivalomi. Pilnumas nenaudojamas prisijungimo ar kitų teisių suteikimui.
 
 ## 14 RLS ir grants
 
@@ -113,7 +114,7 @@ Techninis pasirinkimas peržiūrai: STEP 1 / STEP 2 procentai skiriami už užba
 | --- | --- |
 | Clean isolated migracijų grandinė | PASS |
 | Stage 3 legacy ir papildomos fixtures | PASS |
-| DB / RLS / privileges / profiles / education / license / preferences / completeness | 110 assertions PASS |
+| DB / RLS / privileges / profiles / education / license / preferences / completeness | 166 assertions PASS |
 | Nauji serverio veiksmai, session kontraktas, V2 signup transporto mock | 25 assertions PASS |
 | Ankstesni deterministiniai Auth testai | 35 tests PASS |
 | Database types regeneracija ir sutapimas | PASS, 39 public lentelės / 11 RPC |
@@ -131,7 +132,7 @@ Pirmą build bandymą blokavo aplinkos tinklo teisės atsisiunčiant jau naudoja
 
 ## 17 Security ir Supabase advisor
 
-Lokalus SQL auditas praėjo 7 kategorijas. Tai repo skriptas, ne oficialaus hosted Supabase advisor PASS. Hosted advisor naujai schemai ir tikro PostgREST embedding / filter / count bandymai dar reikalingi staging.
+Lokalus SQL auditas praėjo 7 kategorijas. Tai repo skriptas, ne oficialaus hosted Supabase advisor PASS. Oficialus Supabase CLI security/performance advisor naujai staging schemai ir tikro PostgREST embedding / filter / count bandymai dar reikalingi staging.
 
 Realūs SMTP / Resend / Supabase secrets šiame darbe nebuvo naudojami, neskaitomi ir neįrašyti į Git. `.env` nekurtas. Service-role raktas nenaudotas. Naujuose app veiksmuose nėra privataus payload ar provider klaidų logginimo. Kliento statiniuose build failuose nerasti testiniai licencijų numeriai, testinis slaptažodis, private writer ar `license_number` tekstas.
 
@@ -149,10 +150,10 @@ Pilna seka, patikros ir grįžimo taisyklės: [STAGE4_3_PRODUCTION_MIGRATION_PLA
 
 ## 21 Kas liko prieš production
 
-1. Gauti trūkstamus assistant / pharmacy / commerce bei kitų profesijų autonomy ir development sričių sąrašus, kai užduotis nurodo patvirtintą logiką, bet nepateikia reikšmių; arba patvirtinti aiškų jų atidėjimą.
-2. Patvirtinti kitos specialybės competency vardiklio pasirinkimą, jei produkto lūkestis skiriasi nuo 5 slotų modelio.
-3. Turėti pilną izoliuotą Supabase staging aplinką ir atlikti nurodytus GoTrue / PostgREST / concurrency / platformos advisor testus. Per connectorį rastas tik esamas production projektas, be testinių šakų. Jo PostgreSQL versija – 17.6.1.166; lokalus PGlite – 18.3, todėl būtina ir PostgreSQL 17 patikra. Šiame kompiuteryje Docker / native Postgres nerasti; mokamas cloud projektas savo nuožiūra nekurtas.
-4. Peržiūrėti migracijos teises, trukmę, atsarginę kopiją ir sutarti DB → backend → vėlesnės frontend integracijos seką.
+1. Visi trys product-contract blockeriai ištaisyti ir patikrinti lokaliai. Papildomo pasirinkimų ar completeness taisyklės patvirtinimo nereikia.
+2. Pilna Supabase staging aplinka dar nepaleista. Konkretus variantas: vietinis Podman Desktop / WSL2 + Supabase CLI, PostgreSQL 17, GoTrue, PostgREST ir Mailpit. Paruoštas `supabase/config.toml`; tai konfigūracijos, ne veikiančios aplinkos įrodymas. Žr. [staging planą](STAGE4_3_STAGING_SETUP_PLAN.md).
+3. Įdiegus ir patikrinus konteinerių aplinką atlikti visą plane aprašytą API, realių DB jungčių concurrency, clean install / upgrade ir oficialių advisors matricą. PGlite 18.3 šios patikros nepakeičia.
+4. Peržiūrėti migracijos teises, trukmę, atsarginę kopiją ir DB → backend → vėlesnės frontend integracijos seką.
 5. Gauti atskirą production migracijos patvirtinimą. Po deploy – Pauliaus manual QA ir suplanuotas CEO checkpoint.
 
 Joks Stage 5, 6, 8 ar 9 produktinis flow nepradėtas. Ši ataskaita neuždaro etapo ir neduoda leidimo production migracijai.
