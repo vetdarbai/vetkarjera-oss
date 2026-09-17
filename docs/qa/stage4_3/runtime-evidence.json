@@ -1,0 +1,115 @@
+{
+  "postgresql": "17.6",
+  "gotrue": "v2.196.0",
+  "postgrest": "PostgREST 16.2",
+  "supabase_cli": "2.117.0",
+  "containers": [
+    {
+      "name": "supabase_db_vetkarjera-stage4-3-isolated",
+      "image": "public.ecr.aws/supabase/postgres:17.6.1.167",
+      "imageId": "sha256:6942962433a569e87f228b4d4ab7e11db5deca64e43babb3a038443ad6c4f1bb",
+      "ports": {
+        "5432/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "54322"
+          }
+        ]
+      },
+      "mounts": [
+        {
+          "type": "volume",
+          "source": "/var/lib/docker/volumes/supabase_db_vetkarjera-stage4-3-isolated/_data",
+          "destination": "/var/lib/postgresql/data"
+        }
+      ]
+    },
+    {
+      "name": "supabase_studio_vetkarjera-stage4-3-isolated",
+      "image": "public.ecr.aws/supabase/studio:2026.08.24-sha-8ec45b2",
+      "imageId": "sha256:4905784b715cb22b265d26405067649544b40faffff89fd8dc7a28736f42afb0",
+      "ports": {
+        "3000/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "54323"
+          }
+        ]
+      },
+      "mounts": [
+        {
+          "type": "bind",
+          "source": "/opt/vetkarjera-stage43/supabase/snippets",
+          "destination": "/opt/vetkarjera-stage43/supabase/snippets"
+        }
+      ]
+    },
+    {
+      "name": "supabase_pg_meta_vetkarjera-stage4-3-isolated",
+      "image": "public.ecr.aws/supabase/postgres-meta:v0.99.0",
+      "imageId": "sha256:9a079ac1c94d89629262822a4bd1902d5b1be4adb464e5a0a8fd078aaed72158",
+      "ports": {
+        "8080/tcp": null
+      },
+      "mounts": []
+    },
+    {
+      "name": "supabase_rest_vetkarjera-stage4-3-isolated",
+      "image": "public.ecr.aws/supabase/postgrest:v16.2",
+      "imageId": "sha256:85258123312dc496ad4c2ed832154a65e9746f84df0d6d09b44229ff9230c08e",
+      "ports": {
+        "3000/tcp": null
+      },
+      "mounts": []
+    },
+    {
+      "name": "supabase_inbucket_vetkarjera-stage4-3-isolated",
+      "image": "public.ecr.aws/supabase/mailpit:v1.30.2",
+      "imageId": "sha256:37a38e48e9338cd7e89dfeb487f37b02ebfcd9cb23111bed2d345e79d37d6dd6",
+      "ports": {
+        "1025/tcp": null,
+        "1110/tcp": null,
+        "8025/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "54324"
+          }
+        ]
+      },
+      "mounts": []
+    },
+    {
+      "name": "supabase_auth_vetkarjera-stage4-3-isolated",
+      "image": "public.ecr.aws/supabase/gotrue:v2.196.0",
+      "imageId": "sha256:c0c25187a6b835e65a6f6e6c6b39d090e832d40e6de5186f2c038e0411944232",
+      "ports": {
+        "9999/tcp": null
+      },
+      "mounts": []
+    },
+    {
+      "name": "supabase_kong_vetkarjera-stage4-3-isolated",
+      "image": "public.ecr.aws/supabase/kong:2.8.1",
+      "imageId": "sha256:1b53405d8680a09d6f44494b7990bf7da2ea43f84a258c59717d4539abf09f6d",
+      "ports": {
+        "8000/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "54321"
+          }
+        ],
+        "8001/tcp": null,
+        "8088/tcp": null,
+        "8443/tcp": null,
+        "8444/tcp": null
+      },
+      "mounts": []
+    }
+  ],
+  "migrationSha256LfNormalized": {
+    "20260905075153_stage2_backend_foundation.sql": "bc68ab7ceaaadd69ed3b62e92210a5e514774015903cbbf5c7fe67f4fd6cf4f5",
+    "20260908142249_stage3_auth_accounts.sql": "a42d5cf6b2b99a4229673962c439aec49fc81b40e14732292d3b989376c30957",
+    "20260915162557_stage4_3_profiles.sql": "531acad72d148bdc7e39d65fa8cbf81536f9a14e45a685f1091cb41d3c679f0e",
+    "20260915210103_stage4_3_product_contract_fixes.sql": "72dfdd685e4e5d502ff213532def31b363054a389bb75e42ae19f266dee05113"
+  }
+}

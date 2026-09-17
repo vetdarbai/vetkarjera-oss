@@ -1,5 +1,8 @@
 # VetKarjera Stage 4.3 — CEO blocker resolution
 
+> 2026-09-17: šis ankstesnės peržiūros dokumentas paliktas istorijai. Staging QA užbaigtas; aktualus verdictas ir migracijų pataisos pateikti [STAGE4_3_STAGING_REPORT.md](STAGE4_3_STAGING_REPORT.md). Production vykdymas vis dar neautorizuotas.
+
+
 2026-09-16. Ankstesnis review commit: `b3aed3b1f5c1b24dc2716bba6ab810fca1b233da`.
 
 **Verdict: STAGE 4.3 BACKEND BLOCKED.** Visi trys product-contract blockeriai išspręsti. Liko pilnos izoliuotos Supabase PostgreSQL 17 aplinkos integracinis QA.

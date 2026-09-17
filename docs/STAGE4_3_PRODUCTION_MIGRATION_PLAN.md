@@ -1,6 +1,6 @@
 # Stage 4.3 production migracijos planas
 
-2026-09-16. Šis failas yra peržiūros instrukcija, ne leidimas taikyti migraciją.
+2026-09-17. Šis failas yra peržiūros instrukcija, ne leidimas taikyti migraciją. Vietinis PostgreSQL 17 staging QA baigtas; rezultatai: [STAGE4_3_STAGING_REPORT.md](STAGE4_3_STAGING_REPORT.md).
 
 ## Prieš leidimą
 
@@ -35,7 +35,7 @@
 
 ## Privalomas izoliuotas staging
 
-Pilnos aplinkos paruošimas, testų matrica ir priėmimo kriterijai: [STAGE4_3_STAGING_SETUP_PLAN.md](STAGE4_3_STAGING_SETUP_PLAN.md). Kol tai neatlikta, verdictas BLOCKED. Paruoštas config yra skirtas tik vietinei aplinkai; jo negalima sinchronizuoti į production.
+Pilnos aplinkos paruošimas, testų matrica ir priėmimo kriterijai: [STAGE4_3_STAGING_SETUP_PLAN.md](STAGE4_3_STAGING_SETUP_PLAN.md). 2026-09-17 clean ir Stage 3 upgrade patikros atliktos su PostgreSQL 17.6 / GoTrue / PostgREST: PASS. Prieš leidimą būtina peržiūrėti naują staging pataisų commit, o ne naudoti ankstesnius 0530acc SQL failus. Paruoštas config yra skirtas tik vietinei aplinkai; jo negalima sinchronizuoti į production.
 
 ## Testų pakartojimas
 
@@ -44,3 +44,15 @@ Pilnos aplinkos paruošimas, testų matrica ir priėmimo kriterijai: [STAGE4_3_S
 `npm test` kuria tik izoliuotas atmintines PostgreSQL DB su sintetiniais duomenimis. Jis neskaito `.env`, neturi production URL ir nesijungia prie production. Build patikrai naudotos sintetinės public Supabase reikšmės; realaus projekto secretų nereikia.
 
 `npm run types:generate` regeneruoja public lentelių ir RPC TypeScript tipus iš izoliuotos migracijų schemos. `npm run types:check` tikrina jų sutapimą. Tai repozitorijos generatorius, ne teiginys, kad buvo vykdytas `supabase gen types` prieš production.
+
+## Staging nustatytos būtinos migracijų korekcijos
+
+Abi Stage 4.3 migracijos dar nebuvo taikytos production, todėl pataisyti jų review failai prieš pirmą taikymą. Stage 2 ir Stage 3 istoriniai failai nepakeisti. Naujas atskiras po jų einantis failas negalėtų ištaisyti pirmoje Stage 4.3 migracijoje įvykstančio ownership transfer sustojimo.
+
+- Tik migracijos transakcijos metu vykdytojui suteikiamos writer SET / INHERIT teisės, writer rolei — CREATE privačioje schemoje funkcijų nuosavybei perduoti. Prieš commit jos panaikinamos. Antroji migracija laikinai įjungia INHERIT esamoms funkcijoms atnaujinti ir vėl išjungia.
+- Nereikalaujamas GRANT platformos valdomoje auth schemoje. `private.require_active()` lieka SECURITY INVOKER, paima tokį pat patikimo PostgREST JWT subject kaip `auth.uid()` ir privalomai tikrina esamą `private.has_active_session()`.
+- Runtime writer lieka NOLOGIN / NOBYPASSRLS / NOSUPERUSER; API rolėms writer narystė nesuteikiama. Šios sąlygos patikrintos tikrame PostgreSQL po abiejų migracijos kelių.
+- Ši seka išbandyta su Supabase vietiniu `postgres` naudotoju, kuris nėra superuser. Būsimo production vykdytojo teises ir tikrą migration history vis tiek būtina patikrinti atskirai prieš autorizuotą vykdymą.
+- Oficialūs advisor: 0 ERROR, 0 WARN. INFO apie tuščios staging aplinkos nenaudotus indeksus ir tyčinį `private.account_admins` default-deny dokumentuoti ataskaitoje; tai nėra leidimas trinti indeksus ar pridėti prieigos policy.
+
+Production vykdymo seka išlieka galiojanti su šiais pataisytais failais. CEO CONSULT peržiūra ir atskiras Pauliaus production leidimas lieka privalomi. Stage 4.3 produkto etapo uždarymas po būsimo deploy taip pat reikalauja Pauliaus sutarto manual QA.

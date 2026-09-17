@@ -1,0 +1,15 @@
+{
+  "ubuntu": "Ubuntu 24.04.5 LTS",
+  "kernel": "6.18.33.2-microsoft-standard-WSL2",
+  "node": "v22.23.2",
+  "physicalVhdx": "D:\\VetKarjera-Staging\\ubuntu\\ext4.vhdx",
+  "repo": "/opt/vetkarjera-stage43",
+  "containerdData": "/var/lib/containerd",
+  "dockerHttpProbe": "PASS",
+  "dockerVersion": "29.8.1",
+  "dockerRoot": "/var/lib/docker",
+  "storageDriver": "overlayfs",
+  "network": {
+    "com.docker.network.bridge.host_binding_ipv4": "127.0.0.1"
+  }
+}

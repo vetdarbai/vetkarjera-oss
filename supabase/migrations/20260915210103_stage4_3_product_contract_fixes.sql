@@ -1,5 +1,8 @@
 -- CEO approved Stage 4.3 product-contract corrections. No production application authorized.
 begin;
+-- Temporarily inherit function ownership for CREATE OR REPLACE under the
+-- non-superuser Supabase migration role; never grant this to API roles.
+grant vetkarjera_profile_writer to current_user with inherit true;
 set local lock_timeout='5s';
 
 insert into public.autonomy_options(professional_role_code,code,label_lt) values
@@ -119,4 +122,5 @@ end $$;
 
 -- Existing function owners, restricted grants and invoker API wrappers are preserved.
 -- No autonomy options are added for student, pharmacy or commerce.
+grant vetkarjera_profile_writer to current_user with inherit false;
 commit;

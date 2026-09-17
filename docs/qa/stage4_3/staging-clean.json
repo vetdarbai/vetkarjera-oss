@@ -1,0 +1,71 @@
+{
+  "mode": "clean",
+  "startedAt": "2026-09-17T15:23:23.048Z",
+  "scenarios": [
+    {
+      "name": "PostgreSQL 17 / GoTrue health / local target guard",
+      "status": "PASS"
+    },
+    {
+      "name": "Migration chain history",
+      "status": "PASS"
+    },
+    {
+      "name": "Migration temporary privileges removed / restricted writer",
+      "status": "PASS"
+    },
+    {
+      "name": "V2 specialist signup / local email / confirmed login",
+      "status": "PASS"
+    },
+    {
+      "name": "V2 employer signup / local email / confirmed login",
+      "status": "PASS"
+    },
+    {
+      "name": "GoTrue refresh / real session helper",
+      "status": "PASS"
+    },
+    {
+      "name": "Second profile both directions / idempotence",
+      "status": "PASS"
+    },
+    {
+      "name": "PostgREST anon / owner / foreign reads, count and embedding",
+      "status": "PASS"
+    },
+    {
+      "name": "PostgREST writes / metadata escalation / default-deny CV",
+      "status": "PASS"
+    },
+    {
+      "name": "STEP 2 required selections / completeness / atomic failure",
+      "status": "PASS"
+    },
+    {
+      "name": "STEP 3 choices / 0–5 completeness / role history",
+      "status": "PASS"
+    },
+    {
+      "name": "License privacy / review / revision / stale and self-review",
+      "status": "PASS"
+    },
+    {
+      "name": "Two actual DB connections / second profile and license lock races",
+      "status": "PASS"
+    },
+    {
+      "name": "All specialist child tables: real PostgREST owner/foreign/anon boundaries",
+      "status": "PASS"
+    },
+    {
+      "name": "Expired session / revoked session / GoTrue logout",
+      "status": "PASS"
+    }
+  ],
+  "versions": {
+    "postgresql": "17.6",
+    "gotrue": "v2.196.0"
+  },
+  "finishedAt": "2026-09-17T15:23:31.290Z"
+}

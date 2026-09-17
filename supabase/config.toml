@@ -1,5 +1,5 @@
 # Local isolated testing only. Not linked to a hosted project.
-# Generated with Supabase CLI 2.117.0; full stack startup is pending.
+# Generated with Supabase CLI 2.117.0; validated in isolated Ubuntu WSL2 staging.
 # Mail is captured locally; no production SMTP or credentials.
 project_id = "vetkarjera-stage4-3-isolated"
 
@@ -84,12 +84,13 @@ minimum_password_length = 6
 password_requirements = ""
 
 [auth.rate_limit]
-email_sent = 2
+# Synthetic QA accounts; delivery is confined to local Mailpit.
+email_sent = 1000
 sms_sent = 30
 anonymous_users = 30
 token_refresh = 150
-sign_in_sign_ups = 30
-token_verifications = 30
+sign_in_sign_ups = 1000
+token_verifications = 1000
 web3 = 30
 
 [auth.email]

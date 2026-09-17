@@ -35,7 +35,7 @@ async function generate() {
     for (const name of new Set(enums.map(e => e.typname))) out += `${quote(name)}: ${enums.filter(e => e.typname === name).map(e => quote(e.enumlabel)).join(' | ')};\n`;
     out += '}; CompositeTypes: { [_ in never]: never }; }; };\n';
     if (process.argv.includes('--check')) {
-      if (fs.readFileSync('types/database.ts','utf8') !== out) throw new Error('Database types are stale');
+      if (fs.readFileSync('types/database.ts','utf8').replace(/\r\n/g, '\n') !== out) throw new Error('Database types are stale');
     } else fs.writeFileSync('types/database.ts',out);
     console.log('Database types generated/checked:',tables.length,'tables,',funcs.length,'RPCs');
   } finally { await db.close(); }

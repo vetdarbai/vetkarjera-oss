@@ -1,32 +1,28 @@
 # Stage 4.3 — izoliuotos Supabase aplinkos planas
 
-2026-09-16. **Būsena: paruoštas planas ir vietinis config; pilna aplinka dar nepaleista, testai iš šios matricos neatlikti.**
+2026-09-17. **Patvirtinta alternatyva: Ubuntu WSL2 + Docker Engine. Faktiniai QA rezultatai pateikiami atskiroje staging ataskaitoje; šis dokumentas aprašo procedūrą.**
 
-## Rekomenduojamas sprendimas
+## Patvirtinta aplinka ir ribos
 
-Šiame Windows kompiuteryje paruošti **Podman Desktop su WSL2**, o jame paleisti repozitorijoje prisegtą **Supabase CLI 2.117.0**. Projektas `vetkarjera-stage4-3-isolated`: PostgreSQL 17, GoTrue, PostgREST, Studio ir vietinis Mailpit. Atskiro mokamo Supabase cloud projekto ar subscription pakeitimo nereikia. Production projekto duomenys nekopijuojami.
+Paulius patvirtino Ubuntu WSL2 + Docker Engine vietoje Podman, visą QA vykdant Linux viduje. Podman Windows localhost ryšio bandymai buvo nesėkmingi; jo duomenys paliekami nepakeisti.
 
-Supabase dokumentacija nurodo Podman kaip Docker suderinamą alternatyvą. Suderinamumą su konkrečia šio kompiuterio Windows ir CLI versija dar būtina patikrinti paleidžiant aplinką. Tai rekomendacija, ne garantija, kad dabartinėje aplinkoje stack jau veikia. Šaltinis: [Supabase local development](https://supabase.com/docs/guides/local-development/cli/getting-started).
-
-Podman Windows aplinkai reikia veikiančios WSL2 arba Hyper-V virtualios mašinos. WSL paruošimas gali pareikalauti administratoriaus teisių ir perkrovimo. Skirti bent 6 GB RAM konteinerių mašinai ir prieš atsisiuntimus patikrinti laisvą diską. Šaltinis: [Podman Desktop Windows diegimas](https://podman-desktop.io/docs/installation/windows-install).
-
-Dabartinė patikra: Docker Desktop, Podman ir native PostgreSQL nerasti. `wsl.exe` yra, bet veikianti WSL2 aplinka / distribucija nepatvirtinta. Per Supabase connectorį rastas tik production projektas, testinių šakų nėra. Todėl naujo hosted projekto savo nuožiūra nekuriame.
-
-## Pauliaus sprendimas
-
-Patvirtinti vietinės konteinerių aplinkos paruošimą šiame kompiuteryje. Patvirtinimo reikia prieš diegiant Podman / keičiant WSL2 kompiuterio nustatymus; jis nesuteikia leidimo production migracijai, push ar mokamiems resursams. Jei reikia perkrovimo, jo laiką suderinti su Pauliumi; automatiškai neperkrauti.
-
-Galimas patvirtinimo tekstas: „Patvirtinu vietinės Stage 4.3 Supabase testavimo aplinkos paruošimą su Podman Desktop ir WSL2. Mokamų cloud resursų nekurti, production neliesti. Jei reikės perkrauti kompiuterį, prieš tai informuoti.“
+- WSL distribucija `VetKarjera-Stage43`, Ubuntu 24.04 LTS. Oficialus `wsl --install --location` virtualų diską sukūrė `D:\VetKarjera-Staging\ubuntu\ext4.vhdx`.
+- Docker Engine įdiegtas iš oficialaus pasirašyto Docker Ubuntu apt šaltinio. `/var/lib/docker`, `/var/lib/containerd` ir volumes fiziškai yra D: VHDX.
+- Linux testų kopija `/opt/vetkarjera-stage43`. Nekopijuoti `.env`, produkcijos raktų, Windows `node_modules` ar `.next`.
+- Supabase CLI 2.117.0 prisegtas package-lock. `SUPABASE_TELEMETRY_DISABLED=1`; projekto ID `vetkarjera-stage4-3-isolated`. Nenaudoti `supabase link`, `--linked`, production DB ar debesijos projekto.
+- Dedikuotas Docker bridge `vetkarjera-stage43-local` turi `com.docker.network.bridge.host_binding_ipv4=127.0.0.1`; CLI start naudoja `--network-id vetkarjera-stage43-local`. Patikrinti faktines visų konteinerių portų sąsajas.
+- Jokio Windows restart automatiškai. Jei būtinas Windows restart ar rizikingas sistemos pakeitimas, sustoti ir informuoti Paulių. Jokio main push, production migracijos, UI ar Stage 5+ darbo.
 
 ## Paruošimo seka
 
-1. Patikrinti Windows / WSL2 palaikymą, virtualizaciją, RAM, laisvą diską ir neužimtus 54320–54324 prievadus. Esamų kitų projektų ar duomenų nenaikinti.
-2. Iš oficialaus šaltinio įdiegti Podman Desktop ir paruošti atskirą konteinerių mašiną. Docker suderinamą API patikrinti prieš paleidžiant Supabase. Jei suderinamumas nepavyksta, pateikti konkretų trūkumą ir alternatyvą; nekurti mokamo cloud pakaitalo automatiškai.
-3. Naudoti šį review checkout ir `supabase/config.toml`. Config sukurtas oficialiu CLI, nustatyta PostgreSQL 17, email confirmation, vietinis pašto surinkimas ir išjungtas neegzistuojantis seed failas. TOML sintaksė patikrinta; stack konfigūracijos veikimas dar nepatvirtintas.
-4. Nenaudoti `supabase link`, `--linked`, production DB URL ar production `.env`. Prieš bet kokį reset patikrinti vietinį projekto ID, host ir port. Testavimo komandos turi aiškiai naudoti `--local`.
-5. Paleisti vietinį stack. CLI gali išvesti vietinius raktus: jų neskelbti pokalbyje ar ataskaitoje. Testo raktus laikyti tik proceso atmintyje arba Git ignoruojamame `.env.staging.local`; iš logų pašalinti JWT, slaptažodžius ir licencijų numerius.
-6. Patikrinti faktinį portų susiejimą ir Windows ugniasienės prieigą. Vietinė API / DB negali būti atverta internetui; nenaudoti viešų tunelių. Pašto siuntimas tik į vietinį Mailpit, be Resend / SMTP kredencialų.
-7. Užfiksuoti faktines PostgreSQL, GoTrue, PostgREST ir CLI versijas bei health patikrų rezultatus. `SHOW server_version` turi rodyti PostgreSQL 17. Patikrinti, kad `private` nėra API eksponuojama schema.
+1. Patikrinti WSL2 versiją, distro vietą D:, laisvą fizinę D: vietą (Linux virtualaus disko talpa nėra reali laisva host vieta) ir `systemd` / Docker būseną.
+2. Patikrinti `docker version`, `docker info` ir tik Ubuntu viduje pasiekiamą HTTP konteinerį su localhost binding. Nekeisti Windows port forwarding ar DNS.
+3. Linux kopijoje `npm ci`; be production `.env`. `node node_modules/supabase/dist/supabase.js --version` ir komandų `--help`.
+4. Paleisti `start --network-id vetkarjera-stage43-local --exclude realtime,storage-api,imgproxy,edge-runtime,logflare,vector,supavisor`. Reikalingi PostgreSQL, GoTrue, PostgREST, Kong, Mailpit ir advisor pagalbiniai servisai. Startup / status išvestis gali turėti tik vietinių raktų — neskelbti jos ir necommitinti `.staging-results/`.
+5. Prieš backend QA iš tos pačios Ubuntu patikrinti SQL `SHOW server_version` (17.x), API 54321, DB 54322 ir Mailpit 54324. Privatūs schema duomenys neeksponuojami per REST.
+6. Visi laiškai surenkami vietiniame Mailpit, be Resend. Testų skriptas blokuoja ne localhost HTTP užklausas ir atsisako veikti susietame projekte.
+
+Šaltiniai: [WSL oficialios komandos](https://learn.microsoft.com/en-us/windows/wsl/basic-commands), [Docker Ubuntu diegimas](https://docs.docker.com/engine/install/ubuntu/), [Docker bridge binding](https://docs.docker.com/engine/network/drivers/bridge/), [Supabase local development](https://supabase.com/docs/guides/local-development/cli/getting-started).
 
 ## Migracijų patikros
 

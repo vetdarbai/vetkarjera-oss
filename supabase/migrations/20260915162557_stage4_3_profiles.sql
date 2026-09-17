@@ -415,7 +415,13 @@ create table public.specialist_workloads(user_id uuid references public.speciali
 create index specialist_workloads_choice_idx on public.specialist_workloads(workload_code,user_id);
 create table public.specialist_schedules(user_id uuid references public.specialist_profiles(user_id) on delete cascade,schedule_code text references public.schedules(code),primary key(user_id,schedule_code));
 create index specialist_schedules_choice_idx on public.specialist_schedules(schedule_code,user_id);
-create role vetkarjera_profile_writer nologin noinherit; grant usage on schema public,private,auth to vetkarjera_profile_writer; grant execute on function auth.uid(),auth.jwt(),private.has_active_session(),private.is_admin() to vetkarjera_profile_writer;
+create role vetkarjera_profile_writer nologin noinherit; grant usage on schema public,private to vetkarjera_profile_writer; grant execute on function private.has_active_session(),private.is_admin() to vetkarjera_profile_writer;
+-- Supabase's postgres migration role is not a superuser. Ownership transfer
+-- requires SET membership and CREATE on the target schema (PostgreSQL 17).
+-- These temporary migration privileges are removed before this transaction commits.
+grant vetkarjera_profile_writer to current_user with set true;
+grant vetkarjera_profile_writer to current_user with inherit true;
+grant create on schema private to vetkarjera_profile_writer;
 alter table public.professional_roles enable row level security; revoke all on public.professional_roles from public,anon,authenticated; grant select on public.professional_roles to anon,authenticated,vetkarjera_profile_writer; create policy catalog_read on public.professional_roles for select to anon,authenticated,vetkarjera_profile_writer using(true);
 alter table public.organization_types enable row level security; revoke all on public.organization_types from public,anon,authenticated; grant select on public.organization_types to anon,authenticated,vetkarjera_profile_writer; create policy catalog_read on public.organization_types for select to anon,authenticated,vetkarjera_profile_writer using(true);
 alter table public.experience_bands enable row level security; revoke all on public.experience_bands from public,anon,authenticated; grant select on public.experience_bands to anon,authenticated,vetkarjera_profile_writer; create policy catalog_read on public.experience_bands for select to anon,authenticated,vetkarjera_profile_writer using(true);
@@ -504,8 +510,14 @@ alter table public.organization_memberships enable row level security; revoke al
 alter table private.specialist_licenses enable row level security; revoke all on private.specialist_licenses from public,anon,authenticated; grant select,insert on private.specialist_licenses to vetkarjera_profile_writer; create policy license_writer on private.specialist_licenses to vetkarjera_profile_writer using((user_id=(select auth.uid()) or (select private.is_admin())) and (select private.has_active_session())) with check((user_id=(select auth.uid()) or (select private.is_admin())) and (select private.has_active_session()));
 alter table private.license_reviews enable row level security; revoke all on private.license_reviews from public,anon,authenticated; grant select,insert on private.license_reviews to vetkarjera_profile_writer; create policy license_writer on private.license_reviews to vetkarjera_profile_writer using((user_id=(select auth.uid()) or (select private.is_admin())) and (select private.has_active_session())) with check((user_id=(select auth.uid()) or (select private.is_admin())) and (select private.has_active_session()));
 grant update on private.specialist_licenses to vetkarjera_profile_writer;
-create function private.require_active() returns uuid language plpgsql security invoker set search_path='' as $$ begin
- if auth.uid() is null or not private.has_active_session() then raise exception 'Active confirmed session required' using errcode='42501'; end if; return auth.uid(); end $$;
+create function private.require_active() returns uuid language plpgsql security invoker set search_path='' as $$
+declare uid uuid:=coalesce(nullif(current_setting('request.jwt.claim.sub',true),''),
+ nullif(current_setting('request.jwt.claims',true),'')::jsonb->>'sub')::uuid;
+begin
+ -- Same trusted PostgREST subject as auth.uid(). The existing privileged session
+ -- checker proves that subject owns a live, confirmed Auth session. The writer
+ -- itself needs no namespace access to Supabase's platform-owned auth schema.
+ if uid is null or not private.has_active_session() then raise exception 'Active confirmed session required' using errcode='42501'; end if; return uid; end $$;
 revoke all on function private.require_active() from public,anon; grant execute on function private.require_active() to authenticated,vetkarjera_profile_writer;
 create function private.valid_text(value text, maximum integer) returns boolean language sql immutable set search_path='' as $$ select coalesce(length(btrim(value)) between 1 and maximum,false) $$;
 revoke all on function private.valid_text(text,integer) from public,anon; grant execute on function private.valid_text(text,integer) to authenticated,vetkarjera_profile_writer;
@@ -843,4 +855,7 @@ create index specialist_autonomy_pair_idx on public.specialist_autonomy(professi
 create index specialist_development_pair_idx on public.specialist_development_areas(professional_role_code,area_code,user_id);
 create index specialist_custom_development_role_idx on public.specialist_custom_development(professional_role_code);
 create index specialist_license_role_idx on private.specialist_licenses(professional_role_code);
+revoke create on schema private from vetkarjera_profile_writer;
+grant vetkarjera_profile_writer to current_user with inherit false;
+grant vetkarjera_profile_writer to current_user with set false;
 commit;

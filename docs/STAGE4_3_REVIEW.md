@@ -1,5 +1,8 @@
 # VetKarjera Stage 4.3 backend peržiūra
 
+> 2026-09-17: šis ankstesnės peržiūros dokumentas paliktas istorijai. Staging QA užbaigtas; aktualus verdictas ir migracijų pataisos pateikti [STAGE4_3_STAGING_REPORT.md](STAGE4_3_STAGING_REPORT.md). Production vykdymas vis dar neautorizuotas.
+
+
 Atnaujinta: 2026-09-16. Bazė: `eb2d12baf72ba3a986782eb6d44725da63433ce2`.
 
 **Verdict: STAGE 4.3 BACKEND BLOCKED.**

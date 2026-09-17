@@ -9,7 +9,9 @@ create schema auth; grant usage on schema auth to authenticated,anon;
 create table auth.users(id uuid primary key, email text unique, encrypted_password text, raw_user_meta_data jsonb, email_confirmed_at timestamptz);
 create table auth.sessions(id uuid primary key,user_id uuid references auth.users(id) on delete cascade,not_after timestamptz,created_at timestamptz,updated_at timestamptz);
 create function auth.jwt() returns jsonb language sql stable as $$ select coalesce(nullif(current_setting('request.jwt.claims',true),''),'{}')::jsonb $$;
-create function auth.uid() returns uuid language sql stable as $$ select nullif(auth.jwt()->>'sub','')::uuid $$;
+-- Match Supabase's actual auth.uid(): do not add a nested auth.jwt() lookup
+-- that incorrectly requires runtime namespace USAGE for restricted writer roles.
+create function auth.uid() returns uuid language sql stable as $$ select coalesce(nullif(current_setting('request.jwt.claim.sub',true),''),nullif(current_setting('request.jwt.claims',true),'')::jsonb->>'sub')::uuid $$;
 grant execute on function auth.jwt(),auth.uid() to authenticated,anon;
 `;
 async function createDatabase({ stage3Only = false } = {}) {
