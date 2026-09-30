@@ -9,7 +9,7 @@ const Module = require('node:module');
 const ts = require('typescript');
 const originalLoad = Module._load;
 let responseError = null, confirmed = true, session = false, calls = [], redirectType = null, subscriber = () => {};
-let headerUser = null, signupUser = null;
+let headerUser = null, signupUser = null, profileBundle = null;
 const client = { auth: {
   onAuthStateChange: fn => { subscriber = fn; return { data: { subscription: { unsubscribe() {} } } }; },
   signUp: async input => { calls.push(['signup', input]); return { data: { user: signupUser, session: session ? {} : null }, error: responseError }; },
@@ -27,6 +27,7 @@ require.extensions['.ts'] = (module, filename) => module._compile(ts.transpileMo
 Module._load = function(id, parent, isMain) {
   if (id === '@/lib/supabase/server') return { createClient: async () => client };
   if (id === '@/lib/auth/session') return { getActiveUser: async () => confirmed ? { id: 'test-user', email: 'test@example.com', hasSpecialistProfile: true, hasEmployerProfile: false, isAdmin: false } : null };
+  if (id === '@/lib/profiles/read') return { readSpecialistProfile: async () => profileBundle };
   if (id === '@/components/AuthSession') return { useAuthSession: () => ({ user: headerUser, verified: false }) };
   if (id === 'next/navigation') return { redirect: target => { throw new Error('REDIRECT:' + target); } };
   if (id === 'next/cache') return { revalidatePath: () => {} };
@@ -36,6 +37,7 @@ Module._load = function(id, parent, isMain) {
 };
 const { safeNext, isAccountRole, isEmail, isPassword } = require('../lib/auth/validation.ts');
 const actions = require('../app/auth/actions.ts');
+require.extensions['.css'] = () => {};
 require.extensions['.tsx'] = (module, filename) => module._compile(ts.transpileModule(fs.readFileSync(filename, 'utf8'), {
   compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020, jsx: ts.JsxEmit.ReactJSX }, fileName: filename,
 }).outputText, filename);
@@ -260,11 +262,14 @@ test('desktop/mobile header uses real account prop and exposes profile directly'
   headerUser = null;
   const out = renderToStaticMarkup(React.createElement(Navigation));
   assert.match(out, /Prisijungti/); assert.match(out, /Registruotis/);
-  headerUser = { role: 'specialist' };
+  headerUser = { hasSpecialistProfile: true, hasEmployerProfile: false, isAdmin: false };
   const loggedIn = renderToStaticMarkup(React.createElement(Navigation));
   assert.doesNotMatch(loggedIn, /Prisijungti|Registruotis/);
   assert.equal((loggedIn.match(/href="\/profilis"/g) || []).length, 2);
   assert.match(loggedIn, /mobile-login profile-link/);
+  assert.doesNotMatch(loggedIn, /href="\/skelbti"/);
+  headerUser = { role:'specialist',hasSpecialistProfile:true,hasEmployerProfile:true,isAdmin:false };
+  assert.equal((renderToStaticMarkup(React.createElement(Navigation)).match(/href="\/skelbti"/g)||[]).length,2);
   headerUser = null;
 });
 test('both basic registration forms have exactly six required controls', () => {
@@ -277,16 +282,23 @@ test('both basic registration forms have exactly six required controls', () => {
     assert.doesNotMatch(html, /license|privacyMode|orgType|employmentTypes|Profesinė kryptis|organizacijos pavadinimas/i);
   }
 });
-test('profile denies anonymous access and only renders account basics', async () => {
+test('profile denies anonymous access and renders the owner specialist projection, not private numbers', async () => {
   const React = require('react');
   const { renderToStaticMarkup } = require('react-dom/server');
   const Profile = require('../app/profilis/page.tsx').default;
   confirmed = false;
   await assert.rejects(Profile(), /REDIRECT:\/prisijungti\?next=\/profilis/);
   confirmed = true;
+  profileBundle = { data: {
+    profile: { first_name:'Test',last_name:'User',professional_role_code:'veterinarian',profile_visibility:'application_only' },
+    ...Object.fromEntries(['education','animals','areas','interests','locations','workloads','schedules','languages','competencies','autonomy','development','custom','customDevelopment'].map(k=>[k,[]])),
+    completeness:{contractVersion:2,step1:20,step2:0,step3:0,total:20,step1Complete:true,step2Complete:false,readyToApply:false,readinessState:'not_ready',missingRequired:[{field:'animal_groups',step:2,reason:'required'}]},
+  }, catalogs:Object.fromEntries(['roles','locations','experience','animals','areas','interests','roleInterests','search','workloads','schedules','mobility','starts','models','languages','languageLevels','visibility','competencies','autonomy','development'].map(k=>[k,[]])) };
   const html = renderToStaticMarkup(await Profile());
-  assert.match(html, /test@example.com/); assert.match(html, /Specialistas/); assert.match(html, /Atsijungti/);
-  assert.doesNotMatch(html, /license|organization|dashboard/i);
+  assert.match(html, /Test User/); assert.match(html, /Specialisto profilis/); assert.match(html, /Atsijungti/);
+  assert.match(html, /Profilis dar neparuoštas kandidatavimui/); assert.match(html, /gyvūnų grupės/);
+  assert.doesNotMatch(html, /test@example.com|Licencijos numeris<|service_role|dashboard/i);
+  profileBundle = null;
 });
 test('token-hash verification sets one-time flag; errors and recovery do not', async () => {
   for (const type of ['email', 'signup', 'recovery']) {
