@@ -1,0 +1,54 @@
+{
+  "timestamp": "2026-09-30T10:38:48.611Z",
+  "status": "PASS",
+  "scope": "local only",
+  "baselineCommit": "95ea4fbf5d36fbd3241785218a466e2b64a28a26",
+  "versions": {
+    "postgres": "17.6",
+    "goTrue": "2.196.0",
+    "postgrest": "16.2",
+    "storage": "1.72.1",
+    "supabaseCli": "2.117.0",
+    "docker": "29.8.1",
+    "ubuntu": "24.04.5 LTS",
+    "node": "22.23.2",
+    "sharp": "0.35.5",
+    "next": "15.5.24"
+  },
+  "qa": {
+    "lint": "PASS: no warnings or errors",
+    "typecheck": "PASS",
+    "build": "PASS",
+    "authMockedTransportTests": 35,
+    "profileActionAssertions": 33,
+    "stage43HistoricalPGliteAssertions": 166,
+    "alignmentPGliteAssertions": 280,
+    "generatedTypes": "PASS:39 tables/11 public RPCs",
+    "databaseAuditCategories": 7,
+    "cleanRealIntegrationAssertions": 379,
+    "upgradeRealIntegrationAssertions": 384,
+    "clientBundleSecretBoundaryFiles": 49,
+    "originalFourMigrationsUnchanged": true,
+    "publishedPorts": "127.0.0.1 only",
+    "localBucketSetup": "PASS"
+  },
+  "advisors": {
+    "ERROR": 0,
+    "WARN": 0,
+    "INFO": 30,
+    "unused_index": 29,
+    "rls_enabled_no_policy_private_account_admins": 1
+  },
+  "limitations": [
+    "Actual handlers use injected cookie client/local Storage endpoint; no browser/Next HTTP cookie end-to-end test claimed.",
+    "No production joint DB+photo backup or restore claimed.",
+    "Recovery RPO equals age of latest jointly verified set; no fixed automatic RPO."
+  ],
+  "production": {
+    "migrationExecuted": false,
+    "push": false,
+    "deploy": false,
+    "uiChanged": false,
+    "stage5Started": false
+  }
+}

@@ -14,12 +14,15 @@ create function auth.jwt() returns jsonb language sql stable as $$ select coales
 create function auth.uid() returns uuid language sql stable as $$ select coalesce(nullif(current_setting('request.jwt.claim.sub',true),''),nullif(current_setting('request.jwt.claims',true),'')::jsonb->>'sub')::uuid $$;
 grant execute on function auth.jwt(),auth.uid() to authenticated,anon;
 `;
-async function createDatabase({ stage3Only = false } = {}) {
+async function createDatabase({ stage3Only = false, stage43Only = false } = {}) {
   const db = new PGlite();
   await db.exec(bootstrap);
   const files = fs.readdirSync(path.resolve('supabase/migrations')).filter(f => f.endsWith('.sql')).sort();
   for (const file of files) {
-    if (stage3Only && file.includes('stage4_3')) continue;
+    if (stage3Only && file > '20260908142249_stage3_auth_accounts.sql') continue;
+    if (stage43Only && file > '20260915210103_stage4_3_product_contract_fixes.sql') continue;
+    // Real Storage policies are verified by local integration QA, not PGlite.
+    if (file.endsWith('_stage4_specialist_photo_access.sql')) continue;
     try { await db.exec(fs.readFileSync(path.resolve('supabase/migrations', file), 'utf8')); }
     catch (error) { console.error('Migration failed:',file,error.message,'position',error.position); throw error; }
   }

@@ -1,0 +1,14 @@
+{
+  "timestamp": "2026-09-30T10:38:48.611Z",
+  "target": "local isolated stack only",
+  "status": "PASS",
+  "levels": {
+    "ERROR": 0,
+    "WARN": 0,
+    "INFO": 30
+  },
+  "names": {
+    "unused_index": 29,
+    "rls_enabled_no_policy": 1
+  }
+}

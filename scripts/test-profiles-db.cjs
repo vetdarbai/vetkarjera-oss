@@ -24,7 +24,7 @@ async function fixture(n,role='specialist',confirmed=true,extra={}) {
   await q('insert into auth.sessions(id,user_id) values($1,$1)',[id(n)]);
 }
 async function run() {
-  let clean=await createDatabase(); await clean.close(); checks++;
+  let clean=await createDatabase({stage43Only:true}); await clean.close(); checks++;
   db=await createDatabase({stage3Only:true});
   for(let n=1;n<=6;n++) await fixture(n,n<=3?'specialist':'employer',true,n===1?{first_name:'Legacy',last_name:'Vardas'}:{});
   await fixture(7); await q(`update public.profiles set role='admin' where id=$1`,[id(7)]);

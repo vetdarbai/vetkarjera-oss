@@ -2,6 +2,7 @@ import catalogs from './catalogs.json';
 
 export type ProfessionalRole = 'veterinarian' | 'veterinary_student' | 'veterinary_assistant' | 'veterinary_pharmacy' | 'animal_health_commerce' | 'other_veterinary_specialty';
 export type SpecialistStep1 = { first_name: string; last_name: string; professional_role_code: ProfessionalRole; specialty_free_text?: string | null };
+export type SpecialistStep1Draft = { [K in keyof SpecialistStep1]?: SpecialistStep1[K] | null };
 export type EmployerStep1 = { organization_name_input: string; organization_type_code: string; organization_type_other?: string | null };
 export type Education = {
   institution_code?: 'lsmu' | 'other' | null; institution_name?: string | null;
@@ -20,6 +21,7 @@ export type SpecialistStep2 = {
   work_locations: string[]; workloads: string[]; schedules?: string[];
   languages: { language_code: string; proficiency_code: string; language_name?: string | null }[];
 };
+export type SpecialistStep2Draft = { [K in keyof SpecialistStep2]?: K extends 'profile_visibility' ? SpecialistStep2[K] : K extends 'languages' ? { language_code: string; proficiency_code?: string | null; language_name?: string | null }[] : NonNullable<SpecialistStep2[K]> extends unknown[] ? SpecialistStep2[K] : SpecialistStep2[K] | null };
 export type StandardLevel = 'with_assistance' | 'independent' | 'can_teach';
 export type StudentLevel = 'theory_only' | 'with_assistance' | 'supervised_confident';
 export type SpecialistStep3 = {
@@ -28,8 +30,8 @@ export type SpecialistStep3 = {
   custom_competencies?: { name: string; level: StandardLevel }[]; custom_development?: string[];
 };
 export type AccountCapabilities = { id: string; hasSpecialistProfile: boolean; hasEmployerProfile: boolean; isAdmin: boolean };
-export type Completeness = { step1: number; step2: number; step3: number; total: number; applicableCompetencies?: number; filledCompetencies?: number };
-export type ProfileResult<T = undefined> = { ok: true; data?: T } | { ok: false; message: string };
+export type Completeness = { step1: number; step2: number; step3: number; total: number; applicableCompetencies?: number; filledCompetencies?: number; step1Complete: boolean; step2Complete: boolean; missingRequired: {field: string; step: 1 | 2; reason: 'required'}[]; readyToApply: boolean; readinessState: 'not_ready' | 'ready' | 'complete'; contractVersion: 2 };
+export type ProfileResult<T = undefined> = { ok: true; data?: T; completeness?: Completeness; completenessStatus?: 'available' | 'unavailable' } | { ok: false; message: string };
 
 export function parseCapabilities(value: unknown): AccountCapabilities | null {
   if (!value || typeof value !== 'object') return null;

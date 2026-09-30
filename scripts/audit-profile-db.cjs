@@ -18,7 +18,7 @@ async function run(){
    console.log(name,rows.length?JSON.stringify(rows):'PASS');
    if(rows.length)failed=true;
   }
-  for(const name of fs.readdirSync('supabase/migrations').filter(name=>name.includes('stage4_3') && name.endsWith('.sql'))){
+  for(const name of fs.readdirSync('supabase/migrations').filter(name=>name.includes('stage4') && name.endsWith('.sql'))){
    const migration=fs.readFileSync(`supabase/migrations/${name}`,'utf8').replace(/^\s*--[^\n]*(?:\n|$)/gm,'').trim();
    if(!migration.startsWith('begin;') || !migration.endsWith('commit;'))throw new Error(`Migration must be atomic: ${name}`);
   }

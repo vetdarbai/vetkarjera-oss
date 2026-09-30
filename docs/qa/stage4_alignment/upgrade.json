@@ -1,0 +1,51 @@
+{
+  "mode": "upgrade",
+  "startedAt": "2026-09-30T10:35:32.493Z",
+  "checks": 384,
+  "groups": [
+    {
+      "name": "Stage4.3 upgrade preserves existing data; cutover timeout rolls back",
+      "status": "PASS"
+    },
+    {
+      "name": "Real Auth/PostgREST draft/readiness/license/RLS behavioural matrix",
+      "status": "PASS"
+    },
+    {
+      "name": "Two-connection PATCH preservation",
+      "status": "PASS"
+    },
+    {
+      "name": "Strict V2 signup regression",
+      "status": "PASS"
+    },
+    {
+      "name": "Photo owner upload/replace/delete, transformed bytes, metadata and single object",
+      "status": "PASS"
+    },
+    {
+      "name": "Photo invalid/SVG/animation/size/CSRF/IDOR/anon and foreign deny",
+      "status": "PASS"
+    },
+    {
+      "name": "Local photo bytes recovery roundtrip and owner/hash consistency",
+      "status": "PASS"
+    },
+    {
+      "name": "Provider failure does not become missing photo; missing privileged key denies mutation",
+      "status": "PASS"
+    },
+    {
+      "name": "Photo replace/delete race and no retained originals",
+      "status": "PASS"
+    },
+    {
+      "name": "Expired and revoked sessions deny photo and RPC despite old access token",
+      "status": "PASS"
+    }
+  ],
+  "postgres": "17.6",
+  "auth": "v2.196.0",
+  "completedAt": "2026-09-30T10:35:52.757Z",
+  "status": "PASS"
+}

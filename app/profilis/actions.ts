@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { getActiveUser } from '@/lib/auth/session';
-import { validPayload, type SpecialistStep1, type EmployerStep1, type Education, type SpecialistStep2, type SpecialistStep3, type ProfileResult } from '@/lib/profiles/contracts';
+import { validPayload, type SpecialistStep1, type SpecialistStep1Draft, type SpecialistStep2Draft, type Completeness, type EmployerStep1, type Education, type SpecialistStep3, type ProfileResult } from '@/lib/profiles/contracts';
 import type { Database, Json } from '@/types/database';
 
 const failure = (): ProfileResult<never> => ({ ok: false, message: 'Nepavyko išsaugoti. Patikrinkite duomenis ir prisijungimą.' });
@@ -15,10 +15,19 @@ async function mutate<N extends keyof Functions>(name: N, args: Functions[N]['Ar
     const { error } = await client.rpc(name, args);
     if (error) return failure(); // Never log private input or provider errors.
     revalidatePath('/profilis');
+    if (['save_specialist_step1','save_specialist_step2','save_specialist_step3','save_education','save_license'].includes(name)) {
+      try {
+        const state = await client.rpc('profile_completeness');
+        if (!state.error && state.data && typeof state.data === 'object' && !Array.isArray(state.data) && state.data.contractVersion === 2) {
+          return { ok: true, completeness: state.data as unknown as Completeness, completenessStatus: 'available' };
+        }
+      } catch { /* Write succeeded; only the follow-up read failed. */ }
+      return { ok: true, completenessStatus: 'unavailable' };
+    }
     return { ok: true };
   } catch { return failure(); }
 }
-export async function saveSpecialistStep1(payload: SpecialistStep1) {
+export async function saveSpecialistStep1(payload: SpecialistStep1Draft) {
   return validPayload(payload) ? mutate('save_specialist_step1', { payload: payload as Json }) : failure();
 }
 export async function saveEmployerStep1(payload: EmployerStep1) {
@@ -30,7 +39,7 @@ export async function createSecondProfile(kind: 'specialist' | 'employer', paylo
 export async function saveEducation(payload: Education) {
   return validPayload(payload) ? mutate('save_education', { payload: payload as Json }) : failure();
 }
-export async function saveSpecialistStep2(payload: SpecialistStep2) {
+export async function saveSpecialistStep2(payload: SpecialistStep2Draft) {
   return validPayload(payload) ? mutate('save_specialist_step2', { payload: payload as Json }) : failure();
 }
 export async function saveSpecialistStep3(payload: SpecialistStep3) {

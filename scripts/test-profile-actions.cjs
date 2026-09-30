@@ -4,9 +4,9 @@ const path = require('node:path');
 const Module = require('node:module');
 const ts = require('typescript');
 const load = Module._load;
-let active=true, rpcError=null, signupSession=false, calls=[], identity={id:'test-user',email:'test@example.invalid',email_confirmed_at:'2026-01-01'};
+let stateError=null,stateThrows=false,stateValue={total:70},active=true, rpcError=null, signupSession=false, calls=[], identity={id:'test-user',email:'test@example.invalid',email_confirmed_at:'2026-01-01'};
 let capabilities={id:'test-user',hasSpecialistProfile:true,hasEmployerProfile:true,isAdmin:false};
-const client={rpc:async(name,args)=>{calls.push([name,args]);return {data:name==='account_capabilities'?capabilities:{total:70},error:rpcError};},auth:{
+const client={rpc:async(name,args)=>{calls.push([name,args]);if(name==='profile_completeness'){if(stateThrows)throw Error('private details');return {data:stateValue,error:stateError};}return {data:name==='account_capabilities'?capabilities:{total:70},error:rpcError};},auth:{
  getUser:async()=>({data:{user:identity},error:null}),
  signUp:async args=>{calls.push(['signup',args]);return {data:{session:signupSession?{}:null},error:null};},
  signOut:async()=>{calls.push(['signout']);return {error:null};}
@@ -46,6 +46,12 @@ async function run(){
  check(Object.hasOwn(calls[0][1].options.data,'first_name'),false);check(Object.hasOwn(calls[0][1].options.data,'terms_accepted_at'),true);
  calls=[];check((await registration.registerProfileAccount({...signup,agreedToTerms:false})).ok,false);check(calls.length,0);
  signupSession=true;calls=[];check((await registration.registerProfileAccount(signup)).ok,false);check(calls[1][0],'signout');
+ stateValue={step1:20,step2:50,step3:0,total:70,step1Complete:true,step2Complete:true,missingRequired:[],readyToApply:true,readinessState:'ready',contractVersion:2};
+ calls=[];check(await actions.saveSpecialistStep1({first_name:'Partial'}),{ok:true,completeness:stateValue,completenessStatus:'available'});check(calls.map(c=>c[0]),['save_specialist_step1','profile_completeness']);check(calls[0][1],{payload:{first_name:'Partial'}});
+ stateError={message:'private read failure'};check(await actions.saveSpecialistStep2({about_me:null}),{ok:true,completenessStatus:'unavailable'});stateError=null;
+ stateThrows=true;check(await actions.saveEducation({institution_code:null}),{ok:true,completenessStatus:'unavailable'});stateThrows=false;
+ rpcError={message:'private write failure'};calls=[];check((await actions.saveSpecialistStep1({first_name:null})).ok,false);check(calls.length,1);rpcError=null;
+ check(contracts.registrationProfile('specialist',{first_name:'Partial'}),null);
  console.log(`PASS ${checks} profile action/session/registration assertions`);
 }
 run().catch(e=>{console.error(e.message);process.exitCode=1;});

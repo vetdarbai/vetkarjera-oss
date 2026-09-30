@@ -644,19 +644,19 @@ Relationships: [{ foreignKeyName: "specialist_interests_user_id_fkey"; columns: 
 Row: {
 "user_id": string;
 "language_code": string;
-"proficiency_code": string;
+"proficiency_code": string | null;
 "language_name": string | null;
 };
 Insert: {
 "user_id": string;
 "language_code": string;
-"proficiency_code": string;
+"proficiency_code"?: string | null;
 "language_name"?: string | null;
 };
 Update: {
 "user_id"?: string;
 "language_code"?: string;
-"proficiency_code"?: string;
+"proficiency_code"?: string | null;
 "language_name"?: string | null;
 };
 Relationships: [{ foreignKeyName: "specialist_languages_user_id_fkey"; columns: ["user_id"]; isOneToOne: false; referencedRelation: "specialist_profiles"; referencedColumns: ["user_id"] },{ foreignKeyName: "specialist_languages_language_code_fkey"; columns: ["language_code"]; isOneToOne: false; referencedRelation: "languages"; referencedColumns: ["code"] },{ foreignKeyName: "specialist_languages_proficiency_code_fkey"; columns: ["proficiency_code"]; isOneToOne: false; referencedRelation: "language_levels"; referencedColumns: ["code"] }];
