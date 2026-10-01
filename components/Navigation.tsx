@@ -14,7 +14,7 @@ function RegistrationMenu({ className = '' }: { className?: string }) {
   );
 }
 
-export default function Navigation() {
+export default function Navigation({ onProfileNavigate }: { onProfileNavigate?: () => void } = {}) {
   const { user, verified } = useAuthSession();
   return (
     <>
@@ -26,11 +26,11 @@ export default function Navigation() {
         </Link>
 
         <div className="desktop-navigation">
-          <Link href="/skelbimai">Skelbimai</Link><Link href="/darbdavys">Darbdaviams</Link>{(!user || user.hasEmployerProfile) && <Link href="/skelbti">Paskelbti skelbimą</Link>}{user ? <Link href="/profilis" className="profile-link">Profilis</Link> : <><Link href="/prisijungti">Prisijungti</Link><RegistrationMenu /></>}
+          <Link href="/skelbimai">Skelbimai</Link><Link href="/darbdavys">Darbdaviams</Link>{(!user || user.hasEmployerProfile) && <Link href="/skelbti">Paskelbti skelbimą</Link>}{user ? <Link href="/profilis" className="profile-link" onNavigate={e => { if (onProfileNavigate) { e.preventDefault(); onProfileNavigate(); } }}>Profilis</Link> : <><Link href="/prisijungti">Prisijungti</Link><RegistrationMenu /></>}
         </div>
 
         <div className="mobile-navigation">
-          {user ? <Link href="/profilis" className="mobile-login profile-link">Profilis</Link> : <><Link href="/prisijungti" className="mobile-login">Prisijungti</Link><RegistrationMenu className="mobile-registration" /></>}
+          {user ? <Link href="/profilis" className="mobile-login profile-link" onNavigate={e => { if (onProfileNavigate) { e.preventDefault(); onProfileNavigate(); } }}>Profilis</Link> : <><Link href="/prisijungti" className="mobile-login">Prisijungti</Link><RegistrationMenu className="mobile-registration" /></>}
           <details className="mobile-menu" suppressHydrationWarning>
             <summary aria-label="Atverti navigaciją"><span /><span /><span /></summary>
             <div className="mobile-menu-panel"><Link href="/skelbimai">Skelbimai</Link><Link href="/darbdavys">Darbdaviams</Link>{(!user || user.hasEmployerProfile) && <Link href="/skelbti">Paskelbti skelbimą</Link>}</div>

@@ -16,6 +16,8 @@ export async function PUT(request: Request) {
 export async function DELETE(request: Request) {
   try { const auth = await authorizePhoto(request, true);
     await removePhoto(auth);
-    return Response.json({ ok: true, ...photoMetadata(auth, await readPhoto(auth)) }, { headers: photoHeaders });
+    // Successful deletion is authoritative. A follow-up download can fail or
+    // return stale bytes; it must not turn a successful removal into an error.
+    return Response.json({ ok: true, ...photoMetadata(auth, null) }, { headers: photoHeaders });
   } catch (error) { return photoFailure(error); }
 }

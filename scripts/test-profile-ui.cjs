@@ -53,8 +53,9 @@ async function login(a,width=1440) {
 }
 async function edit(page,title) { await page.locator('.profile-section').filter({has:page.getByRole('heading',{name:title,exact:true})}).getByRole('button',{name:'Redaguoti',exact:true}).click(); }
 async function step(page,n) { if (page.viewportSize().width <= 760) await page.getByLabel('Profilio dalis',{exact:true}).selectOption(String(n)); else await page.locator('.profile-steps').getByRole('button').nth(n-1).click(); }
-async function save(page) { await page.getByRole('button',{name:'Išsaugoti',exact:true}).first().click(); await page.locator('.profile-notice.success').waitFor(); eq(await page.getByRole('button',{name:'Išsaugoti',exact:true}).first().isDisabled(),true); }
-async function overview(page) { await page.getByRole('button',{name:'‹ Grįžti į profilį',exact:true}).click(); }
+async function returnAndReopen(page, n) { await page.locator('.profile-identity').waitFor(); eq(new URL(page.url()).pathname,'/profilis'); if (page.viewportSize().width <= 760) await edit(page,['Pagrindiniai duomenys','Profesinis profilis','Kompetencijos ir tobulėjimas'][n-1]); else await step(page,n); }
+async function save(page) { const n=await page.locator('.profile-content > h1').innerText(); const index=['Pagrindiniai duomenys','Profesinis profilis','Kompetencijos ir tobulėjimas'].indexOf(n)+1; await page.getByRole('button',{name:'Išsaugoti',exact:true}).first().click(); await page.locator('.profile-notice.success').waitFor(); eq(await page.getByRole('button',{name:'Išsaugoti',exact:true}).first().isDisabled(),true); await returnAndReopen(page,index); }
+async function overview(page) { await page.getByRole('button',{name:'‹ Grįžti į profilį',exact:true}).click();await page.locator('.profile-identity').waitFor();if(await page.locator('.profile-license').count())await page.locator('.profile-license-status').waitFor(); }
 async function overflow(page) { eq(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth),true); }
 async function fullStep2(a) {
   await rpc(a,'save_education',{payload:{institution_code:a.role === 'veterinarian' || a.role === 'veterinary_student' ? 'lsmu' : null,institution_name:'Testų įstaiga',program_or_qualification:'Testų kvalifikacija',...(a.role==='veterinary_student'?{current_course:2}:{})}});
@@ -78,6 +79,21 @@ async function main() {
     await page.reload(); await page.getByRole('heading',{name:'Testo Specialistas'}).waitFor(); await overflow(page);
     await page.screenshot({path:path.join(out,'overview-20-desktop.png'),fullPage:true});
   });
+  await group('Stage4.7 profession, persistent nav, header overview and account email',async()=>{
+    eq(await page.locator('.profile-steps button').count(),3);
+    ok((await page.locator('.profile-identity').innerText()).includes('Profesija: Veterinarijos gydytojas'));
+    for(const n of [1,2,3]){
+      await step(page,n);
+      eq(await page.locator('.profile-steps [aria-current=step]').count(),1);
+      if(n===1){eq(await page.getByLabel('El. paštas',{exact:true}).inputValue(),vet.email);eq(await page.getByLabel('El. paštas',{exact:true}).evaluate(i=>i.readOnly),true);}
+      await page.locator('.desktop-navigation .profile-link').click();await page.locator('.profile-identity').waitFor();
+    }
+    for(const button of await page.locator('.profile-section-heading button').all()){ok((await button.boundingBox()).height>=44);ok((await button.getAttribute('class')).includes('profile-edit'));}
+    await rpc(vet,'save_specialist_step1',{payload:{professional_role_code:null}});await page.reload();
+    await page.getByText('Profesija: Nepasirinkta',{exact:true}).filter({visible:true}).waitFor();eq(await page.locator('.profile-missing-profession').innerText(),'Nepasirinkta');
+    await page.getByRole('button',{name:'Tęsti pildymą',exact:true}).click();await page.getByLabel('Vardas',{exact:true}).waitFor();
+    await rpc(vet,'save_specialist_step1',{payload:{professional_role_code:'veterinarian'}});await page.reload();
+  });
   await group('STEP1 partial clear/save/reload, exit dialog, profession confirmation and preservation',async()=>{
     await edit(page,'Pagrindiniai duomenys'); await page.getByLabel('Vardas',{exact:true}).fill(''); await save(page); eq((await state(vet)).total,0);
     await page.reload();await edit(page,'Pagrindiniai duomenys');eq(await page.getByLabel('Vardas',{exact:true}).inputValue(),'');
@@ -85,9 +101,9 @@ async function main() {
     await page.getByLabel('Pavardė',{exact:true}).fill('Neišsaugota');await step(page,2);await page.getByRole('dialog').waitFor();await page.getByRole('button',{name:'Tęsti redagavimą'}).click();eq(await page.getByLabel('Pavardė',{exact:true}).inputValue(),'Neišsaugota');
     await step(page,2);await page.getByRole('button',{name:'Išeiti neišsaugojus',exact:true}).click();await step(page,1);eq(await page.getByLabel('Pavardė',{exact:true}).inputValue(),'Specialistas');
     await page.getByLabel('Profesija',{exact:true}).selectOption('other_veterinary_specialty');await page.getByLabel('Specialybės pavadinimas').fill('Kita specialybė');await page.getByRole('button',{name:'Išsaugoti',exact:true}).click();await page.getByRole('dialog').waitFor();await page.getByRole('button',{name:'Grįžti',exact:true}).click();eq((await vet.client.from('specialist_profiles').select('professional_role_code').single()).data.professional_role_code,'veterinarian');
-    await page.getByRole('button',{name:'Išsaugoti',exact:true}).click();await page.getByRole('button',{name:'Išsaugoti pakeitimą'}).click();await page.locator('.profile-notice.success').waitFor();
+    await page.getByRole('button',{name:'Išsaugoti',exact:true}).click();await page.getByRole('button',{name:'Išsaugoti pakeitimą'}).click();await page.locator('.profile-notice.success').waitFor();await returnAndReopen(page,1);
     eq((await vet.client.from('specialist_profiles').select('professional_role_code').single()).data.professional_role_code,'other_veterinary_specialty');
-    await page.getByLabel('Profesija',{exact:true}).selectOption('veterinarian');await page.getByRole('button',{name:'Išsaugoti',exact:true}).click();await page.getByRole('button',{name:'Išsaugoti pakeitimą'}).click();await page.locator('.profile-notice.success').waitFor();
+    await page.getByLabel('Profesija',{exact:true}).selectOption('veterinarian');await page.getByRole('button',{name:'Išsaugoti',exact:true}).click();await page.getByRole('button',{name:'Išsaugoti pakeitimą'}).click();await page.locator('.profile-notice.success').waitFor();await returnAndReopen(page,1);
   });
   await group('Photo HTTP owner upload/render/replace/reload/delete, invalid file and retry',async()=>{
     const input=await sharp({create:{width:420,height:300,channels:3,background:'#e6f0fb'}}).jpeg().toBuffer();
@@ -99,13 +115,20 @@ async function main() {
     await page.reload();await edit(page,'Pagrindiniai duomenys');await page.getByRole('img',{name:'Profilio nuotrauka'}).waitFor();
     await page.locator('input[type=file]').setInputFiles({name:'bad.svg',mimeType:'image/svg+xml',buffer:Buffer.from('<svg/>')});ok((await page.locator('.profile-notice.error').innerText()).includes('JPG, PNG arba WebP'));
     await page.getByRole('button',{name:'Pašalinti nuotrauką'}).click();await page.getByRole('button',{name:'Įkelti nuotrauką',exact:true}).waitFor();eq((await (await page.request.get(origin+'/api/profilis/nuotrauka')).json()).hasPhoto,false);
+    await page.reload();await edit(page,'Pagrindiniai duomenys');await page.getByRole('button',{name:'Įkelti nuotrauką',exact:true}).waitFor();eq(await page.getByRole('img',{name:'Profilio nuotrauka'}).count(),0);
     await page.route('**/api/profilis/nuotrauka',r=>r.request().method()==='PUT'?r.fulfill({status:503,contentType:'application/json',body:'{}'}):r.continue());
     await page.getByLabel('Vardas',{exact:true}).fill('Išliks');await page.locator('input[type=file]').setInputFiles({name:'profile.jpg',mimeType:'image/jpeg',buffer:input});await page.locator('.profile-notice.error').waitFor();eq(await page.getByLabel('Vardas',{exact:true}).inputValue(),'Išliks');
     await page.unroute('**/api/profilis/nuotrauka');await page.getByRole('button',{name:'Bandyti dar kartą',exact:true}).click();await page.getByRole('img',{name:'Profilio nuotrauka'}).waitFor();eq(await page.getByLabel('Vardas',{exact:true}).inputValue(),'Išliks');
     await page.getByLabel('Vardas',{exact:true}).fill('Testo');
   });
   await group('STEP2 partial/clear/reload, education Other/LSMU, full preferences/languages/visibility and about validation',async()=>{
-    await step(page,2);await page.getByLabel('Apie mane',{exact:true}).fill('Dalinis profilis');await save(page);eq((await state(vet)).total,20);
+    await rpc(vet,'save_specialist_step2',{payload:{work_model_code:'hybrid',schedules:['regular']}});
+    await step(page,2);eq(await page.getByLabel('Darbo modelis',{exact:true}).count(),0);eq(await page.getByText('Pageidaujamas darbo grafikas',{exact:true}).count(),0);
+    for(const title of ['Darbas savaitgaliais','Naktinis darbas','Budėjimai'])eq(await page.getByLabel(title,{exact:true}).count(),1);
+    eq((await page.getByLabel('Kada galėtumėte pradėti?').locator('option').allTextContents()).includes('Po įspėjimo termino (20 kalendorinių dienų)'),false);
+    await page.getByLabel('Apie mane',{exact:true}).fill('Dalinis profilis');await save(page);eq((await state(vet)).total,20);
+    eq((await vet.client.from('specialist_profiles').select('work_model_code').single()).data.work_model_code,'hybrid');
+    eq((await vet.client.from('specialist_schedules').select('schedule_code')).data,[{schedule_code:'regular'}]);
     await page.reload();await edit(page,'Profesinis profilis');eq(await page.getByLabel('Apie mane',{exact:true}).inputValue(),'Dalinis profilis');
     await page.getByLabel('Apie mane',{exact:true}).fill('a'.repeat(501));await page.getByRole('button',{name:'Išsaugoti',exact:true}).first().click();await page.getByText('Aprašymas negali viršyti 500 simbolių.',{exact:true}).waitFor();eq(await page.getByLabel('Apie mane',{exact:true}).inputValue(),'a'.repeat(501));
     await page.getByLabel('Apie mane',{exact:true}).fill('');await page.getByLabel('Mokymo įstaiga',{exact:true}).selectOption('other');await page.getByLabel('Mokymo įstaigos pavadinimas').fill('Testų įstaiga');await page.getByLabel('Šalis',{exact:true}).fill('Lietuva');await page.getByLabel('Studijų programa / kvalifikacija').fill('Veterinarinė medicina');await save(page);
@@ -139,9 +162,13 @@ async function main() {
     await edit(page,'Kompetencijos ir tobulėjimas');const inputs=page.locator('.profile-competency-items select');eq(await inputs.count(),24);
     const autonomy=page.locator('.profile-radio input');if(await autonomy.count())await autonomy.first().check();
     const development=page.locator('fieldset.profile-multi');if(await development.count()){await development.locator('summary').click();await development.locator('input[type=checkbox]').first().check();}
+    for(let i=0;i<5;i++)await inputs.nth(i).selectOption('independent');await save(page);eq((await state(vet)).total,76.25);await overview(page);
+    await page.getByRole('button',{name:'Tęsti pildymą',exact:true}).click();await page.locator('.profile-content > h1').getByText('Kompetencijos ir tobulėjimas',{exact:true}).waitFor();
     for(let i=0;i<24;i++)await inputs.nth(i).selectOption('independent');await save(page);eq((await state(vet)).total,100);
-    await overview(page);ok((await page.locator('.profile-readiness').innerText()).includes('Išsamus profilis'));await page.screenshot({path:path.join(out,'overview-100-desktop.png'),fullPage:true});
-    await page.setViewportSize({width:390,height:844});await overflow(page);await page.screenshot({path:path.join(out,'overview-100-mobile.png'),fullPage:true});await edit(page,'Kompetencijos ir tobulėjimas');
+    await overview(page);ok((await page.locator('.profile-readiness').innerText()).includes('Išsamus profilis'));eq(await page.getByRole('button',{name:'Tęsti pildymą',exact:true}).count(),0);await page.screenshot({path:path.join(out,'overview-100-desktop.png'),fullPage:true});
+    await page.setViewportSize({width:390,height:844});eq(await page.locator('.profile-steps').isVisible(),false);await overflow(page);
+    for(const n of [1,2,3]){await edit(page,['Pagrindiniai duomenys','Profesinis profilis','Kompetencijos ir tobulėjimas'][n-1]);eq(await page.getByLabel('Profilio dalis',{exact:true}).inputValue(),String(n));await page.locator('.mobile-navigation .profile-link').click();await page.locator('.profile-identity').waitFor();}
+    await page.locator('.profile-license-status').waitFor();await page.screenshot({path:path.join(out,'overview-100-mobile.png'),fullPage:true});await edit(page,'Kompetencijos ir tobulėjimas');
     const accordion=page.getByRole('button',{name:/Procedūros.*Atsakyta/});await accordion.click();await accordion.click();eq(await page.getByLabel('IV kateterio įvedimas',{exact:true}).inputValue(),'independent');
     const rect=await page.getByLabel('IV kateterio įvedimas',{exact:true}).boundingBox();ok(rect.height>=44);ok(rect.width>290);await overflow(page);await page.screenshot({path:path.join(out,'step3-vet-mobile.png'),fullPage:true});
     await step(page,2);await overflow(page);await page.screenshot({path:path.join(out,'step2-mobile.png'),fullPage:true});await page.setViewportSize({width:1440,height:900});await overflow(page);await page.screenshot({path:path.join(out,'step2-desktop.png'),fullPage:true});await page.setViewportSize({width:768,height:900});await overflow(page);eq(errors,[]);
@@ -151,13 +178,28 @@ async function main() {
     await page.getByLabel('Smulkieji gyvūnai',{exact:true}).check();await page.getByLabel('Pridėti kalbą',{exact:true}).selectOption('lt');await page.getByLabel('Mokėjimo lygis',{exact:true}).selectOption('native');await page.getByLabel('Matomas tik kai kandidatuoju',{exact:true}).check();await save(page);eq((await state(vet)).total,100);
     await page.getByLabel('Apie mane',{exact:true}).fill('Įrašyta prieš skaitymo klaidą');await page.route('**/profilis',r=>r.request().method()==='POST'&&r.request().postData()==='[]'?r.abort('failed'):r.continue());await page.getByRole('button',{name:'Išsaugoti',exact:true}).first().click();await page.getByText(/Pakeitimai išsaugoti\. Nepavyko atnaujinti profilio peržiūros/).waitFor();
     await page.getByLabel('Apie mane',{exact:true}).fill('Naujas pakeitimas po skaitymo klaidos');await page.unroute('**/profilis');await page.locator('form').getByRole('button',{name:'Bandyti dar kartą',exact:true}).click();await page.locator('form .profile-notice.error').waitFor({state:'hidden'});eq(await page.getByLabel('Apie mane',{exact:true}).inputValue(),'Naujas pakeitimas po skaitymo klaidos');eq(await page.getByRole('button',{name:'Išsaugoti',exact:true}).first().isEnabled(),true);await save(page);
-    await page.getByLabel('Apie mane',{exact:true}).fill('Išsaugoti po klaidos');await page.route('**/profilis',r=>r.request().method()==='POST'&&r.request().postData()?.includes('about_me')?r.abort('failed'):r.continue());await page.getByRole('button',{name:'Išsaugoti',exact:true}).first().click();await page.locator('form .profile-notice.error').waitFor();eq(await page.getByLabel('Apie mane',{exact:true}).inputValue(),'Išsaugoti po klaidos');
-    await page.unroute('**/profilis');await page.locator('form').getByRole('button',{name:'Bandyti dar kartą',exact:true}).click();await page.locator('.profile-notice.success').waitFor();eq((await vet.client.from('specialist_profiles').select('about_me').single()).data.about_me,'Išsaugoti po klaidos');
+    await page.getByLabel('Apie mane',{exact:true}).fill('Išsaugoti po klaidos');await page.route('**/profilis',r=>r.request().method()==='POST'&&r.request().postData()?.includes('about_me')?r.abort('failed'):r.continue());await page.getByRole('button',{name:'Išsaugoti',exact:true}).first().click();await page.locator('form .profile-notice.error').waitFor();eq(await page.getByLabel('Apie mane',{exact:true}).inputValue(),'Išsaugoti po klaidos');await page.waitForTimeout(2200);eq(await page.locator('.profile-identity').count(),0);
+    await page.unroute('**/profilis');await page.locator('form').getByRole('button',{name:'Bandyti dar kartą',exact:true}).click();await page.locator('.profile-notice.success').waitFor();await returnAndReopen(page,2);eq((await vet.client.from('specialist_profiles').select('about_me').single()).data.about_me,'Išsaugoti po klaidos');
     await page.getByLabel('Apie mane',{exact:true}).fill('Išsaugoma patikra');await page.route('**/profilis',async r=>{if(r.request().method()==='POST'&&r.request().postData()?.includes('about_me'))await new Promise(t=>setTimeout(t,1500));await r.continue();});
-    await page.getByRole('button',{name:'Išsaugoti',exact:true}).first().click();await page.getByRole('button',{name:'Išsaugoma…',exact:true}).waitFor();eq(await page.getByRole('button',{name:'Išsaugoma…',exact:true}).isDisabled(),true);await page.locator('.profile-notice.success').waitFor();await page.unroute('**/profilis');
-    await page.getByLabel('Darbo patirtis',{exact:true}).evaluate(select=>select.add(new Option('Nebegaliojanti testų reikšmė','forged')));await page.getByLabel('Darbo patirtis',{exact:true}).selectOption('forged');await page.getByRole('button',{name:'Išsaugoti',exact:true}).first().click();await page.locator('form .profile-notice.error').waitFor();ok((await page.locator('form .profile-notice.error').innerText()).includes('Nepavyko išsaugoti profilio.'));eq(await page.getByLabel('Darbo patirtis',{exact:true}).inputValue(),'forged');await page.getByLabel('Darbo patirtis',{exact:true}).selectOption('3_5_years');await page.locator('form').getByRole('button',{name:'Bandyti dar kartą',exact:true}).click();await page.locator('.profile-notice.success').waitFor();
-    await vet.client.auth.signOut({scope:'global'});await page.getByLabel('Apie mane',{exact:true}).fill('Išliks po sesijos klaidos');await page.getByRole('button',{name:'Išsaugoti',exact:true}).first().click();await page.locator('form .profile-notice.error').waitFor();ok((await page.locator('form .profile-notice.error').innerText()).includes('Nepavyko susisiekti su serveriu.'));eq(await page.getByLabel('Apie mane',{exact:true}).inputValue(),'Išliks po sesijos klaidos');
-    const renewed=await login(vet);await context.addCookies(await renewed.context.cookies());await renewed.context.close();await vet.client.auth.signInWithPassword({email:vet.email,password:vet.password});await page.locator('form').getByRole('button',{name:'Bandyti dar kartą',exact:true}).click();await page.locator('.profile-notice.success').waitFor();eq((await vet.client.from('specialist_profiles').select('about_me').single()).data.about_me,'Išliks po sesijos klaidos');
+    await page.getByRole('button',{name:'Išsaugoti',exact:true}).first().click();await page.getByRole('button',{name:'Išsaugoma…',exact:true}).waitFor();eq(await page.getByRole('button',{name:'Išsaugoma…',exact:true}).isDisabled(),true);await page.locator('.profile-notice.success').waitFor();await returnAndReopen(page,2);await page.unroute('**/profilis');
+    await page.getByLabel('Darbo patirtis',{exact:true}).evaluate(select=>select.add(new Option('Nebegaliojanti testų reikšmė','forged')));await page.getByLabel('Darbo patirtis',{exact:true}).selectOption('forged');await page.getByRole('button',{name:'Išsaugoti',exact:true}).first().click();await page.locator('form .profile-notice.error').waitFor();ok((await page.locator('form .profile-notice.error').innerText()).includes('Nepavyko išsaugoti profilio.'));eq(await page.getByLabel('Darbo patirtis',{exact:true}).inputValue(),'forged');await page.getByLabel('Darbo patirtis',{exact:true}).selectOption('3_5_years');await page.locator('form').getByRole('button',{name:'Bandyti dar kartą',exact:true}).click();await page.locator('.profile-notice.success').waitFor();await returnAndReopen(page,2);
+    await page.getByLabel('Apie mane',{exact:true}).fill('Išliks po sesijos klaidos');await vet.client.auth.signOut({scope:'global'});
+    try { await page.getByRole('button',{name:'Išsaugoti',exact:true}).first().click({timeout:2000}); }
+    catch(e) { if(new URL(page.url()).pathname!=='/prisijungti')throw e; } // Existing middleware can redirect before the click settles.
+    await Promise.race([page.locator('form .profile-notice.error').waitFor(),page.waitForURL(url=>url.pathname==='/prisijungti')]);
+    eq((await admin.from('specialist_profiles').select('about_me').eq('user_id',vet.id).single()).data.about_me,'Išsaugoma patikra');
+    const renewed=await login(vet);
+    if(new URL(page.url()).pathname==='/prisijungti'){
+      // Existing production middleware redirects a revoked cookie session.
+      // Do not weaken it or demand an inline error instead of this denial.
+      eq(await page.getByRole('heading',{name:'Prisijungti',exact:true}).count(),1);
+      await context.close();context=renewed.context;page=renewed.page;
+      await vet.client.auth.signInWithPassword({email:vet.email,password:vet.password});
+      await edit(page,'Profesinis profilis');eq(await page.getByLabel('Apie mane',{exact:true}).inputValue(),'Išsaugoma patikra');
+    }else{
+      ok((await page.locator('form .profile-notice.error').innerText()).includes('Nepavyko susisiekti su serveriu.'));eq(await page.getByLabel('Apie mane',{exact:true}).inputValue(),'Išliks po sesijos klaidos');
+      await context.addCookies(await renewed.context.cookies());await renewed.context.close();await vet.client.auth.signInWithPassword({email:vet.email,password:vet.password});await page.locator('form').getByRole('button',{name:'Bandyti dar kartą',exact:true}).click();await page.locator('.profile-notice.success').waitFor();await returnAndReopen(page,2);eq((await vet.client.from('specialist_profiles').select('about_me').single()).data.about_me,'Išliks po sesijos klaidos');
+    }
     await overview(page);await page.getByRole('button',{name:'Atsijungti',exact:true}).click();await page.waitForURL(origin+'/');await page.goto(origin+'/profilis');await page.waitForURL('**/prisijungti?next=*');await context.close();
   });
   await group('All other professions real matrices, student scale, custom 1/2/3+ server completeness',async()=>{
@@ -187,4 +229,4 @@ async function main() {
   });
   console.log(`PASS ${checks} browser/integration assertions`);fs.writeFileSync(path.join(out,'profile-ui.json'),JSON.stringify({status:'PASS',checks,groups,completedAt:new Date().toISOString()},null,2));
 }
-main().catch(e=>{console.error(e);process.exitCode=1;}).finally(()=>browser?.close());
+main().catch(async e=>{console.error(e);for(const context of browser?.contexts()??[])for(const page of context.pages()){console.log('Failure route:',new URL(page.url()).pathname);console.log('Failure headings:',await page.locator('h1').allTextContents());console.log('Failure alerts:',await page.locator('[role=alert]').allTextContents());await page.screenshot({path:path.join(out,'profile-failure.png'),fullPage:true});}process.exitCode=1;}).finally(()=>browser?.close());

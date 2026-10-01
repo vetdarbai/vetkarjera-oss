@@ -9,16 +9,16 @@ import ProfileCompetencies from './ProfileCompetencies';
 import { ProfileLicense, ProfilePhoto } from './ProfileOwnerAssets';
 import { saveEducation, saveSpecialistStep1, saveSpecialistStep2, saveSpecialistStep3 } from '@/app/profilis/actions';
 import { reloadSpecialistProfile } from '@/app/profilis/read';
-import { changedPatch, educationDraft, label, missingLabel, readinessLabel, standardLevels, studentLevels, step1Draft, step2Draft, step3Draft, stepNames, type ProfileBundle, type Option } from '@/lib/profiles/view-model';
+import { changedPatch, educationDraft, label, missingLabel, nextIncompleteStep, readinessLabel, standardLevels, studentLevels, step1Draft, step2Draft, step3Draft, stepNames, type ProfileBundle, type Option } from '@/lib/profiles/view-model';
 import type { ProfileResult, SpecialistStep1Draft, StandardLevel } from '@/lib/profiles/contracts';
 
 function Values({ rows }: { rows: [string, ReactNode][] }) {
   return <dl className="profile-values">{rows.map(([title, value]) => <div key={title}><dt>{title}</dt><dd>{value || 'Nepasirinkta'}</dd></div>)}</dl>;
 }
 function OverviewSection({ title, edit, children }: { title: string; edit: () => void; children: ReactNode }) {
-  return <section className="profile-section"><div className="profile-section-heading"><h2>{title}</h2><button type="button" className="profile-text-button" onClick={edit}>Redaguoti</button></div>{children}</section>;
+  return <section className="profile-section"><div className="profile-section-heading"><h2>{title}</h2><button type="button" className="profile-button secondary profile-edit" onClick={edit}>Redaguoti</button></div>{children}</section>;
 }
-export default function SpecialistProfile({ initial }: { initial: ProfileBundle }) {
+export default function SpecialistProfile({ initial, accountEmail }: { initial: ProfileBundle; accountEmail: string }) {
   const [bundle, setBundle] = useState(initial), [step, setStep] = useState<0 | 1 | 2 | 3>(0);
   const [one, setOne] = useState(step1Draft(initial.data)), [two, setTwo] = useState(step2Draft(initial.data)), [education, setEducation] = useState(educationDraft(initial.data)), [three, setThree] = useState(step3Draft(initial.data));
   const [pending, setPending] = useState(false), [saved, setSaved] = useState(false), [error, setError] = useState(''), [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -29,6 +29,15 @@ export default function SpecialistProfile({ initial }: { initial: ProfileBundle 
   const d = bundle.data, p = d.profile, c = bundle.catalogs, role = p.professional_role_code, completeness = d.completeness;
   const changed = (a: object, b: object) => JSON.stringify(a) !== JSON.stringify(b);
   const dirty = (step === 1 ? changed(step1Draft(d), one) : step === 2 ? changed(step2Draft(d), two) || changed(educationDraft(d), education) : step === 3 ? changed(step3Draft(d), three) : false) || licenseDirty;
+  const returning = saved && !dirty && !error && !pending && step > 0;
+  useEffect(() => {
+    if (!returning) return;
+    const timer = window.setTimeout(() => {
+      setStep(0); setSaved(false); window.scrollTo({ top: 0 });
+      requestAnimationFrame(() => titleRef.current?.focus());
+    }, 1800);
+    return () => window.clearTimeout(timer);
+  }, [returning, step]);
   useEffect(() => {
     if (!dirty) return;
     discardExit.current = false;
@@ -59,7 +68,7 @@ export default function SpecialistProfile({ initial }: { initial: ProfileBundle 
     e.preventDefault(); e.stopPropagation(); setExit(() => () => { window.location.assign(url.href); });
   }
   async function save(professionConfirmed = false) {
-    if (pending || error.startsWith('Pakeitimai išsaugoti')) return;
+    if (pending || returning || error.startsWith('Pakeitimai išsaugoti')) return;
     const errors: Record<string, string> = {};
     if (step === 2) {
       if ((two.about_me?.length ?? 0) > 500) errors.about_me = 'Aprašymas negali viršyti 500 simbolių.';
@@ -120,12 +129,13 @@ export default function SpecialistProfile({ initial }: { initial: ProfileBundle 
     currentEducation.institution_code !== 'lsmu' && currentEducation.program_or_qualification, currentEducation.graduation_year].filter(Boolean).join(' · ') : 'Nepasirinkta';
   const searchLabel = (value: string | null) => value === 'actively_looking' ? 'Aktyviai ieškau' : value === 'not_looking' ? 'Šiuo metu neieškau' : label(c.search, value);
   const step2Description = role ? 'Galite išsaugoti ir neužpildytą dalį.' : 'Galite išsaugoti ir neužpildytą dalį. Profesijai skirtus laukus galėsite pildyti išsaugoję profesijos pasirinkimą.';
-  return <div className="specialist-profile-page" onClickCapture={captureLink}><Navigation /><main className={'profile-shell ' + (step ? 'editing' : 'overview')}>
-    {step > 0 && <><button type="button" className="profile-back profile-text-button" onClick={() => navigate(0)}>‹ Grįžti į profilį</button><aside className="profile-steps" aria-label="Profilio dalys">{stepNames.map((s, i) => <button key={s} type="button" aria-current={step === i + 1 ? 'step' : undefined} onClick={() => navigate((i + 1) as 1 | 2 | 3)} disabled={pending}>{s}</button>)}</aside><div className="profile-mobile-steps"><SelectField title="Profilio dalis" value={String(step)} options={stepNames.map((s, i) => ({ code: String(i + 1), label_lt: `${i + 1} iš 3 · ${s}` }))} onChange={s => { if (s) navigate(Number(s) as 1 | 2 | 3); }} disabled={pending} /></div></>}
+  return <div className="specialist-profile-page" onClickCapture={captureLink}><Navigation onProfileNavigate={() => navigate(0)} /><main className={'profile-shell ' + (step ? 'editing' : 'overview')}>
+    <aside className="profile-steps" aria-label="Profilio dalys">{stepNames.map((s, i) => <button key={s} type="button" aria-current={step === i + 1 ? 'step' : undefined} onClick={() => navigate((i + 1) as 1 | 2 | 3)} disabled={pending}>{s}</button>)}</aside>
+    {step > 0 && <><button type="button" className="profile-back profile-text-button" onClick={() => navigate(0)}>‹ Grįžti į profilį</button><div className="profile-mobile-steps"><SelectField title="Profilio dalis" value={String(step)} options={stepNames.map((s, i) => ({ code: String(i + 1), label_lt: `${i + 1} iš 3 · ${s}` }))} onChange={s => { if (s) navigate(Number(s) as 1 | 2 | 3); }} disabled={pending} /></div></>}
     <div className="profile-content">
       {step === 0 ? <>
-        <div className="profile-identity"><ProfilePhoto /><div><p className="profile-eyebrow">Specialisto profilis</p><h1 ref={titleRef} tabIndex={-1}>{[p.first_name, p.last_name].filter(Boolean).join(' ') || 'Specialisto profilis'}</h1><p>{label(c.roles, role)}{role === 'other_veterinary_specialty' && p.specialty_free_text ? ' · ' + p.specialty_free_text : ''}{p.home_location_code ? ' · ' + label(c.locations, p.home_location_code) : ''}</p></div></div>
-        <section className="profile-readiness" aria-label="Profilio paruoštumas">{completeness ? <><div className="profile-readiness-heading"><h2>{readinessLabel(completeness.readinessState)}</h2><strong>{completeness.total} %</strong></div><progress value={completeness.total} max={100} aria-label="Profilio užpildymas" />{completeness.readinessState === 'complete' ? <p>Profilis paruoštas kandidatavimui.</p> : completeness.readyToApply ? <p>Kompetencijas ir tobulėjimo sritis galite papildyti vėliau.</p> : <><p>Dar trūksta: {Array.from(new Set(completeness.missingRequired.map(m => missingLabel(m.field)))).join(', ')}.</p><button className="profile-button" type="button" onClick={() => navigate(completeness.missingRequired.some(m => m.step === 1) ? 1 : 2)}>Tęsti pildymą</button></>}</> : <><h2>Profilio paruoštumas šiuo metu nepasiekiamas.</h2><button type="button" className="profile-button secondary" onClick={() => void refresh()}>Bandyti dar kartą</button></>}</section>
+        <div className="profile-identity"><ProfilePhoto /><div><p className="profile-eyebrow">Specialisto profilis</p><h1 ref={titleRef} tabIndex={-1}>{[p.first_name, p.last_name].filter(Boolean).join(' ') || 'Specialisto profilis'}</h1><p>Profesija: <span className={!role ? 'profile-missing-profession' : undefined}>{label(c.roles, role)}</span>{role === 'other_veterinary_specialty' && p.specialty_free_text ? ' · ' + p.specialty_free_text : ''}{p.home_location_code ? ' · ' + label(c.locations, p.home_location_code) : ''}</p></div></div>
+        <section className="profile-readiness" aria-label="Profilio paruoštumas">{completeness ? <><div className="profile-readiness-heading"><h2>{readinessLabel(completeness.readinessState)}</h2><strong>{completeness.total} %</strong></div><progress value={completeness.total} max={100} aria-label="Profilio užpildymas" />{completeness.readinessState === 'complete' ? <p>Profilis paruoštas kandidatavimui.</p> : completeness.readyToApply ? <p>Kompetencijas ir tobulėjimo sritis galite papildyti vėliau.</p> : <p>Dar trūksta: {Array.from(new Set(completeness.missingRequired.map(m => missingLabel(m.field)))).join(', ')}.</p>}{completeness.total < 100 && <button className="profile-button" type="button" onClick={() => navigate(nextIncompleteStep(completeness))}>Tęsti pildymą</button>}</> : <><h2>Profilio paruoštumas šiuo metu nepasiekiamas.</h2><button type="button" className="profile-button secondary" onClick={() => void refresh()}>Bandyti dar kartą</button></>}</section>
         <OverviewSection title="Pagrindiniai duomenys" edit={() => navigate(1)}><Values rows={[
           ['Vardas ir pavardė', [p.first_name,p.last_name].filter(Boolean).join(' ')], ['Profesija', label(c.roles, role)], ...(role === 'other_veterinary_specialty' ? [['Specialybės pavadinimas', p.specialty_free_text] as [string, ReactNode]] : []), ['Vieta', label(c.locations,p.home_location_code)],
         ]} /></OverviewSection>
@@ -135,7 +145,7 @@ export default function SpecialistProfile({ initial }: { initial: ProfileBundle 
         ]} /></OverviewSection>
         <OverviewSection title="Darbo pageidavimai" edit={() => navigate(2)}><Values rows={[
           ['Darbo paieškos statusas',searchLabel(p.job_search_status_code)], ['Pageidaujamos darbo vietos', join(c.locations,d.locations.map(r => r.location_code))], ['Pageidaujamas darbo krūvis', join(c.workloads,d.workloads.map(r => r.workload_code))], ['Kada galėtumėte pradėti?', [label(c.starts,p.start_option_code),p.start_option_code === 'specific_date' ? p.start_date : null].filter(Boolean).join(' · ')],
-          ['Pageidaujamas darbo grafikas',join(c.schedules,d.schedules.map(r => r.schedule_code))], ['Mobilumas dėl darbo',label(c.mobility,p.mobility_code)], ['Darbo modelis',label(c.models,p.work_model_code)],
+          ['Mobilumas dėl darbo',label(c.mobility,p.mobility_code)],
           ['Darbas savaitgaliais',p.can_work_weekends == null ? 'Nepasirinkta' : p.can_work_weekends ? 'Taip' : 'Ne'], ['Naktinis darbas',p.can_work_nights == null ? 'Nepasirinkta' : p.can_work_nights ? 'Taip' : 'Ne'], ['Budėjimai',p.can_be_on_call == null ? 'Nepasirinkta' : p.can_be_on_call ? 'Taip' : 'Ne'],
         ]} /></OverviewSection>
         <OverviewSection title="Kalbos" edit={() => navigate(2)}>{d.languages.length ? <Values rows={d.languages.map(r => [r.language_code === 'other' ? r.language_name || 'Kita kalba' : label(c.languages,r.language_code),label(c.languageLevels,r.proficiency_code)])} /> : <p className="profile-helper">Nepasirinkta</p>}</OverviewSection>
@@ -143,8 +153,8 @@ export default function SpecialistProfile({ initial }: { initial: ProfileBundle 
         <OverviewSection title="Savininko valdymas" edit={() => navigate(2)}><p className="profile-helper">Matoma tik jums.</p><Values rows={[["Profilio matomumas",label(c.visibility,p.profile_visibility)]]} />{role === 'veterinarian' && <ProfileLicense onSaved={async () => { await refresh(); }} onDirty={licenseChanged} />}</OverviewSection><LogoutButton />
       </> : <>
         <h1 ref={titleRef} tabIndex={-1}>{stepNames[step - 1]}</h1><p className="profile-intro">{step === 3 ? 'Šią dalį galite pildyti palaipsniui.' : step2Description}</p>
-        <form noValidate onSubmit={e => { e.preventDefault(); void save(); }}><fieldset className="profile-form-fields" disabled={pending}>
-          {step === 1 && <><ProfileSection title="Pagrindiniai duomenys"><TextField title="Vardas" value={one.first_name} maxLength={100} onChange={s => setOne({ ...one, first_name: s.trim() ? s : null })} /><TextField title="Pavardė" value={one.last_name} maxLength={100} onChange={s => setOne({ ...one, last_name: s.trim() ? s : null })} /><SelectField title="Profesija" options={c.roles} value={one.professional_role_code} onChange={s => setOne({ ...one, professional_role_code: (s || null) as SpecialistStep1Draft['professional_role_code'] })} />{one.professional_role_code === 'other_veterinary_specialty' && <TextField title="Specialybės pavadinimas" value={one.specialty_free_text} maxLength={200} onChange={s => setOne({ ...one, specialty_free_text: s.trim() ? s : null })} />}</ProfileSection><ProfilePhoto editable /></>}
+        <form noValidate onSubmit={e => { e.preventDefault(); void save(); }}><fieldset className="profile-form-fields" disabled={pending || returning}>
+          {step === 1 && <><ProfileSection title="Pagrindiniai duomenys"><TextField title="Vardas" value={one.first_name} maxLength={100} onChange={s => setOne({ ...one, first_name: s.trim() ? s : null })} /><TextField title="Pavardė" value={one.last_name} maxLength={100} onChange={s => setOne({ ...one, last_name: s.trim() ? s : null })} /><TextField title="El. paštas" type="email" value={accountEmail} readOnly /><SelectField title="Profesija" options={c.roles} value={one.professional_role_code} onChange={s => setOne({ ...one, professional_role_code: (s || null) as SpecialistStep1Draft['professional_role_code'] })} />{one.professional_role_code === 'other_veterinary_specialty' && <TextField title="Specialybės pavadinimas" value={one.specialty_free_text} maxLength={200} onChange={s => setOne({ ...one, specialty_free_text: s.trim() ? s : null })} />}</ProfileSection><ProfilePhoto editable /></>}
           {step === 2 && <ProfileProfessional role={role} catalogs={c} value={two} education={education} onChange={setTwo} onEducation={setEducation} errors={fieldErrors} />}
           {step === 3 && <ProfileCompetencies role={role} catalogs={c} value={three} onChange={setThree} errors={fieldErrors} />}
         </fieldset>

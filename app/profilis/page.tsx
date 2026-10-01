@@ -13,7 +13,7 @@ export default async function ProfilePage() {
   if (user.hasSpecialistProfile) {
     try {
       const initial = await readSpecialistProfile();
-      if (initial) return <SpecialistProfile initial={initial} />;
+      if (initial) return <SpecialistProfile initial={initial} accountEmail={user.email} />;
     } catch { /* Keep the read failure separate from an empty profile. */ }
     return <AuthFrame><h1>Specialisto profilis</h1><p role="alert">Nepavyko susisiekti su serveriu.</p><a className="btn btn-secondary" href="/profilis">Bandyti dar kartą</a><LogoutButton /></AuthFrame>;
   }

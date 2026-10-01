@@ -1,7 +1,8 @@
 .specialist-profile-page { color: var(--ink); background: var(--ivory); min-height: 100vh; }
 .profile-shell { max-width: 1120px; margin: 0 auto; padding: 32px 24px 48px; }
-.profile-shell.overview { max-width: 1000px; }
-.profile-shell.editing { display: grid; grid-template-columns: 216px minmax(0, 1fr); gap: 16px 40px; }
+.profile-shell { display: grid; grid-template-columns: 216px minmax(0, 1fr); gap: 16px 40px; }
+.overview .profile-steps, .overview .profile-content { grid-row: 1; }
+.overview .profile-content { grid-column: 2; }
 .profile-content { min-width: 0; }
 .specialist-profile-page .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 .profile-content h1, .profile-content h2, .profile-content h3, .profile-dialog h2 { font-family: var(--font-manrope), sans-serif; color: var(--ink); letter-spacing: -.025em; }
@@ -22,6 +23,8 @@
 .profile-field select { padding-right: 28px; text-overflow: ellipsis; }
 .profile-field input:focus-visible, .profile-field select:focus-visible, .profile-field textarea:focus-visible { border-color: var(--primary); outline: 2px solid var(--primary); outline-offset: 2px; }
 .profile-field [aria-invalid=true] { border-color: #bd3939; }
+.profile-field input[readonly] { background: #e2e8f0; color: #475569; cursor: default; }
+.profile-missing-profession { color: #8a2929; }
 .profile-field-error { color: #8a2929; font-size: 13px; margin: 0; line-height: 1.5; }
 .profile-counter { font-size: 12px; color: var(--muted); text-align: right; }
 .profile-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 0 20px; }
@@ -39,6 +42,8 @@
 .profile-button:hover:not(:disabled) { background: var(--primary-dark); border-color: var(--primary-dark); color: white; }
 .profile-button.secondary { background: var(--paper); color: var(--primary-dark); border-color: var(--primary); }
 .profile-button.secondary:hover:not(:disabled) { background: var(--surface-soft); color: var(--primary-dark); }
+.profile-button.profile-edit { background: var(--paper); border-color: var(--line); color: var(--ink); font-size: 13px; font-weight: 500; padding: 8px 12px; flex-shrink: 0; }
+.profile-button.profile-edit:hover:not(:disabled) { background: var(--surface-soft); border-color: var(--primary-dark); color: var(--ink); }
 .profile-button.danger { background: var(--paper); color: #8a2929; border-color: #bd3939; }
 .profile-button.danger:hover:not(:disabled) { background: #fff3f2; color: #8a2929; }
 .profile-button:disabled { background: #e2e8f0; border-color: #cbd5e1; color: #475569; cursor: default; }
@@ -75,7 +80,7 @@
 .profile-photo-image { width: 112px; height: 112px; object-fit: cover; border-radius: 4px; }
 .profile-photo-edit { display: flex; align-items: center; gap: 24px; }
 .profile-photo-actions { display: flex; flex-wrap: wrap; gap: 12px; }
-.profile-license { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 24px; margin: 16px 0 0; padding: 20px 0; border-top: 1px solid var(--line); }
+.profile-license { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 24px; margin: 16px 0 0; padding: 20px; border: 1px solid var(--line); border-radius: 4px; background: var(--surface-soft); }
 .profile-license-status { display: inline-block; font-size: 12px; padding: 6px 10px; border-radius: 4px; background: #e2e8f0; color: #334155; }
 .profile-license-status.pending { background: #fff0c7; color: #664717; }
 .profile-license-status.verified { background: #e6f5eb; color: #245738; }

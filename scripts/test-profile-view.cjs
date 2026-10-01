@@ -19,4 +19,10 @@ eq(v.step3Draft(data).competencies,[{competency_code:'owner_context',level:'inde
 const other={...data,profile:{...data.profile,professional_role_code:'other_veterinary_specialty'}};
 eq(v.educationDraft(other).institution_code,null);eq(v.step3Draft(other).custom_competencies,[{name:'Owner skill',level:'can_teach'}]);eq(v.step3Draft(other).custom_development,['Owner development']);
 for(const role of ['veterinarian','veterinary_student','veterinary_assistant','veterinary_pharmacy','animal_health_commerce','other_veterinary_specialty'])eq(v.step3Draft({...data,profile:{...data.profile,professional_role_code:role}}).competencies.every(c=>data.competencies.some(r=>r.professional_role_code===role&&r.competency_code===c.competency_code)),true);
+eq(Object.hasOwn(v.step2Draft(data),'work_model_code'),false);eq(Object.hasOwn(v.step2Draft(data),'schedules'),false);
+eq(v.nextIncompleteStep({...backend,missingRequired:[{field:'first_name',step:1,reason:'required'}]}),1);
+eq(v.nextIncompleteStep(backend),2);
+eq(v.nextIncompleteStep({...backend,total:76.25,step2:50,step3:6.25,step2Complete:true,missingRequired:[],readyToApply:true}),3);
+eq(v.nextIncompleteStep({...backend,total:30,step1Complete:false,missingRequired:[]}),1);
+eq(v.nextIncompleteStep({...backend,total:50,step2Complete:false,missingRequired:[]}),2);
 console.log(`PASS ${checks} frontend projection/PATCH assertions`);

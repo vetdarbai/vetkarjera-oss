@@ -5,9 +5,9 @@ import type { Option } from '@/lib/profiles/view-model';
 export function ProfileSection({ title, optional, children }: { title: string; optional?: boolean; children: ReactNode }) {
   return <section className="profile-section"><h2>{title}{optional && <span className="profile-hint">Neprivaloma</span>}</h2>{children}</section>;
 }
-export function TextField({ title, value, onChange, error, type = 'text', maxLength, optional }: { title: string; value: string | number | null | undefined; onChange: (v: string) => void; error?: string; type?: string; maxLength?: number; optional?: boolean }) {
+export function TextField({ title, value, onChange, error, type = 'text', maxLength, optional, readOnly = false }: { title: string; value: string | number | null | undefined; onChange?: (v: string) => void; error?: string; type?: string; maxLength?: number; optional?: boolean; readOnly?: boolean }) {
   const id = useId();
-  return <div className="profile-field"><label htmlFor={id}>{title}{optional && <span className="profile-hint">Neprivaloma</span>}</label><input id={id} type={type} value={value ?? ''} onChange={e => onChange(e.target.value)} maxLength={maxLength} aria-invalid={!!error} aria-describedby={error ? id + '-error' : undefined} />{error && <p id={id + '-error'} className="profile-field-error" role="alert">{error}</p>}</div>;
+  return <div className="profile-field"><label htmlFor={id}>{title}{optional && <span className="profile-hint">Neprivaloma</span>}</label><input id={id} type={type} value={value ?? ''} readOnly={readOnly} onChange={onChange ? e => onChange(e.target.value) : undefined} maxLength={maxLength} aria-invalid={!!error} aria-describedby={error ? id + '-error' : undefined} />{error && <p id={id + '-error'} className="profile-field-error" role="alert">{error}</p>}</div>;
 }
 export function SelectField({ title, value, options, onChange, empty = 'Nepasirinkta', disabled = false }: { title: string; value: string | null | undefined; options: Option[]; onChange: (v: string) => void; empty?: string; disabled?: boolean }) {
   const id = useId();

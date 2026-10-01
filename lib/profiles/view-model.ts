@@ -51,6 +51,14 @@ export function label(options: Option[], code: string | null | undefined) { retu
 export function readinessLabel(state: Completeness['readinessState']) {
   return state === 'complete' ? 'Išsamus profilis' : state === 'ready' ? 'Profilis paruoštas kandidatavimui' : 'Profilis dar neparuoštas kandidatavimui';
 }
+/** Route using the server's required gaps and scored sections, not a client score. */
+export function nextIncompleteStep(value: Completeness): 1 | 2 | 3 {
+  const required = value.missingRequired.find(m => m.step === 1) ?? value.missingRequired[0];
+  if (required) return required.step;
+  if (!value.step1Complete) return 1;
+  if (!value.step2Complete) return 2;
+  return value.step3 < 30 ? 3 : 2;
+}
 export function parseCompleteness(value: unknown): Completeness | null {
   if (!value || typeof value !== 'object') return null;
   const v = value as Completeness;
@@ -71,11 +79,11 @@ export function step2Draft(d: ProfileData): SpecialistStep2Draft {
   return {
     home_location_code: p.home_location_code, home_country: p.home_country, home_city: p.home_city, experience_band_code: p.experience_band_code,
     about_me: p.about_me, job_search_status_code: p.job_search_status_code as SpecialistStep2Draft['job_search_status_code'], mobility_code: p.mobility_code,
-    start_option_code: p.start_option_code, start_date: p.start_date, work_model_code: p.work_model_code as SpecialistStep2Draft['work_model_code'],
+    start_option_code: p.start_option_code, start_date: p.start_date,
     can_work_weekends: p.can_work_weekends, can_work_nights: p.can_work_nights, can_be_on_call: p.can_be_on_call,
     profile_visibility: p.profile_visibility as SpecialistStep2Draft['profile_visibility'],
     animal_groups: d.animals.map(r => r.animal_group_code), activity_areas: d.areas.map(r => r.activity_area_code),
-    work_locations: d.locations.map(r => r.location_code), workloads: d.workloads.map(r => r.workload_code), schedules: d.schedules.map(r => r.schedule_code),
+    work_locations: d.locations.map(r => r.location_code), workloads: d.workloads.map(r => r.workload_code),
     interests: d.interests.filter(r => r.professional_role_code === p.professional_role_code).map(r => r.interest_code),
     languages: d.languages.map(r => ({ language_code: r.language_code, proficiency_code: r.proficiency_code, language_name: r.language_name })),
   };

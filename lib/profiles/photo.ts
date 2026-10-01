@@ -74,7 +74,11 @@ type Authorization = Awaited<ReturnType<typeof authorizePhoto>>;
 export async function readPhoto(auth: Authorization) {
   const { data, error } = await auth.client.storage.from(bucket).download(auth.path);
   if (error) {
-    if (('statusCode' in error && Number(error.statusCode) === 404) || ('error' in error && error.error === 'NoSuchKey')) return null;
+    // Current Storage SDK puts the service code in `code` (and sometimes
+    // `statusCode`), not `error`; the HTTP status is a separate property.
+    if (error.status === 404 || Number(error.statusCode) === 404 ||
+      ('code' in error && error.code === 'NoSuchKey') || error.statusCode === 'NoSuchKey' ||
+      ('error' in error && error.error === 'NoSuchKey')) return null;
     throw new PhotoError(503, 'unavailable');
   }
   const bytes = Buffer.from(await data.arrayBuffer());
