@@ -284,6 +284,10 @@
       [
         "specific_date",
         "Konkreti data / vėliau"
+      ],
+      [
+        "notice_period",
+        "Po įspėjimo termino (20 kalendorinių dienų)"
       ]
     ],
     "work_models": [

@@ -209,6 +209,9 @@ async function run() {
   for(const [table,source] of [['autonomy_options',options.autonomy],['development_areas',options.development]]) {
     for(const [role,choices] of Object.entries(source)) equal((await q(`select code,label_lt from public.${table} where professional_role_code=$1 order by code`,[role])).rows,choices.map(([code,label_lt])=>({code,label_lt})).sort((a,b)=>a.code.localeCompare(b.code)));
   }
+  // This suite deliberately retains Stage 4.3 RPC semantics. Apply the later
+  // data-only catalog addition before comparing the current catalog fixture.
+  await db.exec(fs.readFileSync('supabase/migrations/20261001091441_stage4_7_start_option_notice_period.sql','utf8'));
   const requiredCatalogs=require('../lib/profiles/catalogs.json');
   for(const [table,entries] of Object.entries(requiredCatalogs.catalogs)) equal((await q(`select code,label_lt from public.${table} order by sort_order`)).rows,entries.map(([code,label_lt])=>({code,label_lt})));
   equal((await q('select count(*)::int n from public.competencies')).rows[0].n,119);

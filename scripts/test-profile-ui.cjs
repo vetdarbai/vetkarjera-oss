@@ -125,7 +125,14 @@ async function main() {
     await rpc(vet,'save_specialist_step2',{payload:{work_model_code:'hybrid',schedules:['regular']}});
     await step(page,2);eq(await page.getByLabel('Darbo modelis',{exact:true}).count(),0);eq(await page.getByText('Pageidaujamas darbo grafikas',{exact:true}).count(),0);
     for(const title of ['Darbas savaitgaliais','Naktinis darbas','Budėjimai'])eq(await page.getByLabel(title,{exact:true}).count(),1);
-    eq((await page.getByLabel('Kada galėtumėte pradėti?').locator('option').allTextContents()).includes('Po įspėjimo termino (20 kalendorinių dienų)'),false);
+    eq((await page.getByLabel('Kada galėtumėte pradėti?').locator('option').allTextContents()).includes('Po įspėjimo termino (20 kalendorinių dienų)'),true);
+    await page.getByLabel('Kada galėtumėte pradėti?').selectOption('notice_period');await save(page);
+    eq((await vet.client.from('specialist_profiles').select('start_option_code').single()).data.start_option_code,'notice_period');
+    await page.reload();await edit(page,'Profesinis profilis');eq(await page.getByLabel('Kada galėtumėte pradėti?').inputValue(),'notice_period');
+    await page.screenshot({path:path.join(out,'start-option-selected-desktop.png'),fullPage:true});
+    await overview(page);eq(await page.getByText('Po įspėjimo termino (20 kalendorinių dienų)',{exact:true}).count(),1);
+    await page.screenshot({path:path.join(out,'start-option-overview-desktop.png'),fullPage:true});
+    await step(page,2);await page.getByLabel('Kada galėtumėte pradėti?').selectOption('');await save(page);
     await page.getByLabel('Apie mane',{exact:true}).fill('Dalinis profilis');await save(page);eq((await state(vet)).total,20);
     eq((await vet.client.from('specialist_profiles').select('work_model_code').single()).data.work_model_code,'hybrid');
     eq((await vet.client.from('specialist_schedules').select('schedule_code')).data,[{schedule_code:'regular'}]);

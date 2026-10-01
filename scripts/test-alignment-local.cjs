@@ -60,7 +60,7 @@ async function main(){
   const after=(await db.query("select jsonb_build_object('users',(select jsonb_agg(to_jsonb(t) order by id) from auth.users t),'profiles',(select jsonb_agg(to_jsonb(t) order by id) from public.profiles t),'specialist',(select jsonb_agg(to_jsonb(t) order by user_id) from public.specialist_profiles t)) state")).rows[0].state;
   eq(after,before);report.groups.push({name:'Stage4.3 upgrade preserves existing data; cutover timeout rolls back',status:'PASS'});
  }
- eq((await db.query('select version from supabase_migrations.schema_migrations order by version')).rows.map(x=>x.version),['20260905075153','20260908142249','20260915162557','20260915210103','20260930060436','20260930060437']);
+ eq((await db.query('select version from supabase_migrations.schema_migrations order by version')).rows.map(x=>x.version),['20260905075153','20260908142249','20260915162557','20260915210103','20260930060436','20260930060437','20261001091441']);
  // PostgREST schema reload is asynchronous.
  await db.query("notify pgrst,'reload schema'");await new Promise(r=>setTimeout(r,1000));
  const settings={public:false,fileSizeLimit:250*1024,allowedMimeTypes:['image/webp']};
