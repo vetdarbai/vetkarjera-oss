@@ -15,7 +15,8 @@
     "audit:db": "node scripts/audit-profile-db.cjs",
     "types:generate": "node scripts/generate-profile-types.cjs",
     "types:check": "node scripts/generate-profile-types.cjs --check",
-    "test": "node scripts/test-auth.cjs && node scripts/test-profile-actions.cjs && node scripts/test-profiles-db.cjs && node scripts/test-alignment-db.cjs && node scripts/generate-profile-types.cjs --check && node scripts/audit-profile-db.cjs",
+    "test": "node scripts/test-auth.cjs && node scripts/test-profile-actions.cjs && node scripts/test-photo-errors.cjs && node scripts/test-photo-replacement.cjs --routes-only && node scripts/test-profiles-db.cjs && node scripts/test-alignment-db.cjs && node scripts/generate-profile-types.cjs --check && node scripts/audit-profile-db.cjs",
+    "test:photo": "node scripts/test-photo-replacement.cjs",
     "test:alignment": "node scripts/test-alignment-db.cjs",
     "test:alignment:local": "node scripts/test-alignment-local.cjs"
   },

@@ -207,13 +207,22 @@ async function run() {
   equal((await q('select name from public.specialist_custom_development')).rows[0].name,'Individuali tobulėjimo sritis');
   await root();
   for(const [table,source] of [['autonomy_options',options.autonomy],['development_areas',options.development]]) {
-    for(const [role,choices] of Object.entries(source)) equal((await q(`select code,label_lt from public.${table} where professional_role_code=$1 order by code`,[role])).rows,choices.map(([code,label_lt])=>({code,label_lt})).sort((a,b)=>a.code.localeCompare(b.code)));
+    // Compare technical codes with the same deterministic collation on Windows
+    // and Linux; the machine's default locale must not change expected rows.
+    for(const [role,choices] of Object.entries(source)) equal((await q(`select code,label_lt from public.${table} where professional_role_code=$1 order by code collate "C"`,[role])).rows,choices.map(([code,label_lt])=>({code,label_lt})).sort((a,b)=>a.code<b.code?-1:a.code>b.code?1:0));
   }
   // This suite deliberately retains Stage 4.3 RPC semantics. Apply the later
   // data-only catalog addition before comparing the current catalog fixture.
   await db.exec(fs.readFileSync('supabase/migrations/20261001091441_stage4_7_start_option_notice_period.sql','utf8'));
   const requiredCatalogs=require('../lib/profiles/catalogs.json');
   for(const [table,entries] of Object.entries(requiredCatalogs.catalogs)) equal((await q(`select code,label_lt from public.${table} order by sort_order`)).rows,entries.map(([code,label_lt])=>({code,label_lt})));
+  // The photo fix must not disturb the Stage 4.7 preference save/read contract.
+  await as(1); await rpc('save_specialist_step2',[{...step2(),start_option_code:'notice_period'}]);
+  await root(); await as(1);
+  equal((await q('select start_option_code from public.specialist_profiles where user_id=$1',[id(1)])).rows[0].start_option_code,'notice_period');
+  await rpc('save_specialist_step1',[{...step1('veterinarian'),first_name:'Saved after photo regression'}]);
+  equal((await q('select first_name,start_option_code from public.specialist_profiles where user_id=$1',[id(1)])).rows[0],{first_name:'Saved after photo regression',start_option_code:'notice_period'});
+  await root();
   equal((await q('select count(*)::int n from public.competencies')).rows[0].n,119);
   await root(); await db.exec('set role anon');
   await rejected(()=>rpc('account_capabilities'),'42501');

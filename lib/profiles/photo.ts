@@ -17,7 +17,10 @@ export const photoHeaders = { 'Cache-Control': 'private, no-store, max-age=0', '
 export async function authorizePhoto(request: Request, mutation: boolean) {
   const url = new URL(request.url);
   if (mutation && (request.headers.get('origin') !== url.origin || url.search)) throw new PhotoError(403, 'forbidden');
-  if (Array.from(url.searchParams.keys()).some(key => key !== 'userId') || url.searchParams.getAll('userId').length > 1) throw new PhotoError(400, 'invalid_request');
+  // The content hash changes the private image URL, never the authorization target.
+  if (Array.from(url.searchParams.keys()).some(key => key !== 'userId' && key !== 'v') ||
+    url.searchParams.getAll('userId').length > 1 || url.searchParams.getAll('v').length > 1 ||
+    (url.searchParams.has('v') && !/^[0-9a-f]{64}$/.test(url.searchParams.get('v')!))) throw new PhotoError(400, 'invalid_request');
   const account = await getActiveUser();
   if (!account) throw new PhotoError(401, 'session_required');
   const target = mutation ? account.id : (url.searchParams.get('userId') ?? account.id);
@@ -26,7 +29,7 @@ export async function authorizePhoto(request: Request, mutation: boolean) {
   const { data, error } = await client.from('specialist_profiles').select('user_id').eq('user_id', target).maybeSingle();
   if (error) throw new PhotoError(503, 'unavailable');
   if (!data) throw new PhotoError(403, 'specialist_required');
-  return { target, path: target + '/profile.webp', client };
+  return { target, path: target + '/profile.webp', client, cacheNonce: url.searchParams.get('v') ?? undefined };
 }
 
 export async function readLimitedImage(request: Request): Promise<Buffer> {
@@ -72,7 +75,7 @@ export async function processPhoto(input: Buffer): Promise<Buffer> {
 
 type Authorization = Awaited<ReturnType<typeof authorizePhoto>>;
 export async function readPhoto(auth: Authorization) {
-  const { data, error } = await auth.client.storage.from(bucket).download(auth.path);
+  const { data, error } = await auth.client.storage.from(bucket).download(auth.path, auth.cacheNonce ? { cacheNonce: auth.cacheNonce } : undefined);
   if (error) {
     // Current Storage SDK puts the service code in `code` (and sometimes
     // `statusCode`), not `error`; the HTTP status is a separate property.
@@ -87,7 +90,7 @@ export async function readPhoto(auth: Authorization) {
 }
 export function photoMetadata(auth: Authorization, value: Awaited<ReturnType<typeof readPhoto>>) {
   return { hasPhoto: !!value, reference: value ? auth.path : null, version: value?.version ?? null,
-    imageUrl: value ? '/api/profilis/nuotrauka/vaizdas?userId=' + auth.target : null };
+    imageUrl: value ? '/api/profilis/nuotrauka/vaizdas?userId=' + auth.target + '&v=' + value.version : null };
 }
 export async function replacePhoto(auth: Authorization, bytes: Buffer) {
   // Recheck session immediately before the privileged write (processing can take time).

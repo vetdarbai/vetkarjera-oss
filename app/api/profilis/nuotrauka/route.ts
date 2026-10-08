@@ -1,4 +1,5 @@
 import { authorizePhoto, readPhoto, photoMetadata, readLimitedImage, processPhoto, replacePhoto, removePhoto, photoHeaders, photoFailure } from '@/lib/profiles/photo';
+import { createHash } from 'node:crypto';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export async function GET(request: Request) {
@@ -10,7 +11,10 @@ export async function PUT(request: Request) {
   try { const auth = await authorizePhoto(request, true);
     const output = await processPhoto(await readLimitedImage(request));
     await replacePhoto(auth, output);
-    return Response.json({ ok: true, ...photoMetadata(auth, await readPhoto(auth)) }, { headers: photoHeaders });
+    // The successful write is authoritative. An immediate Storage download can
+    // still contain the previous generation and must not restore stale UI state.
+    const saved = { bytes: output, version: createHash('sha256').update(output).digest('hex') };
+    return Response.json({ ok: true, ...photoMetadata(auth, saved) }, { headers: photoHeaders });
   } catch (error) { return photoFailure(error); }
 }
 export async function DELETE(request: Request) {

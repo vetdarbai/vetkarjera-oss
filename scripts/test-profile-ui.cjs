@@ -111,8 +111,14 @@ async function main() {
     const response=await page.request.get(origin+'/api/profilis/nuotrauka');eq(response.status(),200);ok((await response.json()).hasPhoto);eq((await state(vet)).total,20);
     const before=(await response.json()).version;const replacement=await sharp({create:{width:260,height:400,channels:3,background:'#1e4a8c'}}).png().toBuffer();
     await page.locator('input[type=file]').setInputFiles({name:'replace.png',mimeType:'image/png',buffer:replacement});await page.getByRole('button',{name:'Pakeisti nuotrauką',exact:true}).waitFor();
-    const metadata=await page.request.get(origin+'/api/profilis/nuotrauka');ok((await metadata.json()).version!==before);
+    const metadata=await page.request.get(origin+'/api/profilis/nuotrauka');const replaced=await metadata.json();ok(replaced.version!==before);
+    // Check the loaded generation before any reload, not just persistence/200.
+    await page.waitForFunction(version=>{const i=document.querySelector('img[alt="Profilio nuotrauka"]');return i?.complete&&i.naturalWidth===260&&i.naturalHeight===400&&new URL(i.src).searchParams.get('v')===version;},replaced.version);
+    const third=await sharp({create:{width:180,height:140,channels:3,background:'#2f9a47'}}).png().toBuffer();
+    await page.locator('input[type=file]').setInputFiles({name:'third.png',mimeType:'image/png',buffer:third});
+    await page.waitForFunction(()=>{const i=document.querySelector('img[alt="Profilio nuotrauka"]');return i?.complete&&i.naturalWidth===180&&i.naturalHeight===140;});
     await page.reload();await edit(page,'Pagrindiniai duomenys');await page.getByRole('img',{name:'Profilio nuotrauka'}).waitFor();
+    await page.waitForFunction(()=>{const i=document.querySelector('img[alt="Profilio nuotrauka"]');return i?.complete&&i.naturalWidth===180&&i.naturalHeight===140;});
     await page.locator('input[type=file]').setInputFiles({name:'bad.svg',mimeType:'image/svg+xml',buffer:Buffer.from('<svg/>')});ok((await page.locator('.profile-notice.error').innerText()).includes('JPG, PNG arba WebP'));
     await page.getByRole('button',{name:'Pašalinti nuotrauką'}).click();await page.getByRole('button',{name:'Įkelti nuotrauką',exact:true}).waitFor();eq((await (await page.request.get(origin+'/api/profilis/nuotrauka')).json()).hasPhoto,false);
     await page.reload();await edit(page,'Pagrindiniai duomenys');await page.getByRole('button',{name:'Įkelti nuotrauką',exact:true}).waitFor();eq(await page.getByRole('img',{name:'Profilio nuotrauka'}).count(),0);
