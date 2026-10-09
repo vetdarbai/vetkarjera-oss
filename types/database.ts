@@ -292,26 +292,305 @@ Update: {
 };
 Relationships: [];
 };
+"organization_attribute_groups": {
+Row: {
+"type_code": string;
+"group_code": string;
+"label_lt": string;
+"value_kind": string;
+"selection_mode": string;
+"allow_other": boolean;
+"sort_order": number;
+"is_active": boolean;
+};
+Insert: {
+"type_code": string;
+"group_code": string;
+"label_lt": string;
+"value_kind": string;
+"selection_mode"?: string;
+"allow_other": boolean;
+"sort_order": number;
+"is_active"?: boolean;
+};
+Update: {
+"type_code"?: string;
+"group_code"?: string;
+"label_lt"?: string;
+"value_kind"?: string;
+"selection_mode"?: string;
+"allow_other"?: boolean;
+"sort_order"?: number;
+"is_active"?: boolean;
+};
+Relationships: [{ foreignKeyName: "organization_attribute_groups_type_code_fkey"; columns: ["type_code"]; isOneToOne: false; referencedRelation: "organization_types"; referencedColumns: ["code"] }];
+};
+"organization_attribute_options": {
+Row: {
+"type_code": string;
+"group_code": string;
+"option_code": string;
+"label_lt": string;
+"sort_order": number;
+"is_active": boolean;
+};
+Insert: {
+"type_code": string;
+"group_code": string;
+"option_code": string;
+"label_lt": string;
+"sort_order": number;
+"is_active"?: boolean;
+};
+Update: {
+"type_code"?: string;
+"group_code"?: string;
+"option_code"?: string;
+"label_lt"?: string;
+"sort_order"?: number;
+"is_active"?: boolean;
+};
+Relationships: [{ foreignKeyName: "organization_attribute_options_type_code_group_code_fkey"; columns: ["type_code","group_code"]; isOneToOne: false; referencedRelation: "organization_attribute_groups"; referencedColumns: ["type_code","group_code"] }];
+};
+"organization_attribute_selections": {
+Row: {
+"organization_id": string;
+"type_revision": number;
+"type_code": string;
+"group_code": string;
+"option_code": string;
+};
+Insert: {
+"organization_id": string;
+"type_revision": number;
+"type_code": string;
+"group_code": string;
+"option_code": string;
+};
+Update: {
+"organization_id"?: string;
+"type_revision"?: number;
+"type_code"?: string;
+"group_code"?: string;
+"option_code"?: string;
+};
+Relationships: [{ foreignKeyName: "organization_attribute_selections_organization_id_fkey"; columns: ["organization_id"]; isOneToOne: false; referencedRelation: "organizations"; referencedColumns: ["id"] },{ foreignKeyName: "organization_attribute_select_type_code_group_code_option__fkey"; columns: ["type_code","group_code","option_code"]; isOneToOne: false; referencedRelation: "organization_attribute_options"; referencedColumns: ["type_code","group_code","option_code"] }];
+};
+"organization_attribute_text_values": {
+Row: {
+"id": string;
+"organization_id": string;
+"type_revision": number;
+"type_code": string;
+"group_code": string;
+"value_text": string;
+"sort_order": number;
+};
+Insert: {
+"id"?: string;
+"organization_id": string;
+"type_revision": number;
+"type_code": string;
+"group_code": string;
+"value_text": string;
+"sort_order"?: number;
+};
+Update: {
+"id"?: string;
+"organization_id"?: string;
+"type_revision"?: number;
+"type_code"?: string;
+"group_code"?: string;
+"value_text"?: string;
+"sort_order"?: number;
+};
+Relationships: [{ foreignKeyName: "organization_attribute_text_values_organization_id_fkey"; columns: ["organization_id"]; isOneToOne: false; referencedRelation: "organizations"; referencedColumns: ["id"] },{ foreignKeyName: "organization_attribute_text_values_type_code_group_code_fkey"; columns: ["type_code","group_code"]; isOneToOne: false; referencedRelation: "organization_attribute_groups"; referencedColumns: ["type_code","group_code"] }];
+};
+"organization_benefit_options": {
+Row: {
+"code": string;
+"label_lt": string;
+"sort_order": number;
+"is_active": boolean;
+};
+Insert: {
+"code": string;
+"label_lt": string;
+"sort_order": number;
+"is_active"?: boolean;
+};
+Update: {
+"code"?: string;
+"label_lt"?: string;
+"sort_order"?: number;
+"is_active"?: boolean;
+};
+Relationships: [];
+};
+"organization_benefits": {
+Row: {
+"organization_id": string;
+"benefit_code": string;
+};
+Insert: {
+"organization_id": string;
+"benefit_code": string;
+};
+Update: {
+"organization_id"?: string;
+"benefit_code"?: string;
+};
+Relationships: [{ foreignKeyName: "organization_benefits_organization_id_fkey"; columns: ["organization_id"]; isOneToOne: false; referencedRelation: "organizations"; referencedColumns: ["id"] },{ foreignKeyName: "organization_benefits_benefit_code_fkey"; columns: ["benefit_code"]; isOneToOne: false; referencedRelation: "organization_benefit_options"; referencedColumns: ["code"] }];
+};
+"organization_custom_benefits": {
+Row: {
+"id": string;
+"organization_id": string;
+"label": string;
+"sort_order": number;
+"created_at": string;
+"updated_at": string;
+};
+Insert: {
+"id"?: string;
+"organization_id": string;
+"label": string;
+"sort_order"?: number;
+"created_at"?: string;
+"updated_at"?: string;
+};
+Update: {
+"id"?: string;
+"organization_id"?: string;
+"label"?: string;
+"sort_order"?: number;
+"created_at"?: string;
+"updated_at"?: string;
+};
+Relationships: [{ foreignKeyName: "organization_custom_benefits_organization_id_fkey"; columns: ["organization_id"]; isOneToOne: false; referencedRelation: "organizations"; referencedColumns: ["id"] }];
+};
+"organization_employee_size_ranges": {
+Row: {
+"code": string;
+"label_lt": string;
+"sort_order": number;
+"is_active": boolean;
+};
+Insert: {
+"code": string;
+"label_lt": string;
+"sort_order": number;
+"is_active"?: boolean;
+};
+Update: {
+"code"?: string;
+"label_lt"?: string;
+"sort_order"?: number;
+"is_active"?: boolean;
+};
+Relationships: [];
+};
+"organization_legal_forms": {
+Row: {
+"code": string;
+"label_lt": string;
+"requires_organization_code": boolean;
+"sort_order": number;
+"is_active": boolean;
+};
+Insert: {
+"code": string;
+"label_lt": string;
+"requires_organization_code": boolean;
+"sort_order": number;
+"is_active"?: boolean;
+};
+Update: {
+"code"?: string;
+"label_lt"?: string;
+"requires_organization_code"?: boolean;
+"sort_order"?: number;
+"is_active"?: boolean;
+};
+Relationships: [];
+};
+"organization_locations": {
+Row: {
+"id": string;
+"organization_id": string;
+"city_name": string;
+"city_key": string;
+"municipality_code": string | null;
+"sort_order": number;
+"created_at": string;
+};
+Insert: {
+"id"?: string;
+"organization_id": string;
+"city_name": string;
+"city_key": string;
+"municipality_code"?: string | null;
+"sort_order"?: number;
+"created_at"?: string;
+};
+Update: {
+"id"?: string;
+"organization_id"?: string;
+"city_name"?: string;
+"city_key"?: string;
+"municipality_code"?: string | null;
+"sort_order"?: number;
+"created_at"?: string;
+};
+Relationships: [{ foreignKeyName: "organization_locations_organization_id_fkey"; columns: ["organization_id"]; isOneToOne: false; referencedRelation: "organizations"; referencedColumns: ["id"] },{ foreignKeyName: "organization_locations_municipality_code_fkey"; columns: ["municipality_code"]; isOneToOne: false; referencedRelation: "locations"; referencedColumns: ["code"] }];
+};
 "organization_memberships": {
 Row: {
 "user_id": string;
 "organization_id": string;
 "created_at": string;
 "revoked_at": string | null;
+"role_code": string;
 };
 Insert: {
 "user_id": string;
 "organization_id": string;
 "created_at"?: string;
 "revoked_at"?: string | null;
+"role_code"?: string;
 };
 Update: {
 "user_id"?: string;
 "organization_id"?: string;
 "created_at"?: string;
 "revoked_at"?: string | null;
+"role_code"?: string;
 };
-Relationships: [{ foreignKeyName: "organization_memberships_user_id_fkey"; columns: ["user_id"]; isOneToOne: false; referencedRelation: "employer_profiles"; referencedColumns: ["user_id"] },{ foreignKeyName: "organization_memberships_organization_id_fkey"; columns: ["organization_id"]; isOneToOne: false; referencedRelation: "organizations"; referencedColumns: ["id"] }];
+Relationships: [{ foreignKeyName: "organization_memberships_organization_id_fkey"; columns: ["organization_id"]; isOneToOne: false; referencedRelation: "organizations"; referencedColumns: ["id"] },{ foreignKeyName: "organization_memberships_user_id_fkey"; columns: ["user_id"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] }];
+};
+"organization_slug_registry": {
+Row: {
+"slug": string;
+"organization_id": string;
+"is_current": boolean;
+"created_at": string;
+"replaced_at": string | null;
+};
+Insert: {
+"slug": string;
+"organization_id": string;
+"is_current": boolean;
+"created_at"?: string;
+"replaced_at"?: string | null;
+};
+Update: {
+"slug"?: string;
+"organization_id"?: string;
+"is_current"?: boolean;
+"created_at"?: string;
+"replaced_at"?: string | null;
+};
+Relationships: [{ foreignKeyName: "organization_slug_registry_organization_id_fkey"; columns: ["organization_id"]; isOneToOne: false; referencedRelation: "organizations"; referencedColumns: ["id"] }];
 };
 "organization_types": {
 Row: {
@@ -337,23 +616,56 @@ Relationships: [];
 "organizations": {
 Row: {
 "id": string;
-"name": string;
+"name": string | null;
 "created_at": string;
 "updated_at": string;
+"organization_type_code": string | null;
+"organization_type_other": string | null;
+"description": string | null;
+"website": string | null;
+"facebook_url": string | null;
+"instagram_url": string | null;
+"linkedin_url": string | null;
+"public_phone": string | null;
+"public_email": string | null;
+"employee_size_code": string | null;
+"street_address": string | null;
 };
 Insert: {
 "id"?: string;
-"name": string;
+"name"?: string | null;
 "created_at"?: string;
 "updated_at"?: string;
+"organization_type_code"?: string | null;
+"organization_type_other"?: string | null;
+"description"?: string | null;
+"website"?: string | null;
+"facebook_url"?: string | null;
+"instagram_url"?: string | null;
+"linkedin_url"?: string | null;
+"public_phone"?: string | null;
+"public_email"?: string | null;
+"employee_size_code"?: string | null;
+"street_address"?: string | null;
 };
 Update: {
 "id"?: string;
-"name"?: string;
+"name"?: string | null;
 "created_at"?: string;
 "updated_at"?: string;
+"organization_type_code"?: string | null;
+"organization_type_other"?: string | null;
+"description"?: string | null;
+"website"?: string | null;
+"facebook_url"?: string | null;
+"instagram_url"?: string | null;
+"linkedin_url"?: string | null;
+"public_phone"?: string | null;
+"public_email"?: string | null;
+"employee_size_code"?: string | null;
+"street_address"?: string | null;
 };
-Relationships: [];
+Relationships: [{ foreignKeyName: "organizations_organization_type_code_fkey"; columns: ["organization_type_code"]; isOneToOne: false; referencedRelation: "organization_types"; referencedColumns: ["code"] },{ foreignKeyName: "organizations_employee_size_code_fkey"; columns: ["employee_size_code"]; isOneToOne: false; referencedRelation: "organization_employee_size_ranges"; referencedColumns: ["code"] }];
 };
 "professional_interests": {
 Row: {
@@ -862,15 +1174,48 @@ Update: {
 };
 Relationships: [];
 };
-}; Views: { [_ in never]: never }; Functions: {
+}; Views: {
+"organization_public_profiles": { Row: { "id": string | null;"name": string | null;"organization_type_code": string | null;"organization_type_other": string | null;"description": string | null;"website": string | null;"facebook_url": string | null;"instagram_url": string | null;"linkedin_url": string | null;"public_phone": string | null;"public_email": string | null;"employee_size_code": string | null;"street_address": string | null;"slug": string | null }; Relationships: [] };
+}; Functions: {
+"accept_org_transfer": { Args: { "organization_id": string;"expected_row_version": number;"payload": Json }; Returns: Json };
 "account_capabilities": { Args: {  }; Returns: Json };
+"admin_org_review_context": { Args: { "organization_id": string }; Returns: Json };
+"admin_organization_state": { Args: { "organization_id": string;"expected_row_version": number;"payload": Json }; Returns: Json };
+"admin_request_org_transfer": { Args: { "organization_id": string;"expected_row_version": number;"payload": Json }; Returns: Json };
+"admin_resolve_case": { Args: { "organization_id": string;"expected_row_version": number;"payload": Json }; Returns: Json };
+"admin_resolve_legal_change": { Args: { "organization_id": string;"expected_row_version": number;"payload": Json }; Returns: Json };
+"archive_org": { Args: { "organization_id": string;"expected_row_version": number }; Returns: Json };
+"cancel_org_transfer": { Args: { "organization_id": string;"expected_row_version": number;"payload": Json }; Returns: Json };
+"commit_org_media": { Args: { "organization_id": string;"expected_row_version": number;"payload": Json }; Returns: Json };
+"create_org_draft": { Args: {  }; Returns: Json };
 "create_second_profile": { Args: { "kind": string;"payload": Json }; Returns: undefined };
+"decline_org_transfer": { Args: { "organization_id": string;"expected_row_version": number;"payload": Json }; Returns: Json };
+"get_public_organization": { Args: { "organization_id": string }; Returns: Json };
+"list_my_pending_transfers": { Args: {  }; Returns: Json };
+"org_completeness": { Args: { "organization_id": string }; Returns: Json };
+"org_required_state": { Args: { "organization_id": string }; Returns: Json };
+"organization_capabilities": { Args: { "organization_id": string }; Returns: Json };
+"own_org_context": { Args: { "organization_id": string }; Returns: Json };
+"patch_org_public": { Args: { "organization_id": string;"expected_row_version": number;"payload": Json }; Returns: Json };
+"prepare_org_media": { Args: { "organization_id": string;"expected_row_version": number;"payload": Json }; Returns: Json };
 "profile_completeness": { Args: {  }; Returns: Json };
 "read_license": { Args: { "target_user_id": string }; Returns: Json };
+"read_org_media": { Args: { "organization_id": string;"kind": string;"version"?: string | null }; Returns: Json };
+"remove_org_media": { Args: { "organization_id": string;"expected_row_version": number;"payload": Json }; Returns: Json };
+"request_employer_verification": { Args: { "organization_id": string;"expected_row_version": number;"payload": Json }; Returns: Json };
+"request_org_legal_change": { Args: { "organization_id": string;"expected_row_version": number;"payload": Json }; Returns: Json };
+"request_org_transfer": { Args: { "organization_id": string;"expected_row_version": number;"payload": Json }; Returns: Json };
+"request_representation_verification": { Args: { "organization_id": string;"expected_row_version": number;"payload": Json }; Returns: Json };
+"resolve_org_slug": { Args: { "slug": string }; Returns: Json };
 "review_license": { Args: { "target_user_id": string;"expected_revision": number;"decision": string }; Returns: undefined };
 "save_education": { Args: { "payload": Json }; Returns: undefined };
 "save_employer_step1": { Args: { "payload": Json }; Returns: undefined };
 "save_license": { Args: { "number_input": string }; Returns: undefined };
+"save_org_benefits": { Args: { "organization_id": string;"expected_row_version": number;"payload": Json }; Returns: Json };
+"save_org_legal_draft": { Args: { "organization_id": string;"expected_row_version": number;"payload": Json }; Returns: Json };
+"save_org_locations": { Args: { "organization_id": string;"expected_row_version": number;"payload": Json }; Returns: Json };
+"save_org_type_block": { Args: { "organization_id": string;"expected_row_version": number;"payload": Json }; Returns: Json };
+"save_own_representative_details": { Args: { "organization_id": string;"expected_row_version": number;"payload": Json }; Returns: Json };
 "save_specialist_step1": { Args: { "payload": Json }; Returns: undefined };
 "save_specialist_step2": { Args: { "payload": Json }; Returns: undefined };
 "save_specialist_step3": { Args: { "payload": Json }; Returns: undefined };

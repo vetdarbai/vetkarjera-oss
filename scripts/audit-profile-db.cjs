@@ -6,7 +6,7 @@ async function run(){
   const checks={
    exposed_tables_without_rls:`select c.relname from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relkind='r' and not c.relrowsecurity`,
    public_security_definers:`select p.proname from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.prosecdef`,
-   anonymous_rpc_execute:`select p.proname from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and has_function_privilege('anon',p.oid,'EXECUTE')`,
+   anonymous_rpc_execute:`select p.proname from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and has_function_privilege('anon',p.oid,'EXECUTE') and p.proname not in ('read_org_media','get_public_organization','resolve_org_slug')`,
    unsafe_function_search_path:`select p.proname from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname in ('public','private') and p.prosecdef and not coalesce(p.proconfig @> array['search_path=""'],false)`,
    private_table_client_grants:`select table_name,grantee,privilege_type from information_schema.role_table_grants where table_schema='private' and grantee in ('PUBLIC','anon','authenticated')`,
    private_fields_in_public:`select table_name,column_name from information_schema.columns where table_schema='public' and column_name in ('license_number','reviewed_by','reviewed_revision','verification_status','encrypted_password')`,

@@ -1,0 +1,1549 @@
+{
+  "types": [
+    [
+      "veterinary_clinic",
+      "Veterinarijos klinika / ligoninė / gydykla / kabinetas"
+    ],
+    [
+      "farm_livestock_poultry",
+      "Gyvulininkystės ūkis / ŽŪB / paukštynas / gyvūnų auginimo įmonė"
+    ],
+    [
+      "veterinary_retail_pharmacy",
+      "Veterinarijos vaistinė / vaistinių tinklas"
+    ],
+    [
+      "veterinary_wholesale_distributor",
+      "Veterinarijos distributorius / didmenininkas"
+    ],
+    [
+      "animal_health_pharma_products",
+      "Gamintojas / gyvūnų sveikatos / farmacijos / pašarų / papildų įmonė"
+    ],
+    [
+      "public_institution",
+      "Valstybinė institucija / priežiūros tarnyba"
+    ],
+    [
+      "university_research_education",
+      "Universitetas / kolegija / profesinė mokykla / mokslo ar tyrimų įstaiga"
+    ],
+    [
+      "laboratory_diagnostics",
+      "Veterinarijos laboratorija / diagnostikos centras"
+    ],
+    [
+      "shelter_ngo",
+      "Gyvūnų prieglauda / NVO / gyvūnų gerovės organizacija"
+    ],
+    [
+      "animal_care_physiotherapy",
+      "Gyvūnų reabilitacija / fizioterapija / priežiūros paslaugos"
+    ],
+    [
+      "veterinary_equipment_technology",
+      "Veterinarinė įranga / technologijos / veterinarijos paslaugų įmonė"
+    ],
+    [
+      "professional_association",
+      "Asociacija / profesinė organizacija"
+    ],
+    [
+      "other",
+      "Kita veterinarijos / gyvūnų sveikatos sektoriaus organizacija"
+    ],
+    [
+      "individual_activity",
+      "Fizinis asmuo / individuali veikla"
+    ]
+  ],
+  "typeMatrix": [
+    {
+      "type": "veterinary_clinic",
+      "groups": [
+        "animals",
+        "clinical_areas"
+      ],
+      "optional": [
+        "working_models"
+      ],
+      "catalogs": {
+        "animals": "dogs / cats / exotics / horses / farm_animals / other",
+        "clinical_areas": "general_practice / internal_medicine / surgery / diagnostics / dentistry / dermatology / cardiology / orthopedics_traumatology / ophthalmology / anesthesiology / intensive_care / reproduction / other",
+        "working_models": "regular_clinic / 24_7 / emergency / on_call / inpatient"
+      }
+    },
+    {
+      "type": "farm_livestock_poultry",
+      "groups": [
+        "species",
+        "operation_direction"
+      ],
+      "optional": [
+        "work_site_model"
+      ],
+      "catalogs": {
+        "species": "cattle / pigs / poultry / horses / sheep_goats / other",
+        "operation_direction": "dairy / beef_cattle / pig_production / poultry_production / breeding_reproduction / mixed_farming / other",
+        "work_site_model": "one_farm / multiple_sites / mobile_work"
+      }
+    },
+    {
+      "type": "veterinary_retail_pharmacy",
+      "groups": [
+        "operating_model",
+        "product_activity_areas"
+      ],
+      "optional": [
+        "veterinary_services",
+        "customer_segments"
+      ],
+      "catalogs": {
+        "operating_model": "physical_pharmacy / pharmacy_chain / ecommerce",
+        "product_activity_areas": "veterinary_medicines / feed / supplements / animal_care_hygiene_products / veterinary_supplies / other",
+        "veterinary_services": "microchipping / vaccination / consultation / other"
+      }
+    },
+    {
+      "type": "veterinary_wholesale_distributor",
+      "groups": [
+        "product_areas"
+      ],
+      "optional": [
+        "animal_market_segments"
+      ],
+      "catalogs": {
+        "product_areas": "veterinary_medicines / vaccines_biological_products / feed / supplements / diagnostics / veterinary_equipment / consumables / animal_care_products / other",
+        "animal_market_segments": "companion_animals / livestock / horses / mixed"
+      }
+    },
+    {
+      "type": "animal_health_pharma_products",
+      "groups": [
+        "activity_product_areas"
+      ],
+      "optional": [
+        "animal_segments"
+      ],
+      "catalogs": {
+        "activity_product_areas": "veterinary_medicines / vaccines_biological_products / diagnostics / feed / supplements / animal_care_products / other",
+        "animal_segments": "companion_animals / livestock / horses / mixed"
+      }
+    },
+    {
+      "type": "public_institution",
+      "groups": [
+        "activity_areas"
+      ],
+      "optional": [
+        "units"
+      ],
+      "catalogs": {
+        "activity_areas": "animal_health / animal_welfare / food_safety / veterinary_medicines_control / border_control / disease_surveillance_control / administration / laboratory_control / other"
+      }
+    },
+    {
+      "type": "university_research_education",
+      "groups": [
+        "activity_areas"
+      ],
+      "optional": [
+        "opportunities"
+      ],
+      "catalogs": {
+        "activity_areas": "education_teaching / clinical_activity / research / laboratory / continuing_professional_education / other",
+        "opportunities": "student_practice / internships / residency / study_programmes / continuing_qualification_courses / research_opportunities / doctoral_academic_career / international_placements_exchanges / other"
+      }
+    },
+    {
+      "type": "laboratory_diagnostics",
+      "groups": [
+        "diagnostic_areas"
+      ],
+      "optional": [
+        "served_sectors_species"
+      ],
+      "catalogs": {
+        "diagnostic_areas": "clinical_pathology / microbiology / molecular_diagnostics / pathology_histology / parasitology / toxicology / food_feed_testing / other"
+      }
+    },
+    {
+      "type": "shelter_ngo",
+      "groups": [
+        "activity_areas"
+      ],
+      "optional": [],
+      "catalogs": {
+        "activity_areas": "animal_sheltering_care / rescue / adoption / animal_welfare / veterinary_care / education_awareness / other"
+      }
+    },
+    {
+      "type": "animal_care_physiotherapy",
+      "groups": [
+        "activity_areas"
+      ],
+      "optional": [],
+      "catalogs": {
+        "activity_areas": "physiotherapy / rehabilitation / hydrotherapy / postoperative_rehabilitation / mobility_pain_management / animal_care / other"
+      }
+    },
+    {
+      "type": "veterinary_equipment_technology",
+      "groups": [
+        "activity_areas"
+      ],
+      "optional": [],
+      "catalogs": {
+        "activity_areas": "veterinary_equipment / diagnostic_equipment / laboratory_equipment / software_it / technical_service / consulting_training / other"
+      }
+    },
+    {
+      "type": "professional_association",
+      "groups": [
+        "activity_areas"
+      ],
+      "optional": [],
+      "catalogs": {
+        "activity_areas": "professional_representation / continuing_professional_development / events_conferences / member_services / advocacy / standards_guidelines / other"
+      }
+    },
+    {
+      "type": "other",
+      "groups": [
+        "activity_areas"
+      ],
+      "optional": [],
+      "customOnly": true,
+      "catalogs": {}
+    },
+    {
+      "type": "individual_activity",
+      "groups": [
+        "activity_areas"
+      ],
+      "optional": [],
+      "catalogs": {
+        "activity_areas": "veterinary_practice / consulting / animal_care / rehabilitation_physiotherapy / training_education / other"
+      }
+    }
+  ],
+  "groups": [
+    {
+      "type": "veterinary_clinic",
+      "code": "animals",
+      "label": "Gyvūnų grupės",
+      "kind": "choice",
+      "allowOther": true,
+      "order": 1
+    },
+    {
+      "type": "veterinary_clinic",
+      "code": "clinical_areas",
+      "label": "Klinikinės sritys",
+      "kind": "choice",
+      "allowOther": true,
+      "order": 2
+    },
+    {
+      "type": "veterinary_clinic",
+      "code": "working_models",
+      "label": "Darbo modeliai",
+      "kind": "choice",
+      "allowOther": false,
+      "order": 3
+    },
+    {
+      "type": "farm_livestock_poultry",
+      "code": "species",
+      "label": "Gyvūnų rūšys",
+      "kind": "choice",
+      "allowOther": true,
+      "order": 1
+    },
+    {
+      "type": "farm_livestock_poultry",
+      "code": "operation_direction",
+      "label": "Veiklos kryptys",
+      "kind": "choice",
+      "allowOther": true,
+      "order": 2
+    },
+    {
+      "type": "farm_livestock_poultry",
+      "code": "work_site_model",
+      "label": "Darbo vietos modelis",
+      "kind": "choice",
+      "allowOther": false,
+      "order": 3
+    },
+    {
+      "type": "veterinary_retail_pharmacy",
+      "code": "operating_model",
+      "label": "Veiklos modeliai",
+      "kind": "choice",
+      "allowOther": false,
+      "order": 1
+    },
+    {
+      "type": "veterinary_retail_pharmacy",
+      "code": "product_activity_areas",
+      "label": "Produktų / veiklos sritys",
+      "kind": "choice",
+      "allowOther": true,
+      "order": 2
+    },
+    {
+      "type": "veterinary_retail_pharmacy",
+      "code": "veterinary_services",
+      "label": "Veterinarinės paslaugos",
+      "kind": "choice",
+      "allowOther": true,
+      "order": 3
+    },
+    {
+      "type": "veterinary_retail_pharmacy",
+      "code": "customer_segments",
+      "label": "Klientų segmentai",
+      "kind": "text",
+      "allowOther": false,
+      "order": 4
+    },
+    {
+      "type": "veterinary_wholesale_distributor",
+      "code": "product_areas",
+      "label": "Produktų sritys",
+      "kind": "choice",
+      "allowOther": true,
+      "order": 1
+    },
+    {
+      "type": "veterinary_wholesale_distributor",
+      "code": "animal_market_segments",
+      "label": "Gyvūnų / rinkos segmentai",
+      "kind": "choice",
+      "allowOther": false,
+      "order": 2
+    },
+    {
+      "type": "animal_health_pharma_products",
+      "code": "activity_product_areas",
+      "label": "Veiklos / produktų sritys",
+      "kind": "choice",
+      "allowOther": true,
+      "order": 1
+    },
+    {
+      "type": "animal_health_pharma_products",
+      "code": "animal_segments",
+      "label": "Gyvūnų segmentai",
+      "kind": "choice",
+      "allowOther": false,
+      "order": 2
+    },
+    {
+      "type": "public_institution",
+      "code": "activity_areas",
+      "label": "Veiklos sritys",
+      "kind": "choice",
+      "allowOther": true,
+      "order": 1
+    },
+    {
+      "type": "public_institution",
+      "code": "units",
+      "label": "Padaliniai",
+      "kind": "text",
+      "allowOther": false,
+      "order": 2
+    },
+    {
+      "type": "university_research_education",
+      "code": "activity_areas",
+      "label": "Veiklos sritys",
+      "kind": "choice",
+      "allowOther": true,
+      "order": 1
+    },
+    {
+      "type": "university_research_education",
+      "code": "opportunities",
+      "label": "Galimybės",
+      "kind": "choice",
+      "allowOther": true,
+      "order": 2
+    },
+    {
+      "type": "laboratory_diagnostics",
+      "code": "diagnostic_areas",
+      "label": "Diagnostikos sritys",
+      "kind": "choice",
+      "allowOther": true,
+      "order": 1
+    },
+    {
+      "type": "laboratory_diagnostics",
+      "code": "served_sectors_species",
+      "label": "Aptarnaujami sektoriai / rūšys",
+      "kind": "text",
+      "allowOther": false,
+      "order": 2
+    },
+    {
+      "type": "shelter_ngo",
+      "code": "activity_areas",
+      "label": "Veiklos sritys",
+      "kind": "choice",
+      "allowOther": true,
+      "order": 1
+    },
+    {
+      "type": "animal_care_physiotherapy",
+      "code": "activity_areas",
+      "label": "Veiklos sritys",
+      "kind": "choice",
+      "allowOther": true,
+      "order": 1
+    },
+    {
+      "type": "veterinary_equipment_technology",
+      "code": "activity_areas",
+      "label": "Veiklos sritys",
+      "kind": "choice",
+      "allowOther": true,
+      "order": 1
+    },
+    {
+      "type": "professional_association",
+      "code": "activity_areas",
+      "label": "Veiklos sritys",
+      "kind": "choice",
+      "allowOther": true,
+      "order": 1
+    },
+    {
+      "type": "other",
+      "code": "activity_areas",
+      "label": "Veiklos sritys",
+      "kind": "text",
+      "allowOther": false,
+      "order": 1
+    },
+    {
+      "type": "individual_activity",
+      "code": "activity_areas",
+      "label": "Veiklos sritys",
+      "kind": "choice",
+      "allowOther": true,
+      "order": 1
+    }
+  ],
+  "options": [
+    {
+      "type": "veterinary_clinic",
+      "group": "animals",
+      "code": "dogs",
+      "label": "Šunys",
+      "order": 1
+    },
+    {
+      "type": "veterinary_clinic",
+      "group": "animals",
+      "code": "cats",
+      "label": "Katės",
+      "order": 2
+    },
+    {
+      "type": "veterinary_clinic",
+      "group": "animals",
+      "code": "exotics",
+      "label": "Egzotiniai gyvūnai",
+      "order": 3
+    },
+    {
+      "type": "veterinary_clinic",
+      "group": "animals",
+      "code": "horses",
+      "label": "Arkliai",
+      "order": 4
+    },
+    {
+      "type": "veterinary_clinic",
+      "group": "animals",
+      "code": "farm_animals",
+      "label": "Ūkiniai gyvūnai",
+      "order": 5
+    },
+    {
+      "type": "veterinary_clinic",
+      "group": "animals",
+      "code": "other",
+      "label": "Kita",
+      "order": 6
+    },
+    {
+      "type": "veterinary_clinic",
+      "group": "clinical_areas",
+      "code": "general_practice",
+      "label": "Bendroji praktika",
+      "order": 1
+    },
+    {
+      "type": "veterinary_clinic",
+      "group": "clinical_areas",
+      "code": "internal_medicine",
+      "label": "Vidaus ligos",
+      "order": 2
+    },
+    {
+      "type": "veterinary_clinic",
+      "group": "clinical_areas",
+      "code": "surgery",
+      "label": "Chirurgija",
+      "order": 3
+    },
+    {
+      "type": "veterinary_clinic",
+      "group": "clinical_areas",
+      "code": "diagnostics",
+      "label": "Diagnostika",
+      "order": 4
+    },
+    {
+      "type": "veterinary_clinic",
+      "group": "clinical_areas",
+      "code": "dentistry",
+      "label": "Odontologija",
+      "order": 5
+    },
+    {
+      "type": "veterinary_clinic",
+      "group": "clinical_areas",
+      "code": "dermatology",
+      "label": "Dermatologija",
+      "order": 6
+    },
+    {
+      "type": "veterinary_clinic",
+      "group": "clinical_areas",
+      "code": "cardiology",
+      "label": "Kardiologija",
+      "order": 7
+    },
+    {
+      "type": "veterinary_clinic",
+      "group": "clinical_areas",
+      "code": "orthopedics_traumatology",
+      "label": "Ortopedija / traumatologija",
+      "order": 8
+    },
+    {
+      "type": "veterinary_clinic",
+      "group": "clinical_areas",
+      "code": "ophthalmology",
+      "label": "Oftalmologija",
+      "order": 9
+    },
+    {
+      "type": "veterinary_clinic",
+      "group": "clinical_areas",
+      "code": "anesthesiology",
+      "label": "Anesteziologija",
+      "order": 10
+    },
+    {
+      "type": "veterinary_clinic",
+      "group": "clinical_areas",
+      "code": "intensive_care",
+      "label": "Intensyvioji terapija",
+      "order": 11
+    },
+    {
+      "type": "veterinary_clinic",
+      "group": "clinical_areas",
+      "code": "reproduction",
+      "label": "Reprodukcija",
+      "order": 12
+    },
+    {
+      "type": "veterinary_clinic",
+      "group": "clinical_areas",
+      "code": "other",
+      "label": "Kita",
+      "order": 13
+    },
+    {
+      "type": "veterinary_clinic",
+      "group": "working_models",
+      "code": "regular_clinic",
+      "label": "Įprasta klinika",
+      "order": 1
+    },
+    {
+      "type": "veterinary_clinic",
+      "group": "working_models",
+      "code": "24_7",
+      "label": "24/7",
+      "order": 2
+    },
+    {
+      "type": "veterinary_clinic",
+      "group": "working_models",
+      "code": "emergency",
+      "label": "Skubi pagalba",
+      "order": 3
+    },
+    {
+      "type": "veterinary_clinic",
+      "group": "working_models",
+      "code": "on_call",
+      "label": "Budėjimai",
+      "order": 4
+    },
+    {
+      "type": "veterinary_clinic",
+      "group": "working_models",
+      "code": "inpatient",
+      "label": "Stacionaras",
+      "order": 5
+    },
+    {
+      "type": "farm_livestock_poultry",
+      "group": "species",
+      "code": "cattle",
+      "label": "Galvijai",
+      "order": 1
+    },
+    {
+      "type": "farm_livestock_poultry",
+      "group": "species",
+      "code": "pigs",
+      "label": "Kiaulės",
+      "order": 2
+    },
+    {
+      "type": "farm_livestock_poultry",
+      "group": "species",
+      "code": "poultry",
+      "label": "Paukščiai",
+      "order": 3
+    },
+    {
+      "type": "farm_livestock_poultry",
+      "group": "species",
+      "code": "horses",
+      "label": "Arkliai",
+      "order": 4
+    },
+    {
+      "type": "farm_livestock_poultry",
+      "group": "species",
+      "code": "sheep_goats",
+      "label": "Avys / ožkos",
+      "order": 5
+    },
+    {
+      "type": "farm_livestock_poultry",
+      "group": "species",
+      "code": "other",
+      "label": "Kita",
+      "order": 6
+    },
+    {
+      "type": "farm_livestock_poultry",
+      "group": "operation_direction",
+      "code": "dairy",
+      "label": "Pienininkystė",
+      "order": 1
+    },
+    {
+      "type": "farm_livestock_poultry",
+      "group": "operation_direction",
+      "code": "beef_cattle",
+      "label": "Mėsinė galvijininkystė",
+      "order": 2
+    },
+    {
+      "type": "farm_livestock_poultry",
+      "group": "operation_direction",
+      "code": "pig_production",
+      "label": "Kiaulininkystė",
+      "order": 3
+    },
+    {
+      "type": "farm_livestock_poultry",
+      "group": "operation_direction",
+      "code": "poultry_production",
+      "label": "Paukštininkystė",
+      "order": 4
+    },
+    {
+      "type": "farm_livestock_poultry",
+      "group": "operation_direction",
+      "code": "breeding_reproduction",
+      "label": "Veisimas / reprodukcija",
+      "order": 5
+    },
+    {
+      "type": "farm_livestock_poultry",
+      "group": "operation_direction",
+      "code": "mixed_farming",
+      "label": "Mišrus ūkis",
+      "order": 6
+    },
+    {
+      "type": "farm_livestock_poultry",
+      "group": "operation_direction",
+      "code": "other",
+      "label": "Kita",
+      "order": 7
+    },
+    {
+      "type": "farm_livestock_poultry",
+      "group": "work_site_model",
+      "code": "one_farm",
+      "label": "Vienas ūkis",
+      "order": 1
+    },
+    {
+      "type": "farm_livestock_poultry",
+      "group": "work_site_model",
+      "code": "multiple_sites",
+      "label": "Kelios vietos",
+      "order": 2
+    },
+    {
+      "type": "farm_livestock_poultry",
+      "group": "work_site_model",
+      "code": "mobile_work",
+      "label": "Mobilus darbas",
+      "order": 3
+    },
+    {
+      "type": "veterinary_retail_pharmacy",
+      "group": "operating_model",
+      "code": "physical_pharmacy",
+      "label": "Fizinė vaistinė",
+      "order": 1
+    },
+    {
+      "type": "veterinary_retail_pharmacy",
+      "group": "operating_model",
+      "code": "pharmacy_chain",
+      "label": "Vaistinių tinklas",
+      "order": 2
+    },
+    {
+      "type": "veterinary_retail_pharmacy",
+      "group": "operating_model",
+      "code": "ecommerce",
+      "label": "Elektroninė prekyba",
+      "order": 3
+    },
+    {
+      "type": "veterinary_retail_pharmacy",
+      "group": "product_activity_areas",
+      "code": "veterinary_medicines",
+      "label": "Veterinariniai vaistai",
+      "order": 1
+    },
+    {
+      "type": "veterinary_retail_pharmacy",
+      "group": "product_activity_areas",
+      "code": "feed",
+      "label": "Pašarai",
+      "order": 2
+    },
+    {
+      "type": "veterinary_retail_pharmacy",
+      "group": "product_activity_areas",
+      "code": "supplements",
+      "label": "Papildai",
+      "order": 3
+    },
+    {
+      "type": "veterinary_retail_pharmacy",
+      "group": "product_activity_areas",
+      "code": "animal_care_hygiene_products",
+      "label": "Gyvūnų priežiūros / higienos produktai",
+      "order": 4
+    },
+    {
+      "type": "veterinary_retail_pharmacy",
+      "group": "product_activity_areas",
+      "code": "veterinary_supplies",
+      "label": "Veterinarinės prekės",
+      "order": 5
+    },
+    {
+      "type": "veterinary_retail_pharmacy",
+      "group": "product_activity_areas",
+      "code": "other",
+      "label": "Kita",
+      "order": 6
+    },
+    {
+      "type": "veterinary_retail_pharmacy",
+      "group": "veterinary_services",
+      "code": "microchipping",
+      "label": "Ženklinimas mikroschemomis",
+      "order": 1
+    },
+    {
+      "type": "veterinary_retail_pharmacy",
+      "group": "veterinary_services",
+      "code": "vaccination",
+      "label": "Vakcinacija",
+      "order": 2
+    },
+    {
+      "type": "veterinary_retail_pharmacy",
+      "group": "veterinary_services",
+      "code": "consultation",
+      "label": "Konsultacijos",
+      "order": 3
+    },
+    {
+      "type": "veterinary_retail_pharmacy",
+      "group": "veterinary_services",
+      "code": "other",
+      "label": "Kita",
+      "order": 4
+    },
+    {
+      "type": "veterinary_wholesale_distributor",
+      "group": "product_areas",
+      "code": "veterinary_medicines",
+      "label": "Veterinariniai vaistai",
+      "order": 1
+    },
+    {
+      "type": "veterinary_wholesale_distributor",
+      "group": "product_areas",
+      "code": "vaccines_biological_products",
+      "label": "Vakcinos / biologiniai produktai",
+      "order": 2
+    },
+    {
+      "type": "veterinary_wholesale_distributor",
+      "group": "product_areas",
+      "code": "feed",
+      "label": "Pašarai",
+      "order": 3
+    },
+    {
+      "type": "veterinary_wholesale_distributor",
+      "group": "product_areas",
+      "code": "supplements",
+      "label": "Papildai",
+      "order": 4
+    },
+    {
+      "type": "veterinary_wholesale_distributor",
+      "group": "product_areas",
+      "code": "diagnostics",
+      "label": "Diagnostika",
+      "order": 5
+    },
+    {
+      "type": "veterinary_wholesale_distributor",
+      "group": "product_areas",
+      "code": "veterinary_equipment",
+      "label": "Veterinarinė įranga",
+      "order": 6
+    },
+    {
+      "type": "veterinary_wholesale_distributor",
+      "group": "product_areas",
+      "code": "consumables",
+      "label": "Eksploatacinės medžiagos",
+      "order": 7
+    },
+    {
+      "type": "veterinary_wholesale_distributor",
+      "group": "product_areas",
+      "code": "animal_care_products",
+      "label": "Gyvūnų priežiūros produktai",
+      "order": 8
+    },
+    {
+      "type": "veterinary_wholesale_distributor",
+      "group": "product_areas",
+      "code": "other",
+      "label": "Kita",
+      "order": 9
+    },
+    {
+      "type": "veterinary_wholesale_distributor",
+      "group": "animal_market_segments",
+      "code": "companion_animals",
+      "label": "Gyvūnai augintiniai",
+      "order": 1
+    },
+    {
+      "type": "veterinary_wholesale_distributor",
+      "group": "animal_market_segments",
+      "code": "livestock",
+      "label": "Ūkiniai gyvūnai",
+      "order": 2
+    },
+    {
+      "type": "veterinary_wholesale_distributor",
+      "group": "animal_market_segments",
+      "code": "horses",
+      "label": "Arkliai",
+      "order": 3
+    },
+    {
+      "type": "veterinary_wholesale_distributor",
+      "group": "animal_market_segments",
+      "code": "mixed",
+      "label": "Mišrūs segmentai",
+      "order": 4
+    },
+    {
+      "type": "animal_health_pharma_products",
+      "group": "activity_product_areas",
+      "code": "veterinary_medicines",
+      "label": "Veterinariniai vaistai",
+      "order": 1
+    },
+    {
+      "type": "animal_health_pharma_products",
+      "group": "activity_product_areas",
+      "code": "vaccines_biological_products",
+      "label": "Vakcinos / biologiniai produktai",
+      "order": 2
+    },
+    {
+      "type": "animal_health_pharma_products",
+      "group": "activity_product_areas",
+      "code": "diagnostics",
+      "label": "Diagnostika",
+      "order": 3
+    },
+    {
+      "type": "animal_health_pharma_products",
+      "group": "activity_product_areas",
+      "code": "feed",
+      "label": "Pašarai",
+      "order": 4
+    },
+    {
+      "type": "animal_health_pharma_products",
+      "group": "activity_product_areas",
+      "code": "supplements",
+      "label": "Papildai",
+      "order": 5
+    },
+    {
+      "type": "animal_health_pharma_products",
+      "group": "activity_product_areas",
+      "code": "animal_care_products",
+      "label": "Gyvūnų priežiūros produktai",
+      "order": 6
+    },
+    {
+      "type": "animal_health_pharma_products",
+      "group": "activity_product_areas",
+      "code": "other",
+      "label": "Kita",
+      "order": 7
+    },
+    {
+      "type": "animal_health_pharma_products",
+      "group": "animal_segments",
+      "code": "companion_animals",
+      "label": "Gyvūnai augintiniai",
+      "order": 1
+    },
+    {
+      "type": "animal_health_pharma_products",
+      "group": "animal_segments",
+      "code": "livestock",
+      "label": "Ūkiniai gyvūnai",
+      "order": 2
+    },
+    {
+      "type": "animal_health_pharma_products",
+      "group": "animal_segments",
+      "code": "horses",
+      "label": "Arkliai",
+      "order": 3
+    },
+    {
+      "type": "animal_health_pharma_products",
+      "group": "animal_segments",
+      "code": "mixed",
+      "label": "Mišrūs segmentai",
+      "order": 4
+    },
+    {
+      "type": "public_institution",
+      "group": "activity_areas",
+      "code": "animal_health",
+      "label": "Gyvūnų sveikata",
+      "order": 1
+    },
+    {
+      "type": "public_institution",
+      "group": "activity_areas",
+      "code": "animal_welfare",
+      "label": "Gyvūnų gerovė",
+      "order": 2
+    },
+    {
+      "type": "public_institution",
+      "group": "activity_areas",
+      "code": "food_safety",
+      "label": "Maisto sauga",
+      "order": 3
+    },
+    {
+      "type": "public_institution",
+      "group": "activity_areas",
+      "code": "veterinary_medicines_control",
+      "label": "Veterinarinių vaistų kontrolė",
+      "order": 4
+    },
+    {
+      "type": "public_institution",
+      "group": "activity_areas",
+      "code": "border_control",
+      "label": "Pasienio kontrolė",
+      "order": 5
+    },
+    {
+      "type": "public_institution",
+      "group": "activity_areas",
+      "code": "disease_surveillance_control",
+      "label": "Ligų stebėsena / kontrolė",
+      "order": 6
+    },
+    {
+      "type": "public_institution",
+      "group": "activity_areas",
+      "code": "administration",
+      "label": "Administravimas",
+      "order": 7
+    },
+    {
+      "type": "public_institution",
+      "group": "activity_areas",
+      "code": "laboratory_control",
+      "label": "Laboratorinė kontrolė",
+      "order": 8
+    },
+    {
+      "type": "public_institution",
+      "group": "activity_areas",
+      "code": "other",
+      "label": "Kita",
+      "order": 9
+    },
+    {
+      "type": "university_research_education",
+      "group": "activity_areas",
+      "code": "education_teaching",
+      "label": "Švietimas / mokymas",
+      "order": 1
+    },
+    {
+      "type": "university_research_education",
+      "group": "activity_areas",
+      "code": "clinical_activity",
+      "label": "Klinikinė veikla",
+      "order": 2
+    },
+    {
+      "type": "university_research_education",
+      "group": "activity_areas",
+      "code": "research",
+      "label": "Moksliniai tyrimai",
+      "order": 3
+    },
+    {
+      "type": "university_research_education",
+      "group": "activity_areas",
+      "code": "laboratory",
+      "label": "Laboratorinė veikla",
+      "order": 4
+    },
+    {
+      "type": "university_research_education",
+      "group": "activity_areas",
+      "code": "continuing_professional_education",
+      "label": "Tęstinis profesinis mokymas",
+      "order": 5
+    },
+    {
+      "type": "university_research_education",
+      "group": "activity_areas",
+      "code": "other",
+      "label": "Kita",
+      "order": 6
+    },
+    {
+      "type": "university_research_education",
+      "group": "opportunities",
+      "code": "student_practice",
+      "label": "Studentų praktika",
+      "order": 1
+    },
+    {
+      "type": "university_research_education",
+      "group": "opportunities",
+      "code": "internships",
+      "label": "Stažuotės",
+      "order": 2
+    },
+    {
+      "type": "university_research_education",
+      "group": "opportunities",
+      "code": "residency",
+      "label": "Rezidentūra",
+      "order": 3
+    },
+    {
+      "type": "university_research_education",
+      "group": "opportunities",
+      "code": "study_programmes",
+      "label": "Studijų programos",
+      "order": 4
+    },
+    {
+      "type": "university_research_education",
+      "group": "opportunities",
+      "code": "continuing_qualification_courses",
+      "label": "Kvalifikacijos tobulinimas / kursai",
+      "order": 5
+    },
+    {
+      "type": "university_research_education",
+      "group": "opportunities",
+      "code": "research_opportunities",
+      "label": "Tyrimų galimybės",
+      "order": 6
+    },
+    {
+      "type": "university_research_education",
+      "group": "opportunities",
+      "code": "doctoral_academic_career",
+      "label": "Doktorantūra / akademinė karjera",
+      "order": 7
+    },
+    {
+      "type": "university_research_education",
+      "group": "opportunities",
+      "code": "international_placements_exchanges",
+      "label": "Tarptautinės stažuotės / mainai",
+      "order": 8
+    },
+    {
+      "type": "university_research_education",
+      "group": "opportunities",
+      "code": "other",
+      "label": "Kita",
+      "order": 9
+    },
+    {
+      "type": "laboratory_diagnostics",
+      "group": "diagnostic_areas",
+      "code": "clinical_pathology",
+      "label": "Klinikinė patologija",
+      "order": 1
+    },
+    {
+      "type": "laboratory_diagnostics",
+      "group": "diagnostic_areas",
+      "code": "microbiology",
+      "label": "Mikrobiologija",
+      "order": 2
+    },
+    {
+      "type": "laboratory_diagnostics",
+      "group": "diagnostic_areas",
+      "code": "molecular_diagnostics",
+      "label": "Molekulinė diagnostika",
+      "order": 3
+    },
+    {
+      "type": "laboratory_diagnostics",
+      "group": "diagnostic_areas",
+      "code": "pathology_histology",
+      "label": "Patologija / histologija",
+      "order": 4
+    },
+    {
+      "type": "laboratory_diagnostics",
+      "group": "diagnostic_areas",
+      "code": "parasitology",
+      "label": "Parazitologija",
+      "order": 5
+    },
+    {
+      "type": "laboratory_diagnostics",
+      "group": "diagnostic_areas",
+      "code": "toxicology",
+      "label": "Toksikologija",
+      "order": 6
+    },
+    {
+      "type": "laboratory_diagnostics",
+      "group": "diagnostic_areas",
+      "code": "food_feed_testing",
+      "label": "Maisto / pašarų tyrimai",
+      "order": 7
+    },
+    {
+      "type": "laboratory_diagnostics",
+      "group": "diagnostic_areas",
+      "code": "other",
+      "label": "Kita",
+      "order": 8
+    },
+    {
+      "type": "shelter_ngo",
+      "group": "activity_areas",
+      "code": "animal_sheltering_care",
+      "label": "Gyvūnų globa / priežiūra",
+      "order": 1
+    },
+    {
+      "type": "shelter_ngo",
+      "group": "activity_areas",
+      "code": "rescue",
+      "label": "Gelbėjimas",
+      "order": 2
+    },
+    {
+      "type": "shelter_ngo",
+      "group": "activity_areas",
+      "code": "adoption",
+      "label": "Gyvūnų įvaikinimas",
+      "order": 3
+    },
+    {
+      "type": "shelter_ngo",
+      "group": "activity_areas",
+      "code": "animal_welfare",
+      "label": "Gyvūnų gerovė",
+      "order": 4
+    },
+    {
+      "type": "shelter_ngo",
+      "group": "activity_areas",
+      "code": "veterinary_care",
+      "label": "Veterinarinė pagalba",
+      "order": 5
+    },
+    {
+      "type": "shelter_ngo",
+      "group": "activity_areas",
+      "code": "education_awareness",
+      "label": "Švietimas / informavimas",
+      "order": 6
+    },
+    {
+      "type": "shelter_ngo",
+      "group": "activity_areas",
+      "code": "other",
+      "label": "Kita",
+      "order": 7
+    },
+    {
+      "type": "animal_care_physiotherapy",
+      "group": "activity_areas",
+      "code": "physiotherapy",
+      "label": "Fizioterapija",
+      "order": 1
+    },
+    {
+      "type": "animal_care_physiotherapy",
+      "group": "activity_areas",
+      "code": "rehabilitation",
+      "label": "Reabilitacija",
+      "order": 2
+    },
+    {
+      "type": "animal_care_physiotherapy",
+      "group": "activity_areas",
+      "code": "hydrotherapy",
+      "label": "Hidroterapija",
+      "order": 3
+    },
+    {
+      "type": "animal_care_physiotherapy",
+      "group": "activity_areas",
+      "code": "postoperative_rehabilitation",
+      "label": "Pooperacinė reabilitacija",
+      "order": 4
+    },
+    {
+      "type": "animal_care_physiotherapy",
+      "group": "activity_areas",
+      "code": "mobility_pain_management",
+      "label": "Judėjimo / skausmo valdymas",
+      "order": 5
+    },
+    {
+      "type": "animal_care_physiotherapy",
+      "group": "activity_areas",
+      "code": "animal_care",
+      "label": "Gyvūnų priežiūra",
+      "order": 6
+    },
+    {
+      "type": "animal_care_physiotherapy",
+      "group": "activity_areas",
+      "code": "other",
+      "label": "Kita",
+      "order": 7
+    },
+    {
+      "type": "veterinary_equipment_technology",
+      "group": "activity_areas",
+      "code": "veterinary_equipment",
+      "label": "Veterinarinė įranga",
+      "order": 1
+    },
+    {
+      "type": "veterinary_equipment_technology",
+      "group": "activity_areas",
+      "code": "diagnostic_equipment",
+      "label": "Diagnostinė įranga",
+      "order": 2
+    },
+    {
+      "type": "veterinary_equipment_technology",
+      "group": "activity_areas",
+      "code": "laboratory_equipment",
+      "label": "Laboratorinė įranga",
+      "order": 3
+    },
+    {
+      "type": "veterinary_equipment_technology",
+      "group": "activity_areas",
+      "code": "software_it",
+      "label": "Programinė įranga / IT",
+      "order": 4
+    },
+    {
+      "type": "veterinary_equipment_technology",
+      "group": "activity_areas",
+      "code": "technical_service",
+      "label": "Techninė priežiūra",
+      "order": 5
+    },
+    {
+      "type": "veterinary_equipment_technology",
+      "group": "activity_areas",
+      "code": "consulting_training",
+      "label": "Konsultavimas / mokymas",
+      "order": 6
+    },
+    {
+      "type": "veterinary_equipment_technology",
+      "group": "activity_areas",
+      "code": "other",
+      "label": "Kita",
+      "order": 7
+    },
+    {
+      "type": "professional_association",
+      "group": "activity_areas",
+      "code": "professional_representation",
+      "label": "Profesinis atstovavimas",
+      "order": 1
+    },
+    {
+      "type": "professional_association",
+      "group": "activity_areas",
+      "code": "continuing_professional_development",
+      "label": "Profesinės kvalifikacijos tobulinimas",
+      "order": 2
+    },
+    {
+      "type": "professional_association",
+      "group": "activity_areas",
+      "code": "events_conferences",
+      "label": "Renginiai / konferencijos",
+      "order": 3
+    },
+    {
+      "type": "professional_association",
+      "group": "activity_areas",
+      "code": "member_services",
+      "label": "Paslaugos nariams",
+      "order": 4
+    },
+    {
+      "type": "professional_association",
+      "group": "activity_areas",
+      "code": "advocacy",
+      "label": "Interesų atstovavimas",
+      "order": 5
+    },
+    {
+      "type": "professional_association",
+      "group": "activity_areas",
+      "code": "standards_guidelines",
+      "label": "Standartai / gairės",
+      "order": 6
+    },
+    {
+      "type": "professional_association",
+      "group": "activity_areas",
+      "code": "other",
+      "label": "Kita",
+      "order": 7
+    },
+    {
+      "type": "individual_activity",
+      "group": "activity_areas",
+      "code": "veterinary_practice",
+      "label": "Veterinarinė praktika",
+      "order": 1
+    },
+    {
+      "type": "individual_activity",
+      "group": "activity_areas",
+      "code": "consulting",
+      "label": "Konsultavimas",
+      "order": 2
+    },
+    {
+      "type": "individual_activity",
+      "group": "activity_areas",
+      "code": "animal_care",
+      "label": "Gyvūnų priežiūra",
+      "order": 3
+    },
+    {
+      "type": "individual_activity",
+      "group": "activity_areas",
+      "code": "rehabilitation_physiotherapy",
+      "label": "Reabilitacija / fizioterapija",
+      "order": 4
+    },
+    {
+      "type": "individual_activity",
+      "group": "activity_areas",
+      "code": "training_education",
+      "label": "Mokymas / švietimas",
+      "order": 5
+    },
+    {
+      "type": "individual_activity",
+      "group": "activity_areas",
+      "code": "other",
+      "label": "Kita",
+      "order": 6
+    }
+  ],
+  "legalForms": [
+    [
+      "uab",
+      "UAB",
+      true
+    ],
+    [
+      "mb",
+      "MB",
+      true
+    ],
+    [
+      "vsi",
+      "VšĮ",
+      true
+    ],
+    [
+      "ab",
+      "AB",
+      true
+    ],
+    [
+      "zub",
+      "ŽŪB",
+      true
+    ],
+    [
+      "budgetary_institution",
+      "Biudžetinė įstaiga",
+      true
+    ],
+    [
+      "association",
+      "Asociacija",
+      true
+    ],
+    [
+      "individual_activity",
+      "Individuali veikla",
+      false
+    ],
+    [
+      "natural_person",
+      "Fizinis asmuo",
+      false
+    ],
+    [
+      "other",
+      "Kita",
+      true
+    ]
+  ],
+  "sizes": [
+    "1–5",
+    "6–15",
+    "16–30",
+    "31–50",
+    "51–100",
+    "100+"
+  ],
+  "benefits": [
+    [
+      "flexible_schedule",
+      "Lankstus darbo grafikas"
+    ],
+    [
+      "training_conferences",
+      "Mokymai ir konferencijos"
+    ],
+    [
+      "career_growth",
+      "Karjeros augimas"
+    ],
+    [
+      "modern_equipment",
+      "Moderni įranga"
+    ],
+    [
+      "bonuses",
+      "Premijos"
+    ],
+    [
+      "fuel_compensation",
+      "Kuro kompensacija"
+    ],
+    [
+      "relocation_support",
+      "Persikėlimo pagalba"
+    ],
+    [
+      "extra_leave",
+      "Papildomos atostogos"
+    ],
+    [
+      "employee_discounts",
+      "Nuolaidos darbuotojams"
+    ],
+    [
+      "international_team",
+      "Tarptautinė komanda"
+    ],
+    [
+      "mentorship",
+      "Mentorystė"
+    ]
+  ]
+}

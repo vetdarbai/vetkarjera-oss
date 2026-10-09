@@ -24,12 +24,18 @@ async function generate() {
         from pg_constraint con join pg_class local_table on local_table.oid=con.conrelid join pg_namespace n on n.oid=local_table.relnamespace join pg_class foreign_table on foreign_table.oid=con.confrelid where con.contype='f' and n.nspname='public' and local_table.relname=$1`,[table])).rows;
       out += `Relationships: [${relations.map(c => `{ foreignKeyName: ${quote(c.conname)}; columns: ${quote(c.columns)}; isOneToOne: ${c.is_one}; referencedRelation: ${quote(c.target)}; referencedColumns: ${quote(c.referenced)} }`).join(',')}];\n};\n`;
     }
-    out += '}; Views: { [_ in never]: never }; Functions: {\n';
-    const funcs = (await db.query(`select p.proname,p.proargnames,p.proargtypes::oid[] as args,t.typname as result from pg_proc p join pg_namespace n on n.oid=p.pronamespace join pg_type t on t.oid=p.prorettype where n.nspname='public' order by p.proname`)).rows;
+    out += '}; Views: {\n';
+    const views=(await db.query("select table_name from information_schema.views where table_schema='public' order by table_name")).rows;
+    for(const {table_name: view} of views){
+      const cols=(await db.query("select column_name,udt_name,is_nullable from information_schema.columns where table_schema='public' and table_name=$1 order by ordinal_position",[view])).rows;
+      out += `${quote(view)}: { Row: { ${cols.map(c=>`${quote(c.column_name)}: ${type(c.udt_name)}${c.is_nullable==='YES'?' | null':''}`).join(';')} }; Relationships: [] };\n`;
+    }
+    out += '}; Functions: {\n';
+    const funcs = (await db.query(`select p.proname,p.proargnames,p.pronargdefaults,p.proargtypes::oid[] as args,t.typname as result from pg_proc p join pg_namespace n on n.oid=p.pronamespace join pg_type t on t.oid=p.prorettype where n.nspname='public' order by p.proname`)).rows;
     for (const p of funcs) {
       const argTypes = [];
       for (const oid of p.args) argTypes.push((await db.query('select typname from pg_type where oid=$1',[oid])).rows[0].typname);
-      out += `${quote(p.proname)}: { Args: { ${argTypes.map((t,i) => `${quote(p.proargnames[i])}: ${type(t)}`).join(';')} }; Returns: ${p.result === 'void' ? 'undefined' : type(p.result)} };\n`;
+      out += `${quote(p.proname)}: { Args: { ${argTypes.map((t,i) => `${quote(p.proargnames[i])}${i >= p.args.length-p.pronargdefaults ? "?" : ""}: ${type(t)}${i >= p.args.length-p.pronargdefaults ? " | null" : ""}`).join(';')} }; Returns: ${p.result === 'void' ? 'undefined' : type(p.result)} };\n`;
     }
     out += '}; Enums: {\n';
     for (const name of new Set(enums.map(e => e.typname))) out += `${quote(name)}: ${enums.filter(e => e.typname === name).map(e => quote(e.enumlabel)).join(' | ')};\n`;
