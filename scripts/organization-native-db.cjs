@@ -5,8 +5,9 @@ const {bootstrap,storageBootstrap}=require('./profile-test-db.cjs');
 const bin='C:/Program Files/PostgreSQL/17/bin';
 const parent='D:/VetKarjera-Staging/qa-private';
 async function nativeDatabase(){
- const root=path.join(parent,'stage5-native-'+Date.now()),data=path.join(root,'data'),pwfile=path.join(root,'init-password.private');
- fs.mkdirSync(root,{recursive:true});
+ // Atomic unique directory: simultaneous QA processes must never share data,
+ // logs or local credentials merely because their timestamps are identical.
+ const root=fs.mkdtempSync(path.join(parent,'stage5-native-'+Date.now()+'-')),data=path.join(root,'data'),pwfile=path.join(root,'init-password.private');
  const sid=spawnSync('whoami',['/user','/fo','csv','/nh'],{encoding:'utf8',windowsHide:true}).stdout.match(/S-1-5-[0-9-]+/)?.[0];
  if(!sid)throw Error('Current SID unavailable');
  const acl=spawnSync('icacls',[root,'/inheritance:r','/grant:r','*'+sid+':(OI)(CI)F'],{encoding:'utf8',windowsHide:true});
@@ -17,7 +18,7 @@ async function nativeDatabase(){
   let r;try{r=spawnSync(path.join(bin,name+'.exe'),args,{encoding:'utf8',windowsHide:true,stdio:['ignore',fd,fd],timeout:120000});}finally{fs.closeSync(fd);}
   if(r.status!==0)throw Error('Native '+name+' failed; local log retained');return fs.readFileSync(log,'utf8');}
  const version=command('postgres',['--version']).trim();if(!/PostgreSQL\) 17\./.test(version))throw Error('PG17 required');
- command('initdb',['-D',data,'-U','postgres','-A','scram-sha-256','--pwfile='+pwfile,'--encoding=UTF8','--locale=C']);fs.unlinkSync(pwfile);
+ try{command('initdb',['-D',data,'-U','postgres','-A','scram-sha-256','--pwfile='+pwfile,'--encoding=UTF8','--locale=C']);}finally{fs.unlinkSync(pwfile);}
  const port=await new Promise((resolve,reject)=>{const s=net.createServer();s.on('error',reject);s.listen(0,'127.0.0.1',()=>{const p=s.address().port;s.close(()=>resolve(p));});});
  command('pg_ctl',['-D',data,'-l',path.join(root,'postgres.log'),'-w','-t','30','-o','-h 127.0.0.1 -p '+port,'start']);
  const settings={host:'127.0.0.1',port,user:'postgres',password,database:'postgres'};

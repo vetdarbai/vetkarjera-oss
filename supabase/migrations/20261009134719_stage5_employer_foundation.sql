@@ -1002,6 +1002,11 @@ grant select on public.organization_public_profiles to anon,authenticated;
 
 -- Private bucket. No SDK mutation capability for API clients, even if another
 -- permissive Storage policy exists. Version/current-key read follows org state.
+-- CEO-approved Stage5 compatibility amendment: keep the authenticated Stage4
+-- predicate unchanged; deny anon specialist reads without calling its helper.
+alter policy specialist_photo_read_guard on storage.objects to authenticated;
+create policy specialist_photo_anon_read_guard on storage.objects
+ as restrictive for select to anon using(bucket_id<>'specialist-profile-photos');
 insert into storage.buckets(id,name,public,file_size_limit,allowed_mime_types)
  values('organization-profile-media','organization-profile-media',false,614400,array['image/webp']);
 grant usage on schema storage to vetkarjera_organization_writer;

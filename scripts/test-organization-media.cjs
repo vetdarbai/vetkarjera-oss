@@ -1,7 +1,7 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 const {PGlite}=require('@electric-sql/pglite'),{createDatabase}=require('./profile-test-db.cjs');
 let db,current,owner,foreign,admin,checks=0,storageFail=false,cleanupFail=false,concurrent=false,oid;
-const bytes=new Map(),bucket='organization-profile-media';
+const bytes=new Map(),oldVersions={},bucket='organization-profile-media';
 process.env.SUPABASE_STORAGE_SERVICE_ROLE_KEY='LOCAL_SYNTHETIC_STORAGE_KEY';
 globalThis.fetch=()=>{throw new Error('Network forbidden in Storage transport fixture QA');};
 const eq=(a,b)=>{assert.deepEqual(a,b);checks++;};
@@ -11,7 +11,8 @@ async function rpc(a,name,args=[]){await as(a);return(await db.query('select pub
 async function account(kind){await root();const uid=crypto.randomUUID();await db.query("insert into auth.users(id,email,raw_user_meta_data,email_confirmed_at) values($1,$2,$3,now())",[uid,uid+'@example.invalid',JSON.stringify({account_role:kind})]);await db.query('insert into auth.sessions(id,user_id) values($1,$1)',[uid]);return {id:uid,claims:{sub:uid,session_id:uid,role:'authenticated'}};}
 async function context(){return rpc(owner,'own_org_context',[oid]);}
 const client={async rpc(name,args){try{return {data:await rpc(current,name,Object.values(args)),error:null};}catch(e){if(name==='read_org_media')console.error('Read RPC failure',e.message,e.code,e.where);return {data:null,error:{code:e.code}};}},
- storage:{from(b){assert.equal(b,bucket);return {async download(p){await as(current);const found=(await db.query('select name from storage.objects where bucket_id=$1 and name=$2',[bucket,p])).rows[0];
+ from(table){assert.equal(table,'specialist_profiles');return {select(){return {eq(column,id){assert.equal(column,'user_id');return {async maybeSingle(){await as(current);return {data:(await db.query('select user_id from public.specialist_profiles where user_id=$1',[id])).rows[0]||null,error:null};}};}};}};},
+ storage:{from(b){assert.ok([bucket,'specialist-profile-photos'].includes(b));return {async download(p){await as(current);const found=(await db.query('select name from storage.objects where bucket_id=$1 and name=$2',[b,p])).rows[0];
  return found&&bytes.has(p)?{data:new Blob([bytes.get(p)]),error:null}:{data:null,error:{status:404}};}};}}};
 const store={async upload(p,data){if(storageFail)return {error:{code:'test_failure'}};await root();await db.exec('set role service_role');await db.query("insert into storage.objects(bucket_id,name,metadata) values($1,$2,$3)",[bucket,p,JSON.stringify({size:data.length,mimetype:'image/webp'})]);bytes.set(p,Buffer.from(data));
  if(concurrent){concurrent=false;const ctx=await context();await rpc(owner,'patch_org_public',[oid,ctx.rowVersion,{description:'Concurrent edit'}]);}
@@ -28,7 +29,7 @@ Module._load=function(name,parent,main){
  if(name.startsWith('@/'))return original.call(this,path.resolve(name.slice(2)),parent,main);
  return original.call(this,name,parent,main);
 };
-const route=require('../app/api/organizacijos/[id]/media/[kind]/route.ts'),publicRoute=require('../app/darbdaviai/[slug]/route.ts'),media=require('../lib/organizations/media.ts'),sharp=require('sharp');
+const route=require('../app/api/organizacijos/[id]/media/[kind]/route.ts'),publicRoute=require('../app/darbdaviai/[slug]/route.ts'),specialistRoute=require('../app/api/profilis/nuotrauka/vaizdas/route.ts'),media=require('../lib/organizations/media.ts'),sharp=require('sharp');
 function request(method,k,body,query='',headers={}){return new Request('http://127.0.0.1:3000/api/organizacijos/'+oid+'/media/'+k+query,{method,headers:{origin:'http://127.0.0.1:3000',...(body?{'content-type':'image/png'}:{}),...headers},body:body?new Uint8Array(body):undefined});}
 async function call(a,method,k,body,query='',headers={}){current=a;return route[method](request(method,k,body,query,headers),{params:Promise.resolve({id:oid,kind:k})});}
 (async()=>{db=await createDatabase();owner=await account('employer');foreign=await account('specialist');admin=await account('specialist');
@@ -41,7 +42,7 @@ async function call(a,method,k,body,query='',headers={}){current=a;return route[
    const get=await call(owner,'GET',kind,null,'?v='+saved.version);eq(get.status,200);eq(get.headers.get('cache-control'),'private, no-store, max-age=0');
    expected=Buffer.from(await get.arrayBuffer());const meta=await sharp(expected).metadata();eq(meta.format,'webp');eq(Math.max(meta.width,meta.height)<=media.ORGANIZATION_MEDIA_LIMITS[kind].edge,true);eq(meta.exif,undefined);
    const reloaded=await context();eq(reloaded.organization.media[kind].version,saved.version);
-   if(previous){eq((await call(owner,'GET',kind,null,'?v='+previous)).status,404);}previous=saved.version;
+   if(previous){oldVersions[kind]=previous;eq((await call(owner,'GET',kind,null,'?v='+previous)).status,404);}previous=saved.version;
   }
   eq((await call(foreign,'GET',kind)).status,404);eq((await call(null,'GET',kind)).status,404);eq((await call(admin,'GET',kind)).status,200);
   eq((await call(foreign,'PUT',kind,images[0])).status,403);eq((await call(null,'PUT',kind,images[0])).status,401);
@@ -71,19 +72,33 @@ async function call(a,method,k,body,query='',headers={}){current=a;return route[
  ctx=await rpc(owner,'save_org_type_block',[oid,ctx.rowVersion,{type_revision:ctx.typeRevision,groups:[{group_code:'activity_areas',options:[],custom:['Synthetic activity']}]}]);
  ctx=await rpc(owner,'save_org_benefits',[oid,ctx.rowVersion,{standard:['mentorship'],custom:[]}]);
  eq(ctx.completeness.total,100);eq(ctx.completeness.quality,30);eq((await context()).completeness.total,100);
- for(const k of ['logo','cover']){eq((await call(null,'GET',k)).status,503);eq((await call(foreign,'GET',k)).status,200);}
- // Known blocker: Stage4 restrictive SELECT policy calls an auth-only helper
- // for anon too. Validate the proposed role split ONLY in a rolled-back QA
- // transaction; it is deliberately NOT included in the product migration.
- await root();await db.exec("begin; alter policy specialist_photo_read_guard on storage.objects to authenticated; create policy stage5_candidate_anon_specialist_guard on storage.objects as restrictive for select to anon using(bucket_id<>'specialist-profile-photos')");
- for(const k of ['logo','cover'])eq((await call(null,'GET',k)).status,200);
+ for(const k of ['logo','cover']){eq((await call(null,'GET',k)).status,200);eq((await call(foreign,'GET',k)).status,200);eq((await call(owner,'GET',k)).status,200);}
+ for(const a of [null,foreign,owner]){current=a;eq((await client.storage.from(bucket).download(orphan)).error.status,404);
+  for(const k of ['logo','cover'])eq((await call(a,'GET',k,null,'?v='+oldVersions[k])).status,404);
+  eq((await call(a,'GET','logo',null,'?v='+orphan.split('/').at(-1).slice(0,-5))).status,404);}
  await root();await db.exec("insert into storage.buckets(id,name) values('specialist-profile-photos','specialist-profile-photos');insert into storage.objects(bucket_id,name) values('specialist-profile-photos','synthetic-private.webp')");
  await as(null);eq((await db.query("select id from storage.objects where bucket_id='specialist-profile-photos'")).rows,[]);
- await root();await db.exec('rollback');
+ await root();eq((await db.query("select has_function_privilege('anon','private.can_read_specialist_photo(text)','EXECUTE') allowed")).rows[0].allowed,false);
  current=null;let result=await publicRoute.GET(new Request('http://127.0.0.1:3000/api/organizacijos/slug/'+ctx.organization.slug),{params:Promise.resolve({slug:ctx.organization.slug})});eq(result.status,200);
  const oldSlug=ctx.organization.slug;ctx=await rpc(owner,'patch_org_public',[oid,ctx.rowVersion,{name:'Renamed media QA'}]);current=null;
  result=await publicRoute.GET(new Request('http://127.0.0.1:3000/api/organizacijos/slug/'+oldSlug),{params:Promise.resolve({slug:oldSlug})});eq(result.status,308);eq(result.headers.get('location').endsWith('/darbdaviai/'+ctx.organization.slug),true);
  cleanupFail=true;eq((await call(owner,'DELETE','logo')).status,503);cleanupFail=false;eq((await context()).organization.media.logo,undefined);
- fs.mkdirSync('.staging-results',{recursive:true});fs.writeFileSync('.staging-results/stage5-media.json',JSON.stringify({status:'BLOCKED',assertions:checks,storageTransport:'fixture',sqlRls:'real PostgreSQL engine',blocker:'Stage4 anon helper EXECUTE in shared Storage SELECT guard',candidateRoleSplit:'validated in rolled-back local transaction only'},null,2));
- console.log('Stage5 media: '+checks+' assertions; BLOCKED anon public read. Candidate role split proven locally; source policy unchanged.');process.exitCode=1;
+ eq((await call(owner,'PUT','logo',images[2])).status,200);
+ ctx=await context();
+ ctx=await rpc(admin,'admin_organization_state',[oid,ctx.rowVersion,{state:'suspended',reason:'LOCAL media access QA'}]);
+ for(const k of ['logo','cover']){eq((await call(null,'GET',k)).status,404);eq((await call(foreign,'GET',k)).status,404);eq((await call(owner,'GET',k)).status,200);}
+ ctx=await rpc(admin,'admin_organization_state',[oid,ctx.rowVersion,{state:'resume',reason:'LOCAL media access QA'}]);
+ ctx=await rpc(admin,'admin_organization_state',[oid,ctx.rowVersion,{state:'archived',reason:'LOCAL media access QA'}]);
+ for(const k of ['logo','cover']){eq((await call(null,'GET',k)).status,404);eq((await call(foreign,'GET',k)).status,404);eq((await call(owner,'GET',k)).status,200);}
+ // Actual specialist GET handler with SQL-backed RLS and synthetic bytes.
+ const specialistBytes=await sharp(images[0]).resize(100,100).webp().toBuffer(),specialistPath=foreign.id+'/profile.webp';
+ await root();await db.query('insert into storage.objects(bucket_id,name) values($1,$2)',['specialist-profile-photos',specialistPath]);bytes.set(specialistPath,specialistBytes);
+ async function specialistGet(a){current=a;return specialistRoute.GET(new Request('http://127.0.0.1:3000/api/profilis/nuotrauka/vaizdas?userId='+foreign.id));}
+ let specialistResponse=await specialistGet(foreign);eq(specialistResponse.status,200);eq(Buffer.from(await specialistResponse.arrayBuffer()),specialistBytes);
+ eq((await specialistGet(admin)).status,200);eq((await specialistGet(owner)).status,403);eq((await specialistGet(null)).status,401);
+ for(const a of [null,owner]){current=a;eq((await client.storage.from('specialist-profile-photos').download(specialistPath)).error.status,404);}
+ await root();await db.query("update auth.sessions set not_after=now()-interval '1 second' where id=$1",[foreign.id]);eq((await specialistGet(foreign)).status,401);
+ await root();await db.query('delete from auth.sessions where id=$1',[foreign.id]);eq((await specialistGet(foreign)).status,401);
+ fs.mkdirSync('.staging-results',{recursive:true});fs.writeFileSync('.staging-results/stage5-media.json',JSON.stringify({status:'PASS',assertions:checks,storageTransport:'fixture',sqlRls:'real PostgreSQL engine',compatibilityAmendment:'applied in new Stage5 migration only'},null,2));
+ console.log('Stage5 media PASS: '+checks+' assertions');
 })().catch(e=>{console.error(e.stack);process.exitCode=1;}).finally(async()=>db?.close());

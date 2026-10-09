@@ -14,6 +14,11 @@ const h={bump(){checks++;},eq(a,b){assert.deepEqual(a,b);checks++;},q:(sql,args=
  if(mode.startsWith('native')){instance=await require('./organization-native-db.cjs').nativeDatabase();db=instance.db;report.postgres=instance.version;report.evidence=instance.root;
  if(mode==='native-clean'){await instance.migrate();report.cleanChain='PASS';}else{await instance.migrate({stage4Only:true});
   const baseline=[];for(let i=0;i<16;i++)baseline.push(await h.actor(i<13?'specialist':'employer'));
+  await h.root();
+  const policySql="select policyname,permissive,array_to_json(roles) roles,cmd,qual,with_check from pg_policies where schemaname='storage' and tablename='objects' and policyname like 'specialist_photo_%' order by policyname";
+  const sourcePolicies=(await db.query(policySql)).rows;
+  const helperSql="select pg_get_functiondef(oid) definition,proacl::text acl from pg_proc where oid='private.can_read_specialist_photo(text)'::regprocedure";
+  const sourceHelper=(await db.query(helperSql)).rows;
   await h.root();const before=(await db.query("select jsonb_build_object('users',(select jsonb_agg(to_jsonb(t) order by id) from auth.users t),'profiles',(select jsonb_agg(to_jsonb(t) order by id) from public.profiles t),'specialist',(select jsonb_agg(to_jsonb(t) order by user_id) from public.specialist_profiles t),'employer',(select jsonb_agg(to_jsonb(t) order by user_id) from public.employer_profiles t)) snapshot")).rows[0].snapshot;
   const blocker=await instance.connect();try{await blocker.query('begin;lock public.organizations in access exclusive mode');await assert.rejects(()=>instance.migrate(),e=>e.code==='55P03');checks++;}finally{await blocker.query('rollback');await blocker.end();}
   h.eq((await db.query('select count(*)::int n from supabase_migrations.schema_migrations')).rows[0].n,7);
@@ -21,9 +26,16 @@ const h={bump(){checks++;},eq(a,b){assert.deepEqual(a,b);checks++;},q:(sql,args=
   report.cutoverLockRollback='PASS';
   await instance.migrate();const after=(await db.query("select jsonb_build_object('users',(select jsonb_agg(to_jsonb(t) order by id) from auth.users t),'profiles',(select jsonb_agg(to_jsonb(t) order by id) from public.profiles t),'specialist',(select jsonb_agg(to_jsonb(t) order by user_id) from public.specialist_profiles t),'employer',(select jsonb_agg(to_jsonb(t) order by user_id) from public.employer_profiles t)) snapshot")).rows[0].snapshot;
   h.eq(after,before);h.eq((await db.query('select count(*)::int n from supabase_migrations.schema_migrations')).rows[0].n,8);
-  report.upgradePreservation='PASS';}
+  const restoredPolicies=(await db.query(policySql)).rows;
+  h.eq(restoredPolicies.filter(p=>p.policyname!=='specialist_photo_anon_read_guard'),sourcePolicies.map(p=>p.policyname==='specialist_photo_read_guard'?{...p,roles:['authenticated']}:p));
+  const anonGuard=restoredPolicies.find(p=>p.policyname==='specialist_photo_anon_read_guard');
+  h.eq(anonGuard.roles,['anon']);h.eq(anonGuard.permissive,'RESTRICTIVE');h.eq(anonGuard.cmd,'SELECT');
+  h.eq(anonGuard.qual,"(bucket_id <> 'specialist-profile-photos'::text)");
+  h.eq((await db.query(helperSql)).rows,sourceHelper);
+  report.stage4StoragePolicyPreservation='PASS';report.upgradePreservation='PASS';}
  }else{db=await createDatabase();report.postgres=(await db.query('show server_version')).rows[0].server_version;}
  const actors=await require('./organization-cases.cjs')(h);report.behavior='PASS';report.assertions=checks;
+ await require('./organization-storage-access.cjs')(h);report.storageCompatibility='PASS';
  if(instance){await require('./organization-concurrency.cjs')(instance,h,actors);report.twoConnectionConcurrency='PASS';report.narrowRoleSecurity='PASS';}
  await h.root();const catalogs=require('../lib/organizations/catalogs.json');
  h.eq((await db.query('select code from public.organization_types order by sort_order')).rows.map(r=>r.code),catalogs.types.map(r=>r[0]));
