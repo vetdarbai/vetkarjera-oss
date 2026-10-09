@@ -21,6 +21,7 @@
     "test:alignment:local": "node scripts/test-alignment-local.cjs",
     "test:organizations": "node scripts/test-organizations-db.cjs",
     "test:organizations:native": "node scripts/test-organizations-db.cjs native",
+    "test:organizations:executor": "node scripts/test-organizations-db.cjs native-executor",
     "test:organizations:clean": "node scripts/test-organizations-db.cjs native-clean",
     "test:organizations:media": "node scripts/test-organization-media.cjs"
   },

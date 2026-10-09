@@ -13,10 +13,9 @@ create role vetkarjera_organization_writer nologin noinherit nosuperuser nocreat
 create role vetkarjera_organization_reader nologin noinherit nosuperuser nocreatedb nocreaterole noreplication nobypassrls;
 grant vetkarjera_organization_writer,vetkarjera_organization_reader to postgres with inherit true,set true;
 grant create on schema private to vetkarjera_organization_writer,vetkarjera_organization_reader;
-grant usage on schema public,private,auth to vetkarjera_organization_writer,vetkarjera_organization_reader;
-grant execute on function auth.uid(),private.has_active_session(),private.require_active(),private.is_admin()
+grant usage on schema public,private to vetkarjera_organization_writer,vetkarjera_organization_reader;
+grant execute on function private.has_active_session(),private.require_active(),private.is_admin()
  to vetkarjera_organization_writer,vetkarjera_organization_reader;
-grant select(id,email,email_confirmed_at) on auth.users to vetkarjera_organization_writer;
 grant select on public.profiles,public.employer_profiles to vetkarjera_organization_writer,vetkarjera_organization_reader;
 create policy organization_writer_profile on public.profiles for select to vetkarjera_organization_writer using(true);
 create policy organization_reader_profile on public.profiles for select to vetkarjera_organization_reader using(true);
@@ -387,6 +386,24 @@ insert into public.organization_attribute_options(type_code,group_code,option_co
 
 -- Narrow internal helpers; public wrappers remain SECURITY INVOKER.
 create function private.org_actor() returns uuid language sql stable security invoker set search_path='' as $$ select private.require_active() $$;
+-- Public/read predicates must return NULL rather than throw for absent sessions.
+-- The existing postgres-owned session checker remains the Auth trust boundary.
+create function private.org_live_actor() returns uuid language sql stable security invoker set search_path='' as $$
+ select case when private.has_active_session() then private.require_active() else null::uuid end
+$$;
+-- Single-purpose confirmed transfer target lookup. Kept postgres-owned: the
+-- organization roles never acquire Auth schema/table privileges. No API EXECUTE.
+create function private.stage5_confirmed_transfer_target(oid uuid,target_email text) returns uuid language plpgsql stable security definer set search_path='' as $$
+declare actor uuid:=private.require_active(); target uuid; begin
+ if not private.is_admin() and not exists(select 1 from public.organization_memberships
+   where organization_id=oid and user_id=actor and revoked_at is null) then
+  raise exception 'Organization owner or trusted administrator required' using errcode='42501';
+ end if;
+ select id into target from auth.users where lower(email)=lower(target_email) and email_confirmed_at is not null;
+ return target;
+end $$;
+revoke all on function private.stage5_confirmed_transfer_target(uuid,text) from public,anon,authenticated;
+grant execute on function private.stage5_confirmed_transfer_target(uuid,text) to vetkarjera_organization_writer;
 create function private.org_owner(oid uuid) returns uuid language sql stable security invoker set search_path='' as $$
  select user_id from public.organization_memberships where organization_id=oid and revoked_at is null
 $$;
@@ -398,14 +415,14 @@ create function private.org_approved(oid uuid,component text) returns boolean la
  and (component='identity' or(v.subject_user_id=private.org_owner(oid) and v.ownership_revision=c.ownership_revision and v.representative_revision=r.representative_revision)));
 $$;
 create function private.org_can_edit(oid uuid) returns boolean language sql stable security invoker set search_path='' as $$
- select private.has_active_session() and private.org_owner(oid)=auth.uid() and
+ select private.org_owner(oid)=private.org_live_actor() and
  exists(select 1 from private.organization_controls c where c.organization_id=oid and c.profile_state not in ('suspended','archived')
  and (private.org_approved(oid,'representation') or (c.ownership_revision=1 and not exists(
  select 1 from private.organization_verification_cases v where v.organization_id=oid and v.scope='representation' and v.ownership_revision=1 and v.status='approved'))))
 $$;
 create function private.org_readable(oid uuid) returns boolean language sql stable security definer set search_path='' as $$
  select exists(select 1 from private.organization_controls c where c.organization_id=oid and
- (c.profile_state='active' or (private.has_active_session() and (private.org_owner(oid)=auth.uid() or private.is_admin()))))
+ (c.profile_state='active' or (private.has_active_session() and (private.org_owner(oid)=private.org_live_actor() or private.is_admin()))))
 $$;
 create function private.org_current_answer(oid uuid,kind text,rev bigint) returns boolean language sql stable security definer set search_path='' as $$
  select private.org_readable(oid) and exists(select 1 from public.organizations o join private.organization_controls c on c.organization_id=o.id
@@ -475,7 +492,7 @@ end $$;
 create function private.org_audit(oid uuid,event text,context jsonb default '{}') returns void language plpgsql security invoker set search_path='' as $$
 begin
  perform private.org_require_keys(context,array['rowVersion','decision','kind','revision','fields','status']);
- insert into private.organization_audit_events(organization_id,actor,event_code,details) values(oid,auth.uid(),event,context);
+ insert into private.organization_audit_events(organization_id,actor,event_code,details) values(oid,private.org_actor(),event,context);
 end $$;
 create function private.org_slug(oid uuid,brand text) returns void language plpgsql security invoker set search_path='' as $$
 declare base text; candidate text; n integer:=0; old text; begin
@@ -728,7 +745,7 @@ declare uid uuid:=private.org_actor(); t private.organization_ownership_transfer
  if action in('request','admin_request') then
   perform private.org_require_keys(data,case when action='admin_request' then array['target_email','method','reference','reason'] else array['target_email'] end);
   if action='admin_request' and (not private.is_admin() or private.org_text(data,'method') is null or private.org_text(data,'reference') is null or private.org_text(data,'reason') is null) then raise exception 'Independent admin evidence required' using errcode='42501';end if;
-  select id into target from auth.users where lower(email)=lower(private.org_text(data,'target_email')) and email_confirmed_at is not null;
+  target:=private.stage5_confirmed_transfer_target(oid,private.org_text(data,'target_email'));
   fromid:=private.org_owner(oid);
  else
   perform private.org_require_keys(data,case when action='accept' then array['transfer_id','first_name','last_name','capacity','private_phone'] else array['transfer_id'] end);
@@ -817,12 +834,12 @@ declare c private.organization_controls; kindval text; ver uuid; previous text; 
  select object_path into previous from private.organization_media_current where organization_id=oid and kind=kindval;
  if action='prepare' then
   perform private.org_require_keys(data,array['kind']);ver:=gen_random_uuid();
-  insert into private.organization_media_uploads(version,organization_id,kind,prepared_by,expected_row_version) values(ver,oid,kindval,auth.uid(),expected);
+  insert into private.organization_media_uploads(version,organization_id,kind,prepared_by,expected_row_version) values(ver,oid,kindval,private.org_actor(),expected);
   return jsonb_build_object('kind',kindval,'version',ver,'path',oid::text||'/'||kindval||'/'||ver::text||'.webp','rowVersion',expected);
  elsif action='commit' then
   perform private.org_require_keys(data,array['kind','version','sha256','size_bytes','width','height']);
   ver:=(data->>'version')::uuid;pathval:=oid::text||'/'||kindval||'/'||ver::text||'.webp';
-  if not exists(select 1 from private.organization_media_uploads where version=ver and organization_id=oid and kind=kindval and prepared_by=auth.uid()
+  if not exists(select 1 from private.organization_media_uploads where version=ver and organization_id=oid and kind=kindval and prepared_by=private.org_actor()
    and expected_row_version=expected and not used and created_at>now()-interval '15 minutes') then raise exception 'Invalid media preparation' using errcode='22023';end if;
   update private.organization_media_uploads set used=true where version=ver;
   -- Only the server-only Storage helper can put bytes at this immutable key.
@@ -890,7 +907,9 @@ begin
  update private.organization_verification_cases set status='cancelled',resolved_at=now() where scope='representation' and status='pending' and subject_user_id=old.id;
  return old;
 end $$;
-create trigger organization_account_delete_guard before delete on auth.users for each row execute function private.org_account_delete();
+-- Auth account deletion cascades through the existing public.profiles FK.
+-- Guard the product row before its dependent FK actions, without modifying Auth.
+create trigger organization_account_delete_guard before delete on public.profiles for each row execute function private.org_account_delete();
 create function private.org_public(oid uuid) returns jsonb language sql stable security definer set search_path='' as $$
  select private.org_public_dto(oid) where exists(select 1 from private.organization_controls where organization_id=oid and profile_state='active')
 $$;
@@ -957,7 +976,7 @@ create policy org_catalog_read on public.locations for select to vetkarjera_orga
 grant update(id) on public.profiles to vetkarjera_organization_writer;
 create policy org_profile_lock on public.profiles for update to vetkarjera_organization_writer using(true) with check(true);
 grant insert on public.employer_profiles to vetkarjera_organization_writer;
-create policy org_shell_bootstrap on public.employer_profiles for insert to vetkarjera_organization_writer with check(user_id=(select auth.uid()));
+create policy org_shell_bootstrap on public.employer_profiles for insert to vetkarjera_organization_writer with check(user_id=(select private.org_actor()));
 
 drop policy organizations_read_member_or_admin on public.organizations;
 drop policy organizations_require_active_session on public.organizations;

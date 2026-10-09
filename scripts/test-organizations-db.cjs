@@ -11,21 +11,34 @@ const h={bump(){checks++;},eq(a,b){assert.deepEqual(a,b);checks++;},q:(sql,args=
  async deny(a,name,args=[],code){await assert.rejects(()=>h.rpc(a,name,args),e=>!code||e.code===code);checks++;}
 };
 (async()=>{
- if(mode.startsWith('native')){instance=await require('./organization-native-db.cjs').nativeDatabase();db=instance.db;report.postgres=instance.version;report.evidence=instance.root;
+ const productionEquivalent=mode.startsWith('native-executor'),authSchemaOwner=mode==='native-executor-auth-admin'?'supabase_auth_admin':'supabase_admin';
+ if(mode.startsWith('native')){instance=await require('./organization-native-db.cjs').nativeDatabase({productionEquivalent,authSchemaOwner});db=instance.db;report.postgres=instance.version;report.evidence=instance.root;
  if(mode==='native-clean'){await instance.migrate();report.cleanChain='PASS';}else{await instance.migrate({stage4Only:true});
-  const baseline=[];for(let i=0;i<16;i++)baseline.push(await h.actor(i<13?'specialist':'employer'));
+  const baseline=[];for(let i=0;i<(productionEquivalent?17:16);i++)baseline.push(await h.actor(i<13?'specialist':'employer'));
+  report.syntheticUpgradeBaseline={users:baseline.length,specialist:13,employer:baseline.length-13};
   await h.root();
   const policySql="select policyname,permissive,array_to_json(roles) roles,cmd,qual,with_check from pg_policies where schemaname='storage' and tablename='objects' and policyname like 'specialist_photo_%' order by policyname";
   const sourcePolicies=(await db.query(policySql)).rows;
   const helperSql="select pg_get_functiondef(oid) definition,proacl::text acl from pg_proc where oid='private.can_read_specialist_photo(text)'::regprocedure";
   const sourceHelper=(await db.query(helperSql)).rows;
   await h.root();const before=(await db.query("select jsonb_build_object('users',(select jsonb_agg(to_jsonb(t) order by id) from auth.users t),'profiles',(select jsonb_agg(to_jsonb(t) order by id) from public.profiles t),'specialist',(select jsonb_agg(to_jsonb(t) order by user_id) from public.specialist_profiles t),'employer',(select jsonb_agg(to_jsonb(t) order by user_id) from public.employer_profiles t)) snapshot")).rows[0].snapshot;
+  let authBefore;
+  if(productionEquivalent){
+   report.executorBefore=await instance.prepareExecutor();
+   authBefore=await require('./organization-executor-fixture.cjs').authCatalog(db);
+  }
   const blocker=await instance.connect();try{await blocker.query('begin;lock public.organizations in access exclusive mode');await assert.rejects(()=>instance.migrate(),e=>e.code==='55P03');checks++;}finally{await blocker.query('rollback');await blocker.end();}
   h.eq((await db.query('select count(*)::int n from supabase_migrations.schema_migrations')).rows[0].n,7);
   h.eq((await db.query("select count(*)::int n from pg_roles where rolname='vetkarjera_organization_writer'")).rows[0].n,0);
   report.cutoverLockRollback='PASS';
   await instance.migrate();const after=(await db.query("select jsonb_build_object('users',(select jsonb_agg(to_jsonb(t) order by id) from auth.users t),'profiles',(select jsonb_agg(to_jsonb(t) order by id) from public.profiles t),'specialist',(select jsonb_agg(to_jsonb(t) order by user_id) from public.specialist_profiles t),'employer',(select jsonb_agg(to_jsonb(t) order by user_id) from public.employer_profiles t)) snapshot")).rows[0].snapshot;
   h.eq(after,before);h.eq((await db.query('select count(*)::int n from supabase_migrations.schema_migrations')).rows[0].n,8);
+  if(productionEquivalent){
+   report.executorAfter=await require('./organization-executor-fixture.cjs').verify(instance.executor,authSchemaOwner);
+   h.eq(await require('./organization-executor-fixture.cjs').authCatalog(db),authBefore);
+   h.eq(instance.notices.filter(n=>n.severity==='WARNING'),[]);
+   report.authManagedObjectsUnchanged='PASS';report.nonSuperuserUpgrade='PASS';
+  }
   const restoredPolicies=(await db.query(policySql)).rows;
   h.eq(restoredPolicies.filter(p=>p.policyname!=='specialist_photo_anon_read_guard'),sourcePolicies.map(p=>p.policyname==='specialist_photo_read_guard'?{...p,roles:['authenticated']}:p));
   const anonGuard=restoredPolicies.find(p=>p.policyname==='specialist_photo_anon_read_guard');
@@ -35,6 +48,7 @@ const h={bump(){checks++;},eq(a,b){assert.deepEqual(a,b);checks++;},q:(sql,args=
   report.stage4StoragePolicyPreservation='PASS';report.upgradePreservation='PASS';}
  }else{db=await createDatabase();report.postgres=(await db.query('show server_version')).rows[0].server_version;}
  const actors=await require('./organization-cases.cjs')(h);report.behavior='PASS';report.assertions=checks;
+ if(productionEquivalent){const start=checks;await require('./organization-executor-boundary.cjs')(h);report.executorBoundary={status:'PASS',assertions:checks-start};}
  await require('./organization-storage-access.cjs')(h);report.storageCompatibility='PASS';
  if(instance){await require('./organization-concurrency.cjs')(instance,h,actors);report.twoConnectionConcurrency='PASS';report.narrowRoleSecurity='PASS';}
  await h.root();const catalogs=require('../lib/organizations/catalogs.json');
