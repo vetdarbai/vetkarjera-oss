@@ -1,0 +1,22 @@
+.public-employer { padding-top: 32px; padding-bottom: 48px; overflow-wrap: anywhere; }
+.public-employer h1, .public-employer h2 { font-family: var(--font-manrope), sans-serif; }
+.public-employer h1 { font-size: 30px; line-height: 1.3; margin-bottom: 12px; }
+.public-employer h2 { font-size: 21px; margin-bottom: 16px; }
+.public-employer-heading { display: flex; gap: 24px; align-items: flex-start; padding: 24px 0; }
+.public-employer-logo { width: 112px; height: 112px; object-fit: contain; flex-shrink: 0; }
+.public-employer-cover { width: 100%; max-height: 320px; object-fit: cover; }
+.public-employer section { padding: 24px 0; border-top: 1px solid var(--line); }
+.public-employer-description { white-space: pre-wrap; }
+.public-employer dl > div { padding: 8px 0; }
+.public-employer dt { font-weight: 650; }
+.public-employer dd { margin: 8px 0 0; }
+.public-employer-contacts { display: flex; flex-wrap: wrap; gap: 12px 24px; }
+.public-employer-contacts a { min-height: 44px; display: inline-flex; align-items: center; }
+@media (max-width: 760px) {
+  .public-employer { padding-top: 16px; padding-bottom: 32px; }
+  .public-employer h1 { font-size: 25px; }
+  .public-employer-heading { flex-direction: column; gap: 16px; }
+  .public-employer-logo { width: 80px; height: 80px; }
+  .public-employer-cover { max-height: 200px; }
+  .public-employer-contacts { flex-direction: column; }
+}

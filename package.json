@@ -23,7 +23,9 @@
     "test:organizations:native": "node scripts/test-organizations-db.cjs native",
     "test:organizations:executor": "node scripts/test-organizations-db.cjs native-executor",
     "test:organizations:clean": "node scripts/test-organizations-db.cjs native-clean",
-    "test:organizations:media": "node scripts/test-organization-media.cjs"
+    "test:organizations:media": "node scripts/test-organization-media.cjs",
+    "test:employer:actions": "node scripts/test-employer-actions.cjs",
+    "test:employer:ui": "node scripts/test-employer-frontend.cjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.6",

@@ -29,7 +29,7 @@ Module._load=function(name,parent,main){
  if(name.startsWith('@/'))return original.call(this,path.resolve(name.slice(2)),parent,main);
  return original.call(this,name,parent,main);
 };
-const route=require('../app/api/organizacijos/[id]/media/[kind]/route.ts'),publicRoute=require('../app/darbdaviai/[slug]/route.ts'),specialistRoute=require('../app/api/profilis/nuotrauka/vaizdas/route.ts'),media=require('../lib/organizations/media.ts'),sharp=require('sharp');
+const route=require('../app/api/organizacijos/[id]/media/[kind]/route.ts'),publicRoute=require('../app/api/organizacijos/slug/[slug]/route.ts'),specialistRoute=require('../app/api/profilis/nuotrauka/vaizdas/route.ts'),media=require('../lib/organizations/media.ts'),sharp=require('sharp');
 function request(method,k,body,query='',headers={}){return new Request('http://127.0.0.1:3000/api/organizacijos/'+oid+'/media/'+k+query,{method,headers:{origin:'http://127.0.0.1:3000',...(body?{'content-type':'image/png'}:{}),...headers},body:body?new Uint8Array(body):undefined});}
 async function call(a,method,k,body,query='',headers={}){current=a;return route[method](request(method,k,body,query,headers),{params:Promise.resolve({id:oid,kind:k})});}
 (async()=>{db=await createDatabase();owner=await account('employer');foreign=await account('specialist');admin=await account('specialist');
