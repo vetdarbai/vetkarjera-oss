@@ -1,22 +1,34 @@
-.public-employer { padding-top: 32px; padding-bottom: 48px; overflow-wrap: anywhere; }
+.public-employer { max-width: 1120px; padding-top: 32px; padding-bottom: 24px; overflow-wrap: anywhere; font-size: 16px; line-height: 1.5; }
 .public-employer h1, .public-employer h2 { font-family: var(--font-manrope), sans-serif; }
 .public-employer h1 { font-size: 30px; line-height: 1.3; margin-bottom: 12px; }
 .public-employer h2 { font-size: 21px; margin-bottom: 16px; }
 .public-employer-heading { display: flex; gap: 24px; align-items: flex-start; padding: 24px 0; }
 .public-employer-logo { width: 112px; height: 112px; object-fit: contain; flex-shrink: 0; }
-.public-employer-cover { width: 100%; max-height: 320px; object-fit: cover; }
+.public-employer-cover { display: block; width: 100%; height: auto; object-fit: contain; border-radius: 4px; }
+.has-cover .public-employer-heading { position: relative; }
+.has-cover .public-employer-logo { margin-top: -48px; background: var(--paper); border: 1px solid var(--line); border-radius: 4px; }
+.public-employer-layout { display: grid; grid-template-columns: minmax(0, 2.1fr) minmax(280px, 1fr); gap: 32px; }
+.public-employer-layout:has(> .public-employer-main:empty) { display: block; max-width: 720px; }
+.public-employer .public-employer-aside section { background: var(--surface-soft); border: 1px solid var(--line); border-radius: 4px; padding: 20px; margin-bottom: 16px; }
 .public-employer section { padding: 24px 0; border-top: 1px solid var(--line); }
-.public-employer-description { white-space: pre-wrap; }
+.public-employer-description { white-space: pre-wrap; max-width: 72ch; color: var(--muted); }
 .public-employer dl > div { padding: 8px 0; }
 .public-employer dt { font-weight: 650; }
-.public-employer dd { margin: 8px 0 0; }
-.public-employer-contacts { display: flex; flex-wrap: wrap; gap: 12px 24px; }
-.public-employer-contacts a { min-height: 44px; display: inline-flex; align-items: center; }
-@media (max-width: 760px) {
+.public-employer dd { margin: 4px 0 0; color: var(--muted); }
+.public-employer-benefits { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 24px; margin: 0; padding: 0; list-style: none; }
+.public-employer-benefits li { display: flex; gap: 12px; align-items: baseline; color: var(--muted); }
+.public-employer-benefits li::before { content: '✓'; color: var(--primary); flex: 0 0 24px; text-align: center; }
+.public-employer-contacts { display: flex; flex-direction: column; gap: 8px; }
+.public-employer-contacts a { min-height: 48px; display: flex; align-items: center; padding: 8px 12px; border-radius: 4px; background: var(--primary-soft); color: var(--primary-dark); overflow-wrap: anywhere; }
+.public-employer-contacts a:hover { background: var(--surface-soft); }
+.public-employer-contacts a:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+@media (max-width: 900px) {
   .public-employer { padding-top: 16px; padding-bottom: 32px; }
-  .public-employer h1 { font-size: 25px; }
+  .public-employer h1 { font-size: 26px; }
   .public-employer-heading { flex-direction: column; gap: 16px; }
   .public-employer-logo { width: 80px; height: 80px; }
-  .public-employer-cover { max-height: 200px; }
+  .public-employer-layout { display: block; }
+  .public-employer .public-employer-aside section { background: transparent; border: 0; border-top: 1px solid var(--line); border-radius: 0; padding: 24px 0; margin: 0; }
+  .public-employer-benefits { grid-template-columns: minmax(0, 1fr); }
   .public-employer-contacts { flex-direction: column; }
 }

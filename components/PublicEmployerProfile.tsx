@@ -15,13 +15,15 @@ export default function PublicEmployerProfile({ organization: o }: { organizatio
     return values.length ? [{ label: group.label, values }] : [];
   });
   const benefits = [...(o.benefits ?? []).map(publicBenefitLabel), ...(o.customBenefits ?? [])].filter(Boolean);
-  return <><Navigation /><main className="public-employer registry-container">
+  return <><Navigation /><main className={`public-employer registry-container${o.media?.cover?.src ? ' has-cover' : ''}`}>
     {o.media?.cover?.src && <Image unoptimized width={1600} height={600} className="public-employer-cover" src={o.media.cover.src} alt="Organizacijos viršelio nuotrauka" />}
     <header className="public-employer-heading">{o.media?.logo?.src && <Image unoptimized width={112} height={112} className="public-employer-logo" src={o.media.logo.src} alt={`${o.name || 'Organizacijos'} logotipas`} />}<div><h1>{o.name || 'Organizacija'}</h1>{publicTypeLabel(o) && <p>{publicTypeLabel(o)}{o.primaryType === 'other' && o.typeOther ? ` · ${o.typeOther}` : ''}</p>}{!!o.cities?.length && <p>{o.cities.map(city => city.name).join(' · ')}</p>}{o.employeeSize && <p>Komandos dydis: {employeeSizes.find(size => size.code === o.employeeSize)?.label_lt || o.employeeSize}</p>}</div></header>
+    <div className="public-employer-layout"><div className="public-employer-main">
     {o.description && <section><h2>Apie organizaciją</h2><p className="public-employer-description">{o.description}</p></section>}
     {!!activities.length && <section><h2>Organizacijos veikla</h2><dl>{activities.map(g => <div key={g.label}><dt>{g.label}</dt><dd>{g.values.join(' · ')}</dd></div>)}</dl></section>}
-    {!!benefits.length && <section><h2>Ką siūlome darbuotojams</h2><ul>{benefits.map((benefit, i) => <li key={`${i}:${benefit}`}>{benefit}</li>)}</ul></section>}
+    {!!benefits.length && <section><h2>Ką siūlome darbuotojams</h2><ul className="public-employer-benefits">{benefits.map((benefit, i) => <li key={`${i}:${benefit}`}>{benefit}</li>)}</ul></section>}
+    </div><aside className="public-employer-aside">
     {(o.publicPhone || o.publicEmail || links.some(([,url]) => safePublicUrl(url))) && <section><h2>Kontaktai</h2><div className="public-employer-contacts">{o.publicPhone && <a href={`tel:${encodeURIComponent(o.publicPhone)}`}>{o.publicPhone}</a>}{o.publicEmail && <a href={`mailto:${encodeURIComponent(o.publicEmail)}`}>{o.publicEmail}</a>}{links.flatMap(([label, url]) => { const href = safePublicUrl(url); return href ? [<a key={label} href={href} target="_blank" rel="noopener noreferrer">{label}</a>] : []; })}</div></section>}
-    <section><h2>Darbo skelbimai</h2><p>Šiuo metu aktyvių darbo skelbimų nėra.</p></section>
+    <section><h2>Darbo skelbimai</h2><p>Šiuo metu aktyvių darbo skelbimų nėra.</p></section></aside></div>
   </main><Footer /></>;
 }

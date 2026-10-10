@@ -1,24 +1,128 @@
-.employer-profile-page .profile-content { overflow-wrap: anywhere; }
-.employer-loading { max-width: 816px; display: grid; gap: 24px; }
-.employer-loading > div { min-height: 96px; background: var(--primary-soft); border: 1px solid var(--line); border-radius: 4px; }
-.employer-profile-page .employer-name { margin-top: 16px; }
-.employer-profile-page .profile-notice { display: block; }
-.employer-profile-page .profile-notice .profile-button { margin-top: 12px; }
-.employer-entries { margin: 16px 0 24px; }
-.employer-entry { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 12px; margin: 12px 0; }
-.employer-entry .profile-field { margin: 0; }
-.employer-panel { padding: 20px 0; border-top: 1px solid var(--line); }
-.employer-panel > summary { min-height: 44px; cursor: pointer; font-weight: 650; font-size: 18px; }
-.employer-panel > summary:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
-.employer-panel[open] > summary { margin-bottom: 16px; }
-.employer-activity-group, .employer-media, .employer-transfer { padding: 16px 0; border-bottom: 1px solid var(--line); }
-.employer-logo { display: block; width: 112px; height: 112px; object-fit: contain; margin-bottom: 16px; }
-.employer-cover { display: block; width: 100%; max-height: 280px; object-fit: contain; margin-bottom: 16px; }
-.employer-ownership > form { margin-top: 16px; }
-.employer-profile-page .profile-content form > fieldset:disabled { opacity: .8; }
-@media (max-width: 760px) {
-  .employer-profile-page .employer-save { position: sticky; bottom: 0; background: var(--paper); padding: 16px 0 max(16px, env(safe-area-inset-bottom)); z-index: 2; }
-  .employer-entry { grid-template-columns: minmax(0, 1fr); }
-  .employer-profile-page .profile-section-heading { align-items: flex-start; flex-wrap: wrap; }
-  .employer-profile-page .profile-inline-actions .profile-button { width: 100%; }
+/* Employer presentation only: shared specialist UI, header and footer are unchanged. */
+.employer-profile-page .profile-shell { max-width:1080px; grid-template-columns:220px minmax(0,1fr); gap:24px 40px; padding-bottom:24px; }
+.employer-profile-page .profile-shell.overview { display:block; max-width:1176px; }
+.employer-profile-page .profile-content { overflow-wrap:anywhere; font-size:16px; line-height:1.5; }
+.employer-profile-page .profile-content h1 { margin-bottom:24px; }
+.employer-profile-page .profile-content h1[tabindex='-1']:focus { outline:none; }
+.employer-profile-page .profile-content h2 { font-size:20px; }
+.employer-profile-page .profile-helper, .employer-profile-page .profile-intro { font-size:14px; line-height:1.5; }
+.employer-profile-page .profile-button { font-size:16px; }
+.employer-profile-page .employer-private-notice { background:var(--primary-soft); border:0; color:var(--muted); }
+.employer-profile-page .profile-field { margin-bottom:24px; }
+.employer-profile-page .profile-field label, .employer-choice > span, .employer-profile-page .profile-multi legend { font-size:16px; line-height:1.5; }
+.employer-profile-page .profile-field input, .employer-profile-page .profile-field select, .employer-profile-page .profile-field textarea { min-height:48px; font-size:16px; }
+.employer-profile-page .profile-notice { display:block; }
+.employer-profile-page .profile-notice .profile-button { margin-top:12px; }
+.employer-profile-page .profile-steps button { display:flex; align-items:center; gap:12px; font-size:14px; border-left:0; border-radius:4px; }
+.employer-step-number { display:inline-flex; justify-content:center; align-items:center; flex-shrink:0; width:32px; height:32px; border:1px solid var(--line); border-radius:50%; background:var(--paper); color:var(--primary-dark); font-weight:650; }
+.employer-profile-page .profile-steps button[aria-current=step] .employer-step-number { background:var(--primary); border-color:var(--primary); color:var(--paper); }
+.employer-profile-page .profile-back { grid-column:1 / -1; padding-left:0; border-color:transparent; background:transparent; }
+.employer-profile-page .profile-back span { margin-right:10px; }
+.employer-eyebrow { font-size:14px; color:var(--primary-dark); margin-bottom:16px; }
+.employer-overview-identity { display:flex; justify-content:space-between; align-items:flex-start; gap:32px; margin-bottom:32px; }
+.employer-overview-identity h1 { font-size:32px; }
+.employer-overview-identity .profile-intro { margin:0; font-size:16px; }
+.employer-overview-layout { display:grid; grid-template-columns:minmax(0,2.2fr) minmax(260px,1fr); gap:32px; }
+.employer-overview-aside { padding-left:32px; border-left:1px solid var(--line); }
+.employer-overview-aside .profile-section { padding-block:24px; }
+.employer-overview-aside .profile-section:first-child { padding-top:0; }
+.employer-overview-aside .profile-inline-actions { margin-top:20px; }
+.employer-profile-page .profile-readiness { border:0; padding:24px; background:var(--surface-soft); }
+.employer-profile-page .profile-readiness h2 { font-size:20px; font-weight:600; }
+.employer-profile-page .profile-readiness strong { color:var(--primary); font-size:22px; }
+.employer-profile-page .profile-readiness p { font-size:14px; }
+.employer-profile-page .employer-overview-step { display:grid; grid-template-columns:44px minmax(0,1fr) auto; align-items:start; gap:16px; padding-block:24px; }
+.employer-overview-step .employer-step-number { width:44px; height:44px; background:var(--primary-soft); border:0; }
+.employer-overview-step h2 { margin:0; }
+.employer-overview-step .profile-helper { margin:6px 0 0; }
+.employer-overview-step .profile-helper:empty { display:none; }
+.employer-profile-page .employer-edit-action { display:flex; align-items:center; gap:12px; padding:0; font-size:14px; }
+.employer-edit-action span { font-size:24px; }
+.employer-profile-page .employer-public-mobile { display:none; }
+.employer-basic-fields { padding-top:8px; }
+.employer-basic-fields > .profile-helper { margin-top:-16px; margin-bottom:28px; }
+.employer-choice details { border:1px solid var(--line); border-radius:4px; background:var(--paper); }
+.employer-choice summary { display:flex; justify-content:space-between; gap:16px; align-items:center; padding:12px; min-height:48px; cursor:pointer; list-style:none; }
+.employer-choice summary::after { content:''; flex:0 0 8px; height:8px; border-right:2px solid currentColor; border-bottom:2px solid currentColor; transform:rotate(45deg); margin-right:4px; }
+.employer-choice details[open] summary::after { transform:rotate(225deg); }
+.employer-choice summary::-webkit-details-marker { display:none; }
+.employer-choice summary[aria-disabled=true] { cursor:default; color:var(--muted); }
+.employer-choice summary:focus-visible { outline:2px solid var(--primary); outline-offset:3px; }
+.employer-choice fieldset { margin:0; padding:8px; border:0; border-top:1px solid var(--line); min-width:0; }
+.employer-choice label { display:flex; align-items:center; gap:12px; padding:10px 8px; min-height:48px; cursor:pointer; }
+.employer-choice label:hover { background:var(--surface-soft); }
+.employer-profile-page .employer-choice input { width:18px; height:18px; min-height:18px; flex:0 0 18px; accent-color:var(--primary); }
+.employer-entries { margin:28px 0 24px; }
+.employer-entry { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:start; gap:8px; margin:12px 0; }
+.employer-profile-page .employer-entry .profile-field { margin:0; }
+.employer-entry .profile-field label { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+.employer-entry .profile-button.danger { background:transparent; border-color:transparent; padding-inline:8px; min-height:48px; }
+.employer-legal-values { margin:0; }
+.employer-legal-values > div { margin-bottom:24px; }
+.employer-legal-values dt { color:var(--muted); font-size:14px; }
+.employer-legal-values dd { margin:6px 0 0; font-size:16px; }
+.employer-panel { border-top:1px solid var(--line); }
+.employer-panel > summary { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:4px 16px; padding:20px 16px; min-height:72px; cursor:pointer; list-style:none; }
+.employer-panel > summary::-webkit-details-marker { display:none; }
+.employer-panel > summary::after { content:'›'; font-size:26px; grid-column:2; grid-row:1 / 3; }
+.employer-panel[open] > summary { background:var(--surface-soft); }
+.employer-panel[open] > summary::after { transform:rotate(90deg); }
+.employer-panel-title { font-weight:650; font-size:18px; }
+.employer-panel-status { color:var(--muted); font-size:14px; grid-column:1; }
+.employer-panel > summary:focus-visible { outline:2px solid var(--primary); outline-offset:-2px; }
+.employer-panel-body { padding:20px 16px; }
+.employer-panel-body > .profile-field:last-child { margin-bottom:0; }
+.employer-activity-group, .employer-media, .employer-transfer { padding:24px 0; border-bottom:1px solid var(--line); }
+.employer-activity-group { position:relative; }
+.employer-selected-count { position:absolute; top:24px; right:0; margin:0 !important; }
+.employer-activity-group .profile-multi legend { padding-right:96px; font-weight:650; }
+.employer-profile-page .profile-checks label { min-height:48px; font-size:16px; gap:16px; padding:8px 0; border-bottom:1px solid var(--line); }
+.employer-profile-page .profile-checks input { width:20px; height:20px; }
+.employer-media:last-child, .employer-activity-group:last-child { border-bottom:0; }
+.employer-media-preview { display:flex; align-items:center; flex-wrap:wrap; gap:24px; margin-top:16px; }
+.employer-logo { display:block; width:120px; height:120px; object-fit:contain; border:1px solid var(--line); border-radius:4px; background:var(--paper); }
+.employer-cover { display:block; width:100%; height:auto; object-fit:contain; border-radius:4px; }
+.employer-media-cover .employer-media-preview { display:block; }
+.employer-media-cover .employer-media-controls { margin-top:16px; }
+.employer-media-success { color:#245738 !important; }
+.employer-media .profile-button.danger { border-color:transparent; background:transparent; }
+.employer-ownership > form { margin-top:16px; }
+.employer-profile-page .profile-content form > fieldset:disabled { opacity:.8; }
+.employer-profile-page .employer-save { position:sticky; bottom:0; display:flex; justify-content:space-between; gap:16px; z-index:2; background:var(--paper); padding:16px 0 max(16px,env(safe-area-inset-bottom)); margin-top:24px; }
+.employer-profile-page .employer-save p { margin:0; }
+.employer-profile-page .employer-save .profile-button { width:auto; min-width:120px; flex-shrink:0; }
+/* Normal-flow bar reserves its actual height. Focused fields retain bottom clearance. */
+.employer-profile-page .profile-content :is(.profile-field,input,select,textarea,.profile-helper,.profile-field-error,.profile-notice,summary,.profile-checks label) { scroll-margin-bottom:120px; scroll-margin-top:96px; }
+.employer-loading { max-width:1120px; display:grid; grid-template-columns:minmax(0,2.2fr) minmax(260px,1fr); gap:24px 32px; }
+.employer-loading > div { min-height:96px; background:var(--surface-soft); border-radius:4px; }
+.employer-loading > div:first-child { grid-column:1 / -1; min-height:64px; }
+@media (max-width:900px) {
+  .employer-profile-page .profile-shell, .employer-profile-page .profile-shell.editing { display:block; padding:20px 16px 24px; }
+  .employer-profile-page .profile-steps { display:none; }
+  .employer-profile-page .profile-back { display:flex; margin-bottom:16px; }
+  .employer-profile-page .profile-mobile-steps { display:block; margin:0 0 24px; }
+  .employer-profile-page .profile-mobile-steps .employer-choice > span { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+  .employer-profile-page .profile-mobile-steps .employer-choice label { position:static; clip:auto; width:auto; height:auto; overflow:visible; }
+  .employer-profile-page .profile-content h1 { font-size:26px; line-height:1.3; }
+  .employer-profile-page .profile-grid, .employer-profile-page .profile-checks { grid-template-columns:minmax(0,1fr); }
+  .employer-overview-identity { display:block; margin-bottom:24px; }
+  .employer-overview-layout { display:block; }
+  .employer-overview-aside { padding-left:0; border-left:0; }
+  .employer-overview-aside .profile-section:first-child { border-top:1px solid var(--line); padding-top:24px; }
+  .employer-profile-page .employer-public-desktop { display:none; }
+  .employer-profile-page .employer-public-mobile { display:flex; width:100%; }
+  .employer-profile-page .profile-readiness { padding:20px 16px; }
+  .employer-profile-page .profile-readiness h2 { font-size:18px; }
+  .employer-profile-page .employer-overview-step { grid-template-columns:32px minmax(0,1fr) auto; gap:12px; }
+  .employer-overview-step .employer-step-number { width:32px; height:32px; }
+  .employer-overview-step .employer-edit-action { grid-column:3; align-self:center; justify-self:end; }
+  .employer-overview-aside .profile-inline-actions .profile-button { width:100%; }
+  .employer-panel > summary { padding-inline:0; }
+  .employer-panel[open] > summary { padding-inline:16px; }
+  .employer-panel-body { padding-inline:0; }
+  .employer-media-logo .employer-media-controls { flex:1 1 160px; }
+  .employer-media .profile-inline-actions { display:flex; flex-direction:column; align-items:stretch; }
+  .employer-profile-page .profile-section { padding-block:28px; }
+  .employer-loading { display:block; }
+  .employer-loading > div { margin-bottom:24px; }
 }

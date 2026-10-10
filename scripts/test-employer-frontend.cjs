@@ -110,16 +110,26 @@ async function session(a, width = 1440) {
   return { context, page };
 }
 async function edit(page, step) {
-  if (page.viewportSize().width <= 760) {
-    if (await page.locator('.profile-mobile-steps').count()) await page.getByLabel('Profilio dalis', { exact: true }).selectOption(String(step));
-    else await page.locator('.profile-section').filter({ has: page.getByRole('heading', { name: ['Pagrindiniai duomenys','Juridiniai ir atstovo duomenys','Organizacijos pristatymas'][step-1], exact: true }) }).getByRole('button').click();
+  await page.waitForFunction(() => [...document.querySelectorAll('main button')].some(e => Object.keys(e).some(k => k.startsWith('__reactProps$'))));
+  if (await page.locator('.employer-overview-step').count()) {
+    await page.locator('.employer-overview-step').nth(step-1).getByRole('button').click();
+  } else if (page.viewportSize().width <= 900) {
+    await choose(page, 'Profilio dalis', String(step));
   } else await page.locator('.profile-steps button').nth(step-1).click();
+}
+async function choose(page, title, code) {
+  const choice = page.locator('.employer-choice').filter({ has: page.locator(':scope > span').filter({ hasText: title }) });
+  await choice.locator('summary').click();
+  const labels = await choice.locator('label').all();
+  // Same catalog order/codes, selected through the visible native radio UI.
+  const options = title === 'Profilio dalis' ? ['1','2','3'] : ['', ...catalog.types.map(([code]) => code)];
+  await labels[options.indexOf(code)].click();
 }
 async function save(page) { await page.locator('.employer-save button').click(); await page.getByRole('status').filter({ hasText: 'Pakeitimai išsaugoti.' }).waitFor(); }
 async function panel(page, name) { const details = page.locator('.employer-panel').filter({ has: page.locator('summary').filter({ hasText: name }) }); if (!(await details.getAttribute('open') !== null)) await details.locator(':scope > summary').click(); return details; }
 async function overview(page) { await page.getByRole('button', { name: 'Grįžti į profilį', exact: true }).click(); }
 async function overflow(page) { eq(await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth), false, 'Horizontal overflow'); }
-async function touchTargets(page) { eq(await page.locator('main').evaluate(main => [...main.querySelectorAll('button, summary, input:not([type=checkbox]):not([type=file]), select, .profile-checks label')].filter(e => e.getClientRects().length).every(e => { const box = e.getBoundingClientRect(); return box.width >= 44 && box.height >= 44; })), true, '44px touch targets'); }
+async function touchTargets(page) { eq(await page.locator('main').evaluate(main => [...main.querySelectorAll('button, summary, input:not([type=checkbox]):not([type=radio]):not([type=file]), select, .profile-checks label, .employer-choice label')].filter(e => e.getClientRects().length).every(e => { const box = e.getBoundingClientRect(); return box.width >= 44 && box.height >= 44; })), true, '44px touch targets'); }
 async function run() {
   fs.mkdirSync(out, { recursive: true });
   const cert = path.join(out, 'fixture-cert.pem'), key = path.join(out, 'fixture-key.pem');
@@ -142,8 +152,8 @@ async function run() {
     await page.getByRole('button', { name: 'Pradėti pildyti profilį' }).click();
     await page.getByLabel('Organizacijos pavadinimas', { exact: true }).fill('Vietinė testų klinika'); await save(page);
     eq((await owner(employer)).completeness.total, 0);
-    await page.getByLabel('Organizacijos tipas', { exact: true }).selectOption('veterinary_clinic'); await page.getByRole('button', { name: 'Keisti tipą', exact: true }).click();
-    await page.locator('.employer-entries').getByRole('button', { name: 'Pridėti', exact: true }).click(); await page.getByLabel('Miestai 1', { exact: true }).fill('Kaunas'); await save(page);
+    await choose(page, 'Organizacijos tipas', 'veterinary_clinic'); await page.getByRole('button', { name: 'Keisti tipą', exact: true }).click();
+    await page.locator('.employer-entries').getByRole('button', { name: /^Pridėti(?: miestą)?$/ }).click(); await page.getByLabel('Miestai 1', { exact: true }).fill('Kaunas'); await save(page);
     eq((await owner(employer)).completeness.total, 20);
     await edit(page, 2); await page.getByLabel('Juridinis pavadinimas', { exact: true }).fill('LOCAL SYNTHETIC UAB'); await save(page);eq((await owner(employer)).completeness.total,20);
     await page.getByLabel('Teisinė forma').selectOption('uab'); await page.getByLabel('Juridinio asmens kodas', { exact: true }).fill('LOCAL-ONLY');
@@ -152,14 +162,14 @@ async function run() {
   });
   await group('All 14 adaptive types; Other; distributor multi including mixed; lab free text', async () => {
     for (const type of catalog.typeMatrix) {
-      await edit(page,1); await page.getByLabel('Organizacijos tipas', { exact:true }).selectOption(type.type);
+      await edit(page,1); await choose(page, 'Organizacijos tipas', type.type);
       if (await page.getByRole('dialog').count()) await page.getByRole('button',{name:'Keisti tipą',exact:true}).click();
       if (await page.locator('.employer-save button').isEnabled()) await save(page);
       await edit(page,3); const activity = await panel(page,'Organizacijos veikla');
       for (const code of type.groups) {
         const g = catalog.groups.find(g => g.type === type.type && g.code === code);
         const area = activity.locator('.employer-activity-group').filter({has:page.getByText(g.label,{exact:true})});
-        if (g.kind === 'text') { await area.getByRole('button',{name:'Pridėti',exact:true}).click(); await area.locator('input[type=text]').fill('Vietinė testų veikla'); }
+        if (g.kind === 'text') { await area.getByRole('button',{name:/^Pridėti(?: miestą)?$/}).click(); await area.locator('input[type=text]').fill('Vietinė testų veikla'); }
         else await area.locator('input[type=checkbox]').first().check();
       }
       if (type.type === 'veterinary_wholesale_distributor') {
@@ -168,7 +178,7 @@ async function run() {
       }
       if (type.type === 'laboratory_diagnostics') {
         const extra = activity.locator('.employer-activity-group').filter({has:page.getByText(catalog.groups.find(g=>g.type===type.type&&g.code==='served_sectors_species').label,{exact:true})});
-        await extra.getByRole('button',{name:'Pridėti',exact:true}).click(); await extra.locator('input[type=text]').fill('Smulkieji gyvūnai');
+        await extra.getByRole('button',{name:/^Pridėti(?: miestą)?$/}).click(); await extra.locator('input[type=text]').fill('Smulkieji gyvūnai');
       }
       await save(page); eq((await owner(employer)).completeness.typeQualityPoints,5,type.type);
     }
@@ -213,14 +223,14 @@ async function run() {
     const old = await owner(employer); await mutate(employer,'patch_org_public',{name:'Kitas serverio pavadinimas'});
     await page.locator('.employer-save button').click(); await page.getByRole('alert').filter({hasText:'Duomenys pasikeitė'}).waitFor(); eq(await page.getByLabel('Organizacijos pavadinimas',{exact:true}).inputValue(),'Vietinis neišsaugotas pavadinimas');
     await page.getByRole('button',{name:'Įkelti naujausius duomenis'}).click(); await page.getByRole('button',{name:'Išeiti neišsaugojus'}).click(); await page.getByLabel('Organizacijos pavadinimas',{exact:true}).filter({visible:true}).waitFor();
-    await page.waitForFunction(() => document.querySelector('main input')?.value==='Kitas serverio pavadinimas');
+    await page.waitForFunction(() => [...document.querySelectorAll('main input[type=text]')].some(input => input.value==='Kitas serverio pavadinimas'));
     const publicSession = await browser.newContext({ignoreHTTPSErrors:true}); const publicPage = await publicSession.newPage();publicPage.on('pageerror',e=>errors.push(`${publicPage.url()} | ${e.stack || e.message}`));
     const redirected = await publicSession.request.get(origin+'/darbdaviai/'+old.organization.slug,{maxRedirects:0}); eq(redirected.status(),308);
     await publicPage.goto(origin+'/darbdaviai/'+(await owner(employer)).organization.slug); eq(await publicPage.locator('h1').textContent(),'Kitas serverio pavadinimas');
     const content = await publicPage.locator('main').innerText(); ok(!content.includes('LOCAL SYNTHETIC UAB')); ok(!content.includes('+37000000000')); ok(!content.includes('70 %')); ok(content.includes('1–5'));
     await page.locator('.employer-entries').getByRole('button',{name:/Pašalinti/}).click(); await save(page); eq((await owner(employer)).profileState,'draft');
     eq((await publicSession.request.get(origin+'/darbdaviai/'+(await owner(employer)).organization.slug)).status(),404);
-    await page.locator('.employer-entries').getByRole('button',{name:'Pridėti',exact:true}).click(); await page.getByLabel('Miestai 1',{exact:true}).fill('Kaunas'); await save(page); eq((await owner(employer)).profileState,'active');
+    await page.locator('.employer-entries').getByRole('button',{name:/^Pridėti(?: miestą)?$/}).click(); await page.getByLabel('Miestai 1',{exact:true}).fill('Kaunas'); await save(page); eq((await owner(employer)).profileState,'active');
     eq((await publicSession.request.get(origin+'/darbdaviai/nezinoma-organizacija')).status(),404);
     await publicSession.close();
   });
@@ -233,7 +243,7 @@ async function run() {
     await rpc(admin,'admin_resolve_case',{organization_id:c.organization.id,expected_row_version:c.rowVersion,payload:{case_id:caseId,decision:'needs_info',reason:'PRIVATE ADMIN QA REASON'}});
     await page.reload(); await page.getByText('Patikrinimui reikia papildomos informacijos.',{exact:true}).waitFor(); ok(!(await page.locator('main').innerText()).includes('PRIVATE ADMIN QA REASON'));
     await approve(employer,admin,'identity'); await approve(employer,admin); await page.reload();
-    await edit(page,2); eq(await page.getByLabel('Juridinis pavadinimas',{exact:true}).getAttribute('readonly'),'');
+    await edit(page,2); eq(await page.locator('.employer-legal-values dd').first().innerText(), (await owner(employer)).legal.legalName); eq(await page.getByLabel('Juridinis pavadinimas',{exact:true}).count(),0);
     await page.getByRole('button',{name:'Prašyti pakeisti',exact:true}).click(); await page.getByRole('dialog').getByLabel('Juridinis pavadinimas',{exact:true}).fill('LOCAL PROPOSED NAME'); await page.getByRole('button',{name:'Pateikti prašymą'}).click();
     await page.getByRole('status').filter({hasText:'Pakeitimo prašymas pateiktas peržiūrai.'}).waitFor(); eq((await owner(employer)).legal.legalName,'LOCAL SYNTHETIC UAB');
   });
@@ -261,12 +271,34 @@ async function run() {
   await group('Responsive 320/360/390/1440; long brand; focus/dialog; public minimal profile', async () => {
     await mutate(recipient,'patch_org_public',{name:'IlgasProfesionaliosVeterinarijosOrganizacijosPavadinimas'.repeat(3)});
     const target = await session(recipient); await target.page.goto(origin+'/profilis/darbdavys');
-    for (const width of [320,360,390,1440]) {
+    for (const width of [320,360,390,899,901,1440]) {
       await target.page.setViewportSize({width,height:900}); await overflow(target.page);
+      eq(await target.page.locator('.profile-steps').count(),0,'Overview has no duplicate step navigation');
+      eq(await target.page.locator('.employer-save').count(),0,'Overview has no Save bar');
       await target.page.screenshot({path:path.join(out,`overview-${width}.png`),fullPage:true});
       for (const n of [1,2,3]) { await edit(target.page,n); if(n===3) for(const summary of await target.page.locator('.employer-panel > summary').all()) { if(await summary.locator('..').getAttribute('open')===null)await summary.click(); } await overflow(target.page); if(width<=390)await touchTargets(target.page); await target.page.screenshot({path:path.join(out,`step-${n}-${width}.png`),fullPage:true}); }
       await overview(target.page);
     }
+    for (const width of [320,360,390,899,901,1440]) {
+      await target.page.setViewportSize({width,height:900}); await edit(target.page,2);
+      const phone=target.page.getByLabel('Kontaktinis telefonas',{exact:true});
+      await phone.focus(); await phone.scrollIntoViewIfNeeded();
+      const helper=target.page.getByText('Viešai nerodomas.',{exact:true}); await helper.scrollIntoViewIfNeeded();
+      const field=await phone.boundingBox(), help=await helper.boundingBox(), bar=await target.page.locator('.employer-save').boundingBox();
+      ok(field.y+field.height<=bar.y && help.y+help.height<=bar.y,'Phone/helper above Save bar '+width);
+      eq(await target.page.locator('.employer-save button').isDisabled(),true,'Saved form has disabled Save');
+      await edit(target.page,3); await panel(target.page,'Vieši kontaktai');
+      const last=target.page.getByLabel('Komandos dydis'); await last.focus(); await last.scrollIntoViewIfNeeded();
+      const lastBox=await last.boundingBox(), lastBar=await target.page.locator('.employer-save').boundingBox();
+      ok(lastBox.y+lastBox.height<=lastBar.y,'Last field above Save bar '+width);
+      const footer=target.page.locator('footer a').last();await footer.scrollIntoViewIfNeeded();
+      ok(await footer.evaluate(e=>{const r=e.getBoundingClientRect();return document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.closest('a')===e;}),'Footer link unobscured '+width);
+      await overview(target.page);
+    }
+    await target.page.setViewportSize({width:390,height:500});await edit(target.page,2);
+    const phone=target.page.getByLabel('Kontaktinis telefonas',{exact:true});await phone.focus();await phone.scrollIntoViewIfNeeded();
+    const phoneBox=await phone.boundingBox(), shortBar=await target.page.locator('.employer-save').boundingBox();
+    ok(phoneBox.y+phoneBox.height<=shortBar.y,'Reduced viewport clearance');await overview(target.page);
     await target.page.setViewportSize({width:390,height:900}); await edit(target.page,1); await target.page.getByLabel('Organizacijos pavadinimas',{exact:true}).fill('Neišsaugota'); await target.page.getByRole('button',{name:'Grįžti į profilį'}).click();
     await target.page.getByRole('dialog').waitFor(); eq(await target.page.evaluate(()=>document.querySelector('dialog').contains(document.activeElement)),true); await target.page.getByRole('button',{name:'Likti',exact:true}).click(); eq(await target.page.getByLabel('Organizacijos pavadinimas',{exact:true}).inputValue(),'Neišsaugota');
     await target.page.getByRole('button',{name:'Grįžti į profilį'}).click(); await target.page.getByRole('button',{name:'Išeiti neišsaugojus'}).click();
@@ -278,7 +310,7 @@ async function run() {
     await mutate(minimal,'save_org_locations',{cities:[{city_name:'Kaunas'}]});await mutate(minimal,'save_org_legal_draft',{legal_name:'LOCAL NATURAL PERSON',legal_form_code:'natural_person'});
     let c=await mutate(minimal,'save_own_representative_details',{first_name:'Vietinis',last_name:'Testas',capacity:'Savininkas',private_phone:'LOCAL PRIVATE PHONE'});eq(c.completeness.total,70);
     const anonymous=await browser.newContext({ignoreHTTPSErrors:true});const p=await anonymous.newPage();p.on('pageerror',e=>errors.push(`${p.url()} | ${e.stack || e.message}`));
-    for(const width of [390,1440]){await p.setViewportSize({width,height:900});const response=await p.goto(origin+'/darbdaviai/'+c.organization.slug);eq(response.status(),200);eq(await p.locator('main img').count(),0);eq(await p.getByRole('heading',{name:'Kontaktai',exact:true}).count(),0);await overflow(p);eq((await p.locator('main').boundingBox()).x,width===390?16:120);await p.screenshot({path:path.join(out,`public-minimal-${width}.png`),fullPage:true});}
+    for(const width of [390,1440]){await p.setViewportSize({width,height:900});const response=await p.goto(origin+'/darbdaviai/'+c.organization.slug);eq(response.status(),200);eq(await p.locator('main img').count(),0);eq(await p.getByRole('heading',{name:'Kontaktai',exact:true}).count(),0);await overflow(p);eq((await p.locator('main').boundingBox()).x,width===390?16:160);await p.screenshot({path:path.join(out,`public-minimal-${width}.png`),fullPage:true});}
     await p.goto(origin+'/profilis/darbdavys');await p.waitForURL(/\/prisijungti\?next=/);ok(p.url().includes('/prisijungti?next='));
     for(const slug of ['nezinoma','nezinoma.png','invalid.slug','invalid/extra'])eq((await anonymous.request.get(origin+'/darbdaviai/'+slug)).status(),404);
     for(const state of ['suspended','archived']){c=await rpc(admin,'admin_organization_state',{organization_id:c.organization.id,expected_row_version:c.rowVersion,payload:{state,reason:'LOCAL FRONTEND QA'}});eq((await anonymous.request.get(origin+'/darbdaviai/'+c.organization.slug)).status(),404);}
