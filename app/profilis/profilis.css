@@ -4,6 +4,10 @@
 .overview .profile-steps, .overview .profile-content { grid-row: 1; }
 .overview .profile-content { grid-column: 2; }
 .profile-content { min-width: 0; }
+.profile-employer-cta { margin-top: 24px; padding: 16px 12px; border-top: 1px solid var(--line); font-size: 13px; overflow-wrap: anywhere; }
+.profile-employer-cta p { margin: 0 0 8px; color: var(--muted); }
+.profile-employer-cta a { display: inline-flex; align-items: center; min-height: 44px; }
+.profile-employer-mobile { display: none; }
 .specialist-profile-page .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 .profile-content h1, .profile-content h2, .profile-content h3, .profile-dialog h2 { font-family: var(--font-manrope), sans-serif; color: var(--ink); letter-spacing: -.025em; }
 .profile-content h1 { font-size: 28px; line-height: 1.25; margin: 0 0 8px; }
@@ -114,6 +118,7 @@
   .profile-content h1 { font-size: 25px; }
   .profile-content h2 { font-size: 19px; }
   .profile-steps { display: none; }
+  .profile-employer-mobile { display: block; }
   .profile-mobile-steps { display: block; margin: 8px 0 20px; }
   .profile-mobile-steps .profile-field label { position: absolute; clip: rect(0,0,0,0); width: 1px; height: 1px; overflow: hidden; }
   .profile-back { display: block; }

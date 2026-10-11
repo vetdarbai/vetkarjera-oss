@@ -339,6 +339,22 @@ test('profile denies anonymous access and renders the owner specialist projectio
   assert.match(html, /Test User/); assert.match(html, /Specialisto profilis/); assert.match(html, /Atsijungti/);
   assert.match(html, /Profilis dar neparuoštas kandidatavimui/); assert.match(html, /gyvūnų grupės/);
   assert.doesNotMatch(html, /test@example.com|Licencijos numeris<|service_role|dashboard/i);
+  const Specialist = require('../components/SpecialistProfile.tsx').default;
+  for (const hasEmployerProfile of [false, true]) {
+    headerUser = { hasSpecialistProfile: true, hasEmployerProfile, isAdmin: false };
+    const markup = renderToStaticMarkup(React.createElement(Specialist, { initial: profileBundle, accountEmail: 'test@example.invalid', employerProfileAvailable: true, hasEmployerProfile }));
+    assert.match(markup, /href="\/profilis\/darbdavys"/);
+    assert.match(markup, /class="profile-steps"[\s\S]*Kompetencijos ir tobulėjimas[\s\S]*profile-employer-cta/);
+    assert.match(markup, /profile-content[\s\S]*profile-identity[\s\S]*profile-employer-mobile/);
+    assert.doesNotMatch(markup, /profile-content[^>]*>\s*<p><a[^>]*href="\/profilis\/darbdavys"/);
+    if (hasEmployerProfile) { assert.match(markup, /Atidaryti darbdavio profilį/); assert.doesNotMatch(markup, /Ieškote darbuotojų|Sukurkite darbdavio profilį/); }
+    else { assert.match(markup, /Ieškote darbuotojų\?/); assert.match(markup, /Sukurkite darbdavio profilį/); assert.doesNotMatch(markup, /Atidaryti darbdavio profilį/); }
+    if (process.env.CTA_FIXTURE_DIR) {
+      fs.mkdirSync(process.env.CTA_FIXTURE_DIR, { recursive: true });
+      fs.writeFileSync(path.join(process.env.CTA_FIXTURE_DIR, hasEmployerProfile ? 'with.html' : 'without.html'), markup);
+    }
+  }
+  headerUser = null;
   profileBundle = null;
 });
 test('token-hash verification sets one-time flag; errors and recovery do not', async () => {
