@@ -10,7 +10,7 @@ const { chromium } = require(process.env.PROFILE_PLAYWRIGHT_MODULE || 'playwrigh
 const { createDatabase } = require('./profile-test-db.cjs');
 const sharp = require('sharp');
 const catalog = require('../lib/organizations/catalogs.json');
-const root = path.resolve(__dirname, '..'), out = path.join(root, '.staging-results', 'stage5-14-frontend');
+const root = path.resolve(__dirname, '..'), out = path.join(root, '.staging-results', 'stage5-15-frontend');
 const origin = 'http://localhost:4368', api = 'https://127.0.0.1:4369';
 let db, transport, next, browser, checks = 0, chain = Promise.resolve(), failDelete = false;
 const actors = new Map(), objects = new Map(), groups = [], errors = [], logs = [], warnings = [], requests = [], captures = [], blockedRequests = [];
@@ -170,6 +170,7 @@ async function run() {
   for (let i=0; i<90; i++) { if (logs.join('').includes('Ready in')) break; if (next.exitCode !== null) throw Error('Local Next start failed'); await wait(1000); }
   browser = await chromium.launch({ headless: true, ...(process.env.PROFILE_BROWSER_EXECUTABLE ? { executablePath: process.env.PROFILE_BROWSER_EXECUTABLE } : {}) });
   const { page } = await session(employer);
+  if (!process.argv.includes('--public-activity-only')) {
   await group('Owner entry, partial draft, real server actions and 20/70 publication', async () => {
     await page.goto(origin + '/profilis'); await page.waitForURL('**/profilis/darbdavys');
     await page.getByRole('button', { name: 'Pradėti pildyti profilį' }).click();
@@ -402,8 +403,11 @@ async function run() {
     for(const state of ['suspended','archived']){c=await rpc(admin,'admin_organization_state',{organization_id:c.organization.id,expected_row_version:c.rowVersion,payload:{state,reason:'LOCAL FRONTEND QA'}});eq((await anonymous.request.get(origin+'/darbdaviai/'+c.organization.slug)).status(),404);}
     await anonymous.close();
   });
+  }
+  await group('Stage5.15 public activity presentation and boundary regression at 320/360/390/1440', () =>
+    require('./test-public-employer-activity.cjs')({ actor, rpc, mutate, owner, session, origin, eq, ok, overflow, capture }));
   eq(errors,[],'Browser runtime errors');
   report.status='PASS'; report.assertions=checks; report.groups=groups; report.browserErrors=errors;report.browserWarnings=[...new Set(warnings)];report.captures=captures;report.blockedExternalRequests=[...new Set(blockedRequests)];
 }
 run().catch(error=>{report.status='FAIL';report.error=error.message;console.error(error.stack);process.exitCode=1;})
-  .finally(async()=>{report.assertions=checks;report.groups=groups;fs.mkdirSync(out,{recursive:true});fs.writeFileSync(path.join(out,'report.json'),JSON.stringify(report,null,2));fs.writeFileSync(path.join(out,'next.log'),logs.join(''));await browser?.close();next?.kill();await new Promise(resolve=>transport ? transport.close(resolve) : resolve());await db?.close();console.log(`Stage5.14 frontend ${report.status}: ${checks} assertions`);});
+  .finally(async()=>{report.assertions=checks;report.groups=groups;fs.mkdirSync(out,{recursive:true});fs.writeFileSync(path.join(out,'report.json'),JSON.stringify(report,null,2));fs.writeFileSync(path.join(out,'next.log'),logs.join(''));await browser?.close();next?.kill();await new Promise(resolve=>transport ? transport.close(resolve) : resolve());await db?.close();console.log(`Employer frontend ${report.status}: ${checks} assertions`);});
