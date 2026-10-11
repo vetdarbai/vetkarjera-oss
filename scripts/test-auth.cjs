@@ -262,15 +262,51 @@ test('desktop/mobile header uses real account prop and exposes profile directly'
   headerUser = null;
   const out = renderToStaticMarkup(React.createElement(Navigation));
   assert.match(out, /Prisijungti/); assert.match(out, /Registruotis/);
+  assert.doesNotMatch(out, /Atsijungti/);
   headerUser = { hasSpecialistProfile: true, hasEmployerProfile: false, isAdmin: false };
   const loggedIn = renderToStaticMarkup(React.createElement(Navigation));
   assert.doesNotMatch(loggedIn, /Prisijungti|Registruotis/);
   assert.equal((loggedIn.match(/href="\/profilis"/g) || []).length, 2);
   assert.match(loggedIn, /mobile-login profile-link/);
   assert.doesNotMatch(loggedIn, /href="\/skelbti"/);
+  assert.equal((loggedIn.match(/>Atsijungti<\/button>/g) || []).length, 2);
+  assert.match(loggedIn, /mobile-menu-panel[\s\S]*navigation-logout-button/);
+  headerUser = { hasSpecialistProfile: false, hasEmployerProfile: true, isAdmin: false };
+  assert.equal((renderToStaticMarkup(React.createElement(Navigation)).match(/>Atsijungti<\/button>/g) || []).length, 2);
   headerUser = { role:'specialist',hasSpecialistProfile:true,hasEmployerProfile:true,isAdmin:false };
   assert.equal((renderToStaticMarkup(React.createElement(Navigation)).match(/href="\/skelbti"/g)||[]).length,2);
   headerUser = null;
+});
+test('navigation logout reuses the existing action; redirects on success and preserves errors', async () => {
+  const React = require('react');
+  const Button = require('../components/LogoutButton.tsx').default;
+  const original = { state: React.useState, window: global.window };
+  const states = []; let cursor = 0, destination;
+  React.useState = initial => { const index = cursor++; if (!(index in states)) states[index] = initial; return [states[index], value => { states[index] = value; }]; };
+  global.window = { location: { assign(value) { destination = value; } } };
+  const render = () => { cursor = 0; return Button({ navigation: true }); };
+  const children = tree => React.Children.toArray(tree.props.children);
+  try {
+    let tree = render();
+    assert.equal(tree.props.className, 'navigation-logout');
+    const request = children(tree)[0].props.onClick();
+    assert.equal(children(render())[0].props.disabled, true);
+    assert.equal(children(render())[0].props.children, 'Atsijungiama…');
+    await children(render())[0].props.onClick();
+    await request;
+    assert.deepEqual(calls, [['logout', { scope: 'global' }]]);
+    assert.equal(destination, '/');
+    destination = undefined; responseError = { code: 'unexpected_error' };
+    await children(render())[0].props.onClick();
+    assert.equal(destination, undefined);
+    tree = render();
+    assert.equal(children(tree)[1].props.role, 'alert');
+    assert.equal(children(tree)[0].props.disabled, false);
+    assert.equal(Button().props.className, 'account-logout');
+  } finally {
+    React.useState = original.state;
+    if (original.window === undefined) delete global.window; else global.window = original.window;
+  }
 });
 test('both basic registration forms have exactly six required controls', () => {
   const React = require('react');

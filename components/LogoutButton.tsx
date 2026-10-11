@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { logoutAccount } from '@/app/auth/actions';
-export default function LogoutButton() {
+export default function LogoutButton({ navigation = false }: { navigation?: boolean } = {}) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState('');
   async function logout() {
@@ -14,5 +14,5 @@ export default function LogoutButton() {
     } catch { setError('Nepavyko susisiekti. Bandykite dar kartą.'); }
     finally { setPending(false); }
   }
-  return <div className="account-logout"><button type="button" className="btn btn-secondary" onClick={logout} disabled={pending}>{pending ? 'Atsijungiama…' : 'Atsijungti'}</button>{error && <div className="notice notice-error" role="alert">{error}</div>}</div>;
+  return <div className={navigation ? 'navigation-logout' : 'account-logout'}><button type="button" className={navigation ? 'navigation-logout-button' : 'btn btn-secondary'} onClick={logout} disabled={pending}>{pending ? 'Atsijungiama…' : 'Atsijungti'}</button>{error && <div className="notice notice-error" role="alert">{error}</div>}</div>;
 }
