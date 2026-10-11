@@ -1,6 +1,9 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),crypto=require('node:crypto');
 const mode=process.argv[2]||'pglite';let db,n=0,checks=0,instance;const report={mode,startedAt:new Date().toISOString(),status:'RUNNING'};
 const {createDatabase}=require('./profile-test-db.cjs');
+const corrections=require('./organization-corrections-cases.cjs');
+const foundation='20261009134719_stage5_employer_foundation.sql';
+const expectedMigrationCount=fs.readdirSync('supabase/migrations').filter(f=>f.endsWith('.sql')).length;
 const h={bump(){checks++;},eq(a,b){assert.deepEqual(a,b);checks++;},q:(sql,args=[])=>db.query(sql,args),
  async root(){await db.query('reset role');},
  async as(a){await h.root();await db.query("select set_config('request.jwt.claims',$1,false)",[JSON.stringify(a.claims)]);await db.query('set role authenticated');},
@@ -31,8 +34,16 @@ const h={bump(){checks++;},eq(a,b){assert.deepEqual(a,b);checks++;},q:(sql,args=
   h.eq((await db.query('select count(*)::int n from supabase_migrations.schema_migrations')).rows[0].n,7);
   h.eq((await db.query("select count(*)::int n from pg_roles where rolname='vetkarjera_organization_writer'")).rows[0].n,0);
   report.cutoverLockRollback='PASS';
-  await instance.migrate();const after=(await db.query("select jsonb_build_object('users',(select jsonb_agg(to_jsonb(t) order by id) from auth.users t),'profiles',(select jsonb_agg(to_jsonb(t) order by id) from public.profiles t),'specialist',(select jsonb_agg(to_jsonb(t) order by user_id) from public.specialist_profiles t),'employer',(select jsonb_agg(to_jsonb(t) order by user_id) from public.employer_profiles t)) snapshot")).rows[0].snapshot;
-  h.eq(after,before);h.eq((await db.query('select count(*)::int n from supabase_migrations.schema_migrations')).rows[0].n,8);
+  await instance.migrate({through:foundation});
+  const upgrade=await corrections.prepareUpgrade(h);
+  await instance.migrate();
+  await corrections.verifyUpgrade(h,upgrade);report.stage513UpgradePreservation='PASS';
+  await h.root();
+  const after=(await db.query("select jsonb_build_object('users',(select jsonb_agg(to_jsonb(t) order by id) from auth.users t),'profiles',(select jsonb_agg(to_jsonb(t) order by id) from public.profiles t),'specialist',(select jsonb_agg(to_jsonb(t) order by user_id) from public.specialist_profiles t),'employer',(select jsonb_agg(to_jsonb(t) order by user_id) from public.employer_profiles t)) snapshot")).rows[0].snapshot;
+  // The upgrade fixture owns additional synthetic accounts; the original Stage4
+  // account rows must remain byte-equivalent across both new migrations.
+  for(const key of Object.keys(before))h.eq(after[key].filter(r=>baseline.some(a=>a.id===(r.id??r.user_id))),before[key]);
+  h.eq((await db.query('select count(*)::int n from supabase_migrations.schema_migrations')).rows[0].n,expectedMigrationCount);
   if(productionEquivalent){
    report.executorAfter=await require('./organization-executor-fixture.cjs').verify(instance.executor,authSchemaOwner);
    h.eq(await require('./organization-executor-fixture.cjs').authCatalog(db),authBefore);
@@ -48,6 +59,7 @@ const h={bump(){checks++;},eq(a,b){assert.deepEqual(a,b);checks++;},q:(sql,args=
   report.stage4StoragePolicyPreservation='PASS';report.upgradePreservation='PASS';}
  }else{db=await createDatabase();report.postgres=(await db.query('show server_version')).rows[0].server_version;}
  const actors=await require('./organization-cases.cjs')(h);report.behavior='PASS';report.assertions=checks;
+ const correctionStart=checks;await corrections.cases(h);report.stage513Corrections={status:'PASS',assertions:checks-correctionStart};
  if(productionEquivalent){const start=checks;await require('./organization-executor-boundary.cjs')(h);report.executorBoundary={status:'PASS',assertions:checks-start};}
  await require('./organization-storage-access.cjs')(h);report.storageCompatibility='PASS';
  if(instance){await require('./organization-concurrency.cjs')(instance,h,actors);report.twoConnectionConcurrency='PASS';report.narrowRoleSecurity='PASS';}

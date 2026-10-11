@@ -32,6 +32,11 @@ const eq=(a,b)=>{assert.deepEqual(a,b);checks++;};
     if(code==='40001')eq(response.code,'conflict');
   }
   error=null;calls=[];const saved=await actions.mutateEmployer('save_org_benefits',id,3,{standard:['mentorship'],custom:[]});eq(saved.data.context,context);eq(calls[0][1].expected_row_version,3);eq(calls[0][1].payload.standard,['mentorship']);
+  for (const [operation,payload] of [['request_employer_verification',{scope:'identity'}],['request_representation_verification',{}]]) {
+    calls=[];eq((await actions.mutateEmployer(operation,id,3,payload)).data.context,context);
+    eq(calls[0][0],operation);eq(calls[0][1].payload,payload);
+    eq('method' in calls[0][1].payload,false);eq('reference' in calls[0][1].payload,false);
+  }
   result={status:'expired'};eq((await actions.mutateEmployer('accept_org_transfer',id,3,{transfer_id:id})).data.status,'expired');
   result={status:'declined'};eq((await actions.mutateEmployer('decline_org_transfer',id,3,{transfer_id:id})).data.status,'declined');
   result={total:70};eq((await actions.mutateEmployer('patch_org_public',id,3,{name:'X'})).ok,false);result=context;

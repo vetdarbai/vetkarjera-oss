@@ -35,8 +35,9 @@ async function nativeDatabase({productionEquivalent=false,authSchemaOwner='supab
  executor.on('notice',n=>notices.push({code:n.code,severity:n.severity,message:n.message}));
  await executor.query(bootstrap+storageBootstrap);
  await executor.query('create schema supabase_migrations;create table supabase_migrations.schema_migrations(version text primary key,name text not null,statements text[])');
- async function migrate({stage4Only=false}={}){
+ async function migrate({stage4Only=false,through}={}){
   for(const file of fs.readdirSync('supabase/migrations').filter(f=>f.endsWith('.sql')).sort()){
+   if(through && file>through)continue;
    if(stage4Only&&file.includes('_stage5_'))continue;
    const version=file.split('_')[0];
    if((await executor.query('select 1 from supabase_migrations.schema_migrations where version=$1',[version])).rowCount)continue;
