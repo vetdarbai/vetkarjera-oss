@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import Navigation from './Navigation';
 import Footer from './Footer';
+import LogoutButton from './LogoutButton';
 import { ProfileDialog, SelectField, TextField } from './ProfileFields';
 import EmployerProfileFields, { EmployerChoice, EmployerLegalFields } from './EmployerProfileFields';
 import EmployerMedia from './EmployerMedia';
@@ -166,6 +167,7 @@ export default function EmployerProfile({ initial }: { initial: OwnerBundle }) {
           </div><aside className="employer-overview-aside"><section className="profile-section"><h2>Duomenų patikrinimas</h2><p>{verificationLabels[context.verification.state]}</p><div className="profile-inline-actions"><button type="button" className="profile-button secondary" disabled={busy} onClick={() => go(2)}>Peržiūrėti duomenis</button>{context.capabilities.canSubmitVerification && context.verification.state !== 'verified' && context.verification.state !== 'pending' && <button type="button" className="profile-button secondary" disabled={busy || refreshRequired} onClick={() => setVerification(true)}>Pateikti patikrinimui</button>}</div></section><EmployerOwnership context={context} transfers={bundle.transfers} busy={busy || refreshRequired} execute={execute} reload={() => reload()} onDirty={setOwnershipDirty} /></aside></div>
         </> : draft && <form onSubmit={save}><EmployerProfileFields step={step} draft={draft} context={context} disabled={busy || refreshRequired} onChange={change} onTypeChange={v => { if (v !== draft.type) setNextType(v); }} onLegalChange={() => setLegalRequest({ legalName: draft.legalName, legalForm: draft.legalForm, legalCode: draft.legalCode })} media={<>{(['logo','cover'] as const).map(kind => <EmployerMedia key={kind} kind={kind} context={context} busy={busy || refreshRequired} lock={lock} adopt={adopt} report={report} />)}</>} /><div className="profile-save employer-save"><p role="status">{busy ? 'Išsaugoma…' : dirty ? 'Neišsaugoti pakeitimai' : error ? 'Patikrinkite klaidą' : 'Išsaugota'}</p><button className="profile-button" disabled={busy || refreshRequired || !dirty || !canSave}>Išsaugoti</button></div></form>}
       </>}
+      {step === 0 && <LogoutButton />}
     </div>
   </main><Footer />
     {nextType !== null && <ProfileDialog title="Keisti organizacijos tipą?" onClose={() => setNextType(null)}><p>Pakeitus organizacijos tipą, pasirinkto tipo veiklos duomenis reikės užpildyti iš naujo. Ankstesni pasirinkimai automatiškai nebus atkurti net grįžus prie ankstesnio tipo.</p><div className="profile-dialog-actions"><button className="profile-button secondary" onClick={() => setNextType(null)}>Atšaukti</button><button className="profile-button" onClick={() => { change({ type: nextType, typeOther: '', groups: [] }); setNextType(null); }}>Keisti tipą</button></div></ProfileDialog>}

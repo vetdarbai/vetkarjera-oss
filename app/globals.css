@@ -500,15 +500,6 @@ h1, h2, h3, .logo-copy strong, .footer-brand {
 .account-summary dt { color: var(--muted); font-size: 0.82rem; }
 .account-summary dd { overflow-wrap: anywhere; }
 .account-logout { margin-top: 20px; display: grid; justify-items: start; gap: 16px; }
-.navigation-logout { position: relative; }
-.navigation-logout-button { min-height: 44px; border: 0; background: transparent; color: var(--ink); font: inherit; font-size: 0.78rem; font-weight: 650; cursor: pointer; }
-.navigation-logout-button:hover { color: var(--forest); }
-.navigation-logout-button:focus-visible { outline: 2px solid var(--forest); outline-offset: 2px; }
-.navigation-logout-button:disabled { opacity: 0.6; cursor: wait; }
-.desktop-navigation .navigation-logout .notice { position: absolute; right: 0; top: 100%; width: 260px; z-index: 120; }
-.mobile-menu-panel .navigation-logout { border-top: 1px solid var(--line); }
-.mobile-menu-panel .navigation-logout-button { width: 100%; min-height: 48px; padding: 8px 16px; text-align: left; font-size: 0.76rem; }
-.mobile-menu-panel .navigation-logout-button:hover { background: var(--ivory); }
 .auth-card .form-stack { margin-top: 24px; }
 
 .modal-overlay { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 20px; background: rgba(30, 74, 140, 0.78); }

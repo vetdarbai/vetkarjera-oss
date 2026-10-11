@@ -1,7 +1,6 @@
 'use client';
 import Link from 'next/link';
 import { useAuthSession } from '@/components/AuthSession';
-import LogoutButton from '@/components/LogoutButton';
 
 function RegistrationMenu({ className = '' }: { className?: string }) {
   return (
@@ -28,14 +27,13 @@ export default function Navigation({ onProfileNavigate }: { onProfileNavigate?: 
 
         <div className="desktop-navigation">
           <Link href="/skelbimai">Skelbimai</Link><Link href="/darbdavys">Darbdaviams</Link>{(!user || user.hasEmployerProfile) && <Link href="/skelbti">Paskelbti skelbimą</Link>}{user ? <Link href="/profilis" className="profile-link" onNavigate={e => { if (onProfileNavigate) { e.preventDefault(); onProfileNavigate(); } }}>Profilis</Link> : <><Link href="/prisijungti">Prisijungti</Link><RegistrationMenu /></>}
-          {user && <LogoutButton navigation />}
         </div>
 
         <div className="mobile-navigation">
           {user ? <Link href="/profilis" className="mobile-login profile-link" onNavigate={e => { if (onProfileNavigate) { e.preventDefault(); onProfileNavigate(); } }}>Profilis</Link> : <><Link href="/prisijungti" className="mobile-login">Prisijungti</Link><RegistrationMenu className="mobile-registration" /></>}
           <details className="mobile-menu" suppressHydrationWarning>
             <summary aria-label="Atverti navigaciją"><span /><span /><span /></summary>
-            <div className="mobile-menu-panel"><Link href="/skelbimai">Skelbimai</Link><Link href="/darbdavys">Darbdaviams</Link>{(!user || user.hasEmployerProfile) && <Link href="/skelbti">Paskelbti skelbimą</Link>}{user && <LogoutButton navigation />}</div>
+            <div className="mobile-menu-panel"><Link href="/skelbimai">Skelbimai</Link><Link href="/darbdavys">Darbdaviams</Link>{(!user || user.hasEmployerProfile) && <Link href="/skelbti">Paskelbti skelbimą</Link>}</div>
           </details>
         </div>
       </div>

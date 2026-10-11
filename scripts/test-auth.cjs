@@ -269,26 +269,31 @@ test('desktop/mobile header uses real account prop and exposes profile directly'
   assert.equal((loggedIn.match(/href="\/profilis"/g) || []).length, 2);
   assert.match(loggedIn, /mobile-login profile-link/);
   assert.doesNotMatch(loggedIn, /href="\/skelbti"/);
-  assert.equal((loggedIn.match(/>Atsijungti<\/button>/g) || []).length, 2);
-  assert.match(loggedIn, /mobile-menu-panel[\s\S]*navigation-logout-button/);
+  assert.doesNotMatch(loggedIn, /Atsijungti/);
   headerUser = { hasSpecialistProfile: false, hasEmployerProfile: true, isAdmin: false };
-  assert.equal((renderToStaticMarkup(React.createElement(Navigation)).match(/>Atsijungti<\/button>/g) || []).length, 2);
+  assert.doesNotMatch(renderToStaticMarkup(React.createElement(Navigation)), /Atsijungti/);
   headerUser = { role:'specialist',hasSpecialistProfile:true,hasEmployerProfile:true,isAdmin:false };
   assert.equal((renderToStaticMarkup(React.createElement(Navigation)).match(/href="\/skelbti"/g)||[]).length,2);
   headerUser = null;
 });
-test('navigation logout reuses the existing action; redirects on success and preserves errors', async () => {
+test('employer logout is at the bottom of the overview, outside editing forms and navigation', () => {
+  const source = fs.readFileSync(path.resolve('components/EmployerProfile.tsx'), 'utf8');
+  assert.match(source, /import LogoutButton from '\.\/LogoutButton'/);
+  assert.match(source, /\{step === 0 && <LogoutButton \/>\}\s*<\/div>\s*<\/main><Footer \/>/);
+  assert.equal((source.match(/<LogoutButton/g) || []).length, 1);
+});
+test('profile logout reuses the existing action; redirects on success and preserves errors', async () => {
   const React = require('react');
   const Button = require('../components/LogoutButton.tsx').default;
   const original = { state: React.useState, window: global.window };
   const states = []; let cursor = 0, destination;
   React.useState = initial => { const index = cursor++; if (!(index in states)) states[index] = initial; return [states[index], value => { states[index] = value; }]; };
   global.window = { location: { assign(value) { destination = value; } } };
-  const render = () => { cursor = 0; return Button({ navigation: true }); };
+  const render = () => { cursor = 0; return Button(); };
   const children = tree => React.Children.toArray(tree.props.children);
   try {
     let tree = render();
-    assert.equal(tree.props.className, 'navigation-logout');
+    assert.equal(tree.props.className, 'account-logout');
     const request = children(tree)[0].props.onClick();
     assert.equal(children(render())[0].props.disabled, true);
     assert.equal(children(render())[0].props.children, 'Atsijungiama…');
