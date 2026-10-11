@@ -44,3 +44,29 @@ export function changedFields(current: Record<string, unknown>, saved: Record<st
 export function hasDuplicates(values: string[]) { const normalized = values.map(v => v.normalize('NFC').trim().replace(/\s+/gu, ' ').toLocaleLowerCase('lt')); return new Set(normalized).size !== normalized.length; }
 export function publicTypeLabel(o: PublicOrganization) { return organizationTypes.find(t => t.code === o.primaryType)?.label_lt ?? ''; }
 export function safePublicUrl(value: string | undefined) { if (!value) return null; try { const url = new URL(value); return ['http:', 'https:'].includes(url.protocol) ? url.href : null; } catch { return null; } }
+
+/** Form input convenience only; the server still validates the saved HTTP(S) URL. */
+export function normalizePublicUrl(value: string): string | null {
+  const text = value.trim();
+  if (!text) return '';
+  if (/[\s\\]/u.test(text) || text.startsWith('//') || (/^[a-z][a-z\d+.-]*:/iu.test(text) && !/^https?:\/\//iu.test(text))) return null;
+  try {
+    const url = new URL(/^https?:\/\//iu.test(text) ? text : `https://${text}`);
+    if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password || !url.hostname.includes('.') || url.hostname.endsWith('.') || !/^[a-z\d.-]+$/iu.test(url.hostname) || url.hostname.split('.').some(part => !part || part.startsWith('-') || part.endsWith('-'))) return null;
+    return url.href.length <= 2048 ? url.href : null;
+  } catch { return null; }
+}
+
+export function activityComplete(draft: Draft) {
+  const matrix = catalogs.typeMatrix.find(t => t.type === draft.type);
+  return !!matrix && matrix.groups.every(code => {
+    const group = draft.groups.find(g => g.group_code === code);
+    if (!group) return false;
+    const text = group.custom.some(v => v.trim());
+    return matrix.customOnly ? text : group.options.some(value => value !== 'other') || (group.options.includes('other') && text);
+  });
+}
+
+export function activityOptions(type: string, group: string, selected: string[]) {
+  return catalogs.options.filter(o => o.type === type && o.group === group && (!('deprecatedForNewSelection' in o && o.deprecatedForNewSelection) || selected.includes(o.code))).sort((a, b) => a.order - b.order).map(o => ({ code: o.code, label_lt: o.label }));
+}

@@ -7,7 +7,7 @@
 .employer-profile-page .profile-content h2 { font-size:20px; }
 .employer-profile-page .profile-helper, .employer-profile-page .profile-intro { font-size:14px; line-height:1.5; }
 .employer-profile-page .profile-button { font-size:16px; }
-.employer-profile-page .employer-private-notice { background:var(--primary-soft); border:0; color:var(--muted); }
+.employer-profile-page .employer-private-notice { background:var(--primary-soft); border:0; color:var(--muted); font-size:16px; line-height:1.65; }
 .employer-profile-page .profile-field { margin-bottom:24px; }
 .employer-profile-page .profile-field label, .employer-choice > span, .employer-profile-page .profile-multi legend { font-size:16px; line-height:1.5; }
 .employer-profile-page .profile-field input, .employer-profile-page .profile-field select, .employer-profile-page .profile-field textarea { min-height:48px; font-size:16px; }
@@ -22,6 +22,10 @@
 .employer-overview-identity { display:flex; justify-content:space-between; align-items:flex-start; gap:32px; margin-bottom:32px; }
 .employer-overview-identity h1 { font-size:32px; }
 .employer-overview-identity .profile-intro { margin:0; font-size:16px; }
+.employer-overview-identity .employer-overview-type { margin-bottom:8px; }
+.employer-profile-page .employer-status.complete { color:#245738; }
+.employer-profile-page .employer-status.incomplete { color:#78551c; }
+.employer-profile-page .employer-status:is(.complete,.incomplete)::before { content:''; display:inline-block; width:7px; height:7px; margin-right:8px; border-radius:50%; background:currentColor; vertical-align:middle; }
 .employer-overview-layout { display:grid; grid-template-columns:minmax(0,2.2fr) minmax(260px,1fr); gap:32px; }
 .employer-overview-aside { padding-left:32px; border-left:1px solid var(--line); }
 .employer-overview-aside .profile-section { padding-block:24px; }
@@ -36,7 +40,7 @@
 .employer-overview-step h2 { margin:0; }
 .employer-overview-step .profile-helper { margin:6px 0 0; }
 .employer-overview-step .profile-helper:empty { display:none; }
-.employer-profile-page .employer-edit-action { display:flex; align-items:center; gap:12px; padding:0; font-size:14px; }
+.employer-profile-page .employer-edit-action { display:flex; align-items:center; justify-content:center; padding:8px 12px; min-height:44px; font-size:14px; }
 .employer-edit-action span { font-size:24px; }
 .employer-profile-page .employer-public-mobile { display:none; }
 .employer-basic-fields { padding-top:8px; }
@@ -116,6 +120,8 @@
   .employer-profile-page .employer-overview-step { grid-template-columns:32px minmax(0,1fr) auto; gap:12px; }
   .employer-overview-step .employer-step-number { width:32px; height:32px; }
   .employer-overview-step .employer-edit-action { grid-column:3; align-self:center; justify-self:end; }
+  .employer-profile-page .employer-save { padding:10px 0 max(10px,env(safe-area-inset-bottom)); font-size:14px; }
+  .employer-profile-page .employer-save .profile-button { min-height:44px; padding-block:8px; }
   .employer-overview-aside .profile-inline-actions .profile-button { width:100%; }
   .employer-panel > summary { padding-inline:0; }
   .employer-panel[open] > summary { padding-inline:16px; }
@@ -125,4 +131,8 @@
   .employer-profile-page .profile-section { padding-block:28px; }
   .employer-loading { display:block; }
   .employer-loading > div { margin-bottom:24px; }
+}
+@media (max-width:360px) {
+  .employer-profile-page .employer-overview-step { grid-template-columns:32px minmax(0,1fr); }
+  .employer-overview-step .employer-edit-action { grid-column:2; justify-self:start; }
 }

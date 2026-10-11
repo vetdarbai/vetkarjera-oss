@@ -10,7 +10,7 @@ import EmployerOwnership, { type EmployerExecute } from './EmployerOwnership';
 import { createEmployerOrganization, mutateEmployer, reloadEmployerOwner } from '@/app/profilis/darbdavys/actions';
 import { createSecondProfile } from '@/app/profilis/actions';
 import profileCatalogs from '@/lib/profiles/catalogs.json';
-import { changedFields, draftStep, employerDraft, employerSteps, hasDuplicates, options, organizationCatalogs, stateLabels, verificationLabels, type Draft, type OwnerBundle, type OwnerOperation } from '@/lib/organizations/frontend';
+import { changedFields, draftStep, employerDraft, employerSteps, hasDuplicates, normalizePublicUrl, options, organizationCatalogs, publicTypeLabel, stateLabels, verificationLabels, type Draft, type OwnerBundle, type OwnerOperation } from '@/lib/organizations/frontend';
 import type { OrganizationContext } from '@/lib/organizations/contracts';
 
 function EmployerError({ message, refreshRequired, busy, onRefresh }: { message: string; refreshRequired: boolean; busy: boolean; onRefresh: () => void }) {
@@ -21,7 +21,7 @@ export default function EmployerProfile({ initial }: { initial: OwnerBundle }) {
   const [draft, setDraft] = useState<Draft | null>(() => initial.context ? employerDraft(initial.context) : null);
   const [busy, setBusy] = useState(false), [error, setError] = useState(''), [notice, setNotice] = useState(''), [refreshRequired, setRefreshRequired] = useState(false);
   const [nextType, setNextType] = useState<string | null>(null), [exit, setExit] = useState<(() => void) | null>(null), [ownershipDirty, setOwnershipDirty] = useState(false);
-  const [legalRequest, setLegalRequest] = useState<Pick<Draft, 'legalName' | 'legalForm' | 'legalCode'> | null>(null), [verification, setVerification] = useState(false), [method, setMethod] = useState(''), [reference, setReference] = useState('');
+  const [legalRequest, setLegalRequest] = useState<Pick<Draft, 'legalName' | 'legalForm' | 'legalCode'> | null>(null), [verification, setVerification] = useState(false);
   const [shell, setShell] = useState({ name: '', type: '', other: '' });
   const mutex = useRef(false), heading = useRef<HTMLHeadingElement>(null), allowExit = useRef(false);
   const context = bundle.context;
@@ -62,7 +62,7 @@ export default function EmployerProfile({ initial }: { initial: OwnerBundle }) {
   }
   function askRefresh() {
     if (mutex.current) return;
-    const refresh = () => { setExit(null); setLegalRequest(null); setVerification(false); setMethod(''); setReference(''); void reload(true); };
+    const refresh = () => { setExit(null); setLegalRequest(null); setVerification(false); void reload(true); };
     if (anyDirty) setExit(() => refresh); else refresh();
   }
   const execute: EmployerExecute = async (operation, payload, target) => {
@@ -97,6 +97,13 @@ export default function EmployerProfile({ initial }: { initial: OwnerBundle }) {
     if (!context || !draft || mutex.current || refreshRequired || !canSave) return;
     const cleaned = { ...draft, cities: draft.cities.map(v => v.trim()).filter(Boolean), customBenefits: draft.customBenefits.map(v => v.trim()).filter(Boolean), groups: draft.groups.map(g => ({ ...g, custom: g.custom.map(v => v.trim()).filter(Boolean) })) };
     if (hasDuplicates(cleaned.cities) || hasDuplicates(cleaned.customBenefits) || cleaned.groups.some(g => hasDuplicates(g.custom))) { report('Pasikartojančių reikšmių negalima išsaugoti. Pašalinkite vienodus įrašus.'); return; }
+    if (step === 3) {
+      for (const key of ['website', 'facebookUrl', 'instagramUrl', 'linkedinUrl'] as const) {
+        const normalized = normalizePublicUrl(cleaned[key]);
+        if (normalized === null) { report('Patikrinkite svetainės ar socialinio tinklo adresą. Įveskite, pavyzdžiui, klinika.lt arba https://klinika.lt.'); return; }
+        cleaned[key] = normalized;
+      }
+    }
     const original = employerDraft(context);
     const jobs: { operation: OwnerOperation; payload: Record<string, unknown> }[] = [];
     const patch = (operation: OwnerOperation, current: Record<string, unknown>, saved: Record<string, unknown>) => { const payload = changedFields(current, saved); if (Object.keys(payload).length) jobs.push({ operation, payload }); };
@@ -134,15 +141,15 @@ export default function EmployerProfile({ initial }: { initial: OwnerBundle }) {
     if (response) { setLegalRequest(null); setNotice('Pakeitimo prašymas pateiktas peržiūrai. Iki patvirtinimo galioja dabartiniai juridiniai duomenys.'); }
   }
   async function submitVerification(e: FormEvent) {
-    e.preventDefault(); if (!context || !method || !reference.trim()) return;
+    e.preventDefault(); if (!context || mutex.current || refreshRequired || !context.capabilities.canSubmitVerification) return;
     let current = context;
-    // Requests carry owner-submitted references, never independent/admin evidence.
+    // Evidence-free owner requests; each subsequent request uses the returned row version.
     for (const scope of (context.verification.identityApproved ? ['representation'] : ['identity','representation'])) {
-      const response = await execute(scope === 'representation' ? 'request_representation_verification' : 'request_employer_verification', { scope, method, reference: reference.trim() }, { id: current.organization.id, version: current.rowVersion });
+      const response = await execute(scope === 'representation' ? 'request_representation_verification' : 'request_employer_verification', scope === 'representation' ? {} : { scope: 'identity' }, { id: current.organization.id, version: current.rowVersion });
       if (!response?.context) return;
       current = response.context;
     }
-    setVerification(false); setMethod(''); setReference(''); setNotice('Duomenys pateikti patikrinimui.');
+    setVerification(false); setNotice('Duomenys pateikti patikrinimui.');
   }
   return <div className="specialist-profile-page employer-profile-page"><Navigation /><main className={`profile-shell ${step ? 'editing' : 'overview'}`}>
     {context && step > 0 && <><nav className="profile-steps" aria-label="Darbdavio profilio dalys">{employerSteps.map((name, i) => <button type="button" key={name} aria-current={step === i + 1 ? 'step' : undefined} disabled={busy} onClick={() => go(i + 1)}><span className="employer-step-number">{i + 1}</span>{name}</button>)}</nav>{step > 0 && <button type="button" className="profile-button secondary profile-back" onClick={() => go(0)} disabled={busy}><span aria-hidden="true">←</span>Grįžti į profilį</button>}</>}
@@ -155,17 +162,17 @@ export default function EmployerProfile({ initial }: { initial: OwnerBundle }) {
         {!context.capabilities.canEditProfile && !['suspended','archived'].includes(context.profileState) && <p className="profile-notice">Profilį galite peržiūrėti. Redagavimas bus įjungtas, kai patvirtinsime jūsų teisę atstovauti organizacijai.</p>}
 
         {step === 0 ? <>
-          <div className="employer-overview-identity"><div><h1 ref={heading} tabIndex={-1}>{context.organization.name || 'Organizacijos profilis'}</h1><p className="profile-intro">{context.profileState === 'active' ? 'Aktyvus · Viešas profilis' : stateLabels[context.profileState]}</p></div>{context.profileState === 'active' && <a className="profile-button employer-public-desktop" href={`/darbdaviai/${context.organization.slug}`}>Atidaryti viešą profilį</a>}</div>
+          <div className="employer-overview-identity"><div><h1 ref={heading} tabIndex={-1}>{context.organization.name || 'Organizacijos profilis'}</h1>{publicTypeLabel(context.organization) && <p className="profile-intro employer-overview-type">{publicTypeLabel(context.organization)}{context.organization.primaryType === 'other' && context.organization.typeOther ? ` · ${context.organization.typeOther}` : ''}</p>}<p className={`profile-intro employer-status ${context.profileState === 'active' ? 'complete' : context.profileState === 'draft' ? 'incomplete' : ''}`}>{context.profileState === 'active' ? 'Aktyvus · Viešas profilis' : stateLabels[context.profileState]}</p></div>{context.profileState === 'active' && <a className="profile-button employer-public-desktop" href={`/darbdaviai/${context.organization.slug}`}>Peržiūrėti, kaip profilį mato kiti</a>}</div>
           <div className="employer-overview-layout"><div>
             <section className="profile-readiness"><div className="profile-readiness-heading"><h2>{context.completeness.total === 100 ? 'Išsamus profilis' : 'Profilio užpildymas'}</h2><strong>{context.completeness.total} %</strong></div><progress max={100} value={context.completeness.total} aria-label="Profilio užpildymas" /><p>70 % pakanka aktyviam viešam profiliui.{context.completeness.total === 100 && ' Organizacijos pristatymą galite papildyti vėliau.'}</p>
-              {context.profileState === 'active' ? <a className="profile-button employer-public-mobile" href={`/darbdaviai/${context.organization.slug}`}>Atidaryti viešą profilį</a> : context.profileState === 'draft' && <button className="profile-button" disabled={busy} onClick={() => go(!context.capabilities.canEditProfile ? 2 : context.completeness.step1 === 0 ? 1 : context.completeness.step2 === 0 ? 2 : 3)}>{context.capabilities.canEditProfile ? 'Tęsti pildymą' : 'Peržiūrėti duomenis'}</button>}
+              {context.profileState === 'active' ? <a className="profile-button employer-public-mobile" href={`/darbdaviai/${context.organization.slug}`}>Peržiūrėti, kaip profilį mato kiti</a> : context.profileState === 'draft' && <button className="profile-button" disabled={busy} onClick={() => go(!context.capabilities.canEditProfile ? 2 : context.completeness.step1 === 0 ? 1 : context.completeness.step2 === 0 ? 2 : 3)}>{context.capabilities.canEditProfile ? 'Tęsti pildymą' : 'Peržiūrėti duomenis'}</button>}
             </section>
             {employerSteps.map((name, i) => {
               const complete = i === 0 ? context.completeness.step1 === 20 : i === 1 ? context.completeness.step2 === 50 : context.completeness.quality === 30;
-              return <section className="profile-section employer-overview-step" key={name}><span className="employer-step-number">{i + 1}</span><div><h2>{name}</h2><p className="profile-helper">{complete ? 'Užpildyta' : i === 2 ? 'Neprivaloma' : 'Pildoma'}</p><p className="profile-helper">{i === 0 ? context.organization.cities?.map(city => city.name).join(', ') || 'Duomenys nepateikti.' : i === 1 ? complete ? 'Privatūs duomenys pateikti' : 'Papildykite juridinius ir atstovo duomenis.' : complete ? '' : 'Galite papildyti vėliau'}</p></div><button type="button" className="profile-text-button employer-edit-action" disabled={busy} onClick={() => go(i + 1)}>{!context.capabilities.canEditProfile ? 'Peržiūrėti' : complete ? 'Redaguoti' : 'Papildyti'}<span aria-hidden="true">›</span></button></section>;
+              return <section className="profile-section employer-overview-step" key={name}><span className="employer-step-number">{i + 1}</span><div><h2>{name}</h2><p className={`profile-helper employer-status ${complete ? 'complete' : 'incomplete'}`}>{complete ? 'Užpildyta' : i === 2 ? 'Neprivaloma' : 'Pildoma'}</p><p className="profile-helper">{i === 0 ? context.organization.cities?.map(city => city.name).join(', ') || 'Duomenys nepateikti.' : i === 1 ? complete ? 'Privatūs duomenys pateikti' : 'Papildykite juridinius ir atstovo duomenis.' : complete ? '' : 'Galite papildyti vėliau'}</p></div><button type="button" className="profile-button secondary employer-edit-action" disabled={busy} onClick={() => go(i + 1)}>{!context.capabilities.canEditProfile ? 'Peržiūrėti' : complete ? 'Redaguoti' : 'Papildyti'}</button></section>;
             })}
           </div><aside className="employer-overview-aside"><section className="profile-section"><h2>Duomenų patikrinimas</h2><p>{verificationLabels[context.verification.state]}</p><div className="profile-inline-actions"><button type="button" className="profile-button secondary" disabled={busy} onClick={() => go(2)}>Peržiūrėti duomenis</button>{context.capabilities.canSubmitVerification && context.verification.state !== 'verified' && context.verification.state !== 'pending' && <button type="button" className="profile-button secondary" disabled={busy || refreshRequired} onClick={() => setVerification(true)}>Pateikti patikrinimui</button>}</div></section><EmployerOwnership context={context} transfers={bundle.transfers} busy={busy || refreshRequired} execute={execute} reload={() => reload()} onDirty={setOwnershipDirty} /></aside></div>
-        </> : draft && <form onSubmit={save}><EmployerProfileFields step={step} draft={draft} context={context} disabled={busy || refreshRequired} onChange={change} onTypeChange={v => { if (v !== draft.type) setNextType(v); }} onLegalChange={() => setLegalRequest({ legalName: draft.legalName, legalForm: draft.legalForm, legalCode: draft.legalCode })} media={<>{(['logo','cover'] as const).map(kind => <EmployerMedia key={kind} kind={kind} context={context} busy={busy || refreshRequired} lock={lock} adopt={adopt} report={report} />)}</>} /><div className="profile-save employer-save"><p role="status">{busy ? 'Išsaugoma…' : dirty ? 'Neišsaugoti pakeitimai' : error ? 'Patikrinkite klaidą' : 'Išsaugota'}</p><button className="profile-button" disabled={busy || refreshRequired || !dirty || !canSave}>Išsaugoti</button></div></form>}
+        </> : draft && <form onSubmit={save}><EmployerProfileFields step={step} draft={draft} context={context} disabled={busy || refreshRequired} onChange={change} onTypeChange={v => { if (v !== draft.type) setNextType(v); }} onLegalChange={() => setLegalRequest({ legalName: draft.legalName, legalForm: draft.legalForm, legalCode: draft.legalCode })} media={<>{(['logo','cover'] as const).map(kind => <EmployerMedia key={kind} kind={kind} context={context} busy={busy || refreshRequired} lock={lock} adopt={adopt} report={report} />)}</>} /><div className="profile-save employer-save"><p role="status">{busy ? 'Išsaugoma…' : error ? 'Patikrinkite klaidą' : dirty ? 'Neišsaugoti pakeitimai' : ''}</p><button className="profile-button" disabled={busy || refreshRequired || !dirty || !canSave}>Išsaugoti</button></div></form>}
       </>}
       {step === 0 && <LogoutButton />}
     </div>
@@ -173,6 +180,6 @@ export default function EmployerProfile({ initial }: { initial: OwnerBundle }) {
     {nextType !== null && <ProfileDialog title="Keisti organizacijos tipą?" onClose={() => setNextType(null)}><p>Pakeitus organizacijos tipą, pasirinkto tipo veiklos duomenis reikės užpildyti iš naujo. Ankstesni pasirinkimai automatiškai nebus atkurti net grįžus prie ankstesnio tipo.</p><div className="profile-dialog-actions"><button className="profile-button secondary" onClick={() => setNextType(null)}>Atšaukti</button><button className="profile-button" onClick={() => { change({ type: nextType, typeOther: '', groups: [] }); setNextType(null); }}>Keisti tipą</button></div></ProfileDialog>}
     {exit && <ProfileDialog title="Turite neišsaugotų pakeitimų." onClose={() => setExit(null)}><p>Išeiti neišsaugojus pakeitimų?</p><div className="profile-dialog-actions"><button className="profile-button secondary" onClick={() => setExit(null)}>Likti</button><button className="profile-button danger" onClick={() => { const action = exit; setExit(null); action(); }}>Išeiti neišsaugojus</button></div></ProfileDialog>}
     {legalRequest && <ProfileDialog title="Prašyti pakeisti juridinius duomenis" onClose={() => { if (!busy && window.confirm('Atšaukti juridinių duomenų pakeitimo prašymą?')) setLegalRequest(null); }}><EmployerError message={error} refreshRequired={refreshRequired} busy={busy} onRefresh={askRefresh} /><form onSubmit={submitLegal}><fieldset disabled={busy || refreshRequired} className="profile-form-fields"><EmployerLegalFields value={legalRequest} onChange={patch => setLegalRequest(old => old ? { ...old, ...patch } : null)} /><button className="profile-button" disabled={!legalRequest.legalName.trim() || !legalRequest.legalForm || (organizationCatalogs.legalForms.find(([code]) => code === legalRequest.legalForm)?.[2] === true && !legalRequest.legalCode.trim())}>Pateikti prašymą</button></fieldset></form></ProfileDialog>}
-    {verification && <ProfileDialog title="Pateikti duomenis patikrinimui" onClose={() => { if (!busy) setVerification(false); }}><EmployerError message={error} refreshRequired={refreshRequired} busy={busy} onRefresh={askRefresh} /><form onSubmit={submitVerification}><fieldset disabled={busy || refreshRequired} className="profile-form-fields"><SelectField title="Patikrinimo būdas" value={method} options={options([['domain_email','Organizacijos domeno el. paštas'],['official_contact','Oficialus kontaktas'],['official_phone','Oficialus telefonas'],['documents_manual','Dokumentų patikrinimas']])} onChange={setMethod} /><TextField title="Patikrinimo nuoroda / kontaktas" value={reference} maxLength={2000} onChange={setReference} /><button className="profile-button" disabled={!method || !reference.trim()}>Pateikti patikrinimui</button></fieldset></form></ProfileDialog>}
+    {verification && <ProfileDialog title="Pateikti duomenis patikrinimui" onClose={() => { if (!busy) setVerification(false); }}><EmployerError message={error} refreshRequired={refreshRequired} busy={busy} onRefresh={askRefresh} /><form onSubmit={submitVerification}><fieldset disabled={busy || refreshRequired} className="profile-form-fields"><p>VetKarjera administratorius peržiūrės pateiktus darbdavio duomenis. Jei reikės papildomos informacijos, administratorius gali susisiekti su organizacijos atstovu nurodytu telefonu arba kitais profilyje pateiktais kontaktais.</p><button className="profile-button">Pateikti patikrinimui</button></fieldset></form></ProfileDialog>}
   </div>;
 }

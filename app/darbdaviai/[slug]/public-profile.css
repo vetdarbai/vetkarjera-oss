@@ -4,7 +4,7 @@
 .public-employer h2 { font-size: 21px; margin-bottom: 16px; }
 .public-employer-heading { display: flex; gap: 24px; align-items: flex-start; padding: 24px 0; }
 .public-employer-logo { width: 112px; height: 112px; object-fit: contain; flex-shrink: 0; }
-.public-employer-cover { display: block; width: 100%; height: auto; object-fit: contain; border-radius: 4px; }
+.public-employer-cover { display: block; width: 100%; height: auto; aspect-ratio: 4 / 1; object-fit: cover; object-position: center; border-radius: 4px; }
 .has-cover .public-employer-heading { position: relative; }
 .has-cover .public-employer-logo { margin-top: -48px; background: var(--paper); border: 1px solid var(--line); border-radius: 4px; }
 .public-employer-layout { display: grid; grid-template-columns: minmax(0, 2.1fr) minmax(280px, 1fr); gap: 32px; }
@@ -19,12 +19,16 @@
 .public-employer-benefits li { display: flex; gap: 12px; align-items: baseline; color: var(--muted); }
 .public-employer-benefits li::before { content: '✓'; color: var(--primary); flex: 0 0 24px; text-align: center; }
 .public-employer-contacts { display: flex; flex-direction: column; gap: 8px; }
-.public-employer-contacts a { min-height: 48px; display: flex; align-items: center; padding: 8px 12px; border-radius: 4px; background: var(--primary-soft); color: var(--primary-dark); overflow-wrap: anywhere; }
+.public-employer .public-employer-aside .public-employer-contact-module { background: transparent; border: 0; border-top: 1px solid var(--line); border-radius: 0; padding: 20px 0; }
+.public-employer-contacts a { min-height: 48px; display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 10px 8px; border-bottom: 1px solid var(--line); border-radius: 4px; color: var(--primary-dark); overflow-wrap: anywhere; }
+.public-employer-contacts a > span:first-child { min-width: 0; }
+.public-employer-contacts small { display: block; color: var(--muted); font-size: 13px; }
 .public-employer-contacts a:hover { background: var(--surface-soft); }
 .public-employer-contacts a:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
 @media (max-width: 900px) {
   .public-employer { padding-top: 16px; padding-bottom: 32px; }
   .public-employer h1 { font-size: 26px; }
+  .public-employer-cover { aspect-ratio: 2.5 / 1; }
   .public-employer-heading { flex-direction: column; gap: 16px; }
   .public-employer-logo { width: 80px; height: 80px; }
   .public-employer-layout { display: block; }

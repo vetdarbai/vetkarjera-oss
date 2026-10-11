@@ -10,10 +10,10 @@ const { chromium } = require(process.env.PROFILE_PLAYWRIGHT_MODULE || 'playwrigh
 const { createDatabase } = require('./profile-test-db.cjs');
 const sharp = require('sharp');
 const catalog = require('../lib/organizations/catalogs.json');
-const root = path.resolve(__dirname, '..'), out = path.join(root, '.staging-results', 'stage5-frontend');
+const root = path.resolve(__dirname, '..'), out = path.join(root, '.staging-results', 'stage5-14-frontend');
 const origin = 'http://localhost:4368', api = 'https://127.0.0.1:4369';
 let db, transport, next, browser, checks = 0, chain = Promise.resolve(), failDelete = false;
-const actors = new Map(), objects = new Map(), groups = [], errors = [], logs = [], warnings = [];
+const actors = new Map(), objects = new Map(), groups = [], errors = [], logs = [], warnings = [], requests = [], captures = [], blockedRequests = [];
 const report = { scope: 'Local synthetic HTTP Auth/Storage transport, real PostgreSQL WASM/RLS and actual Next UI', productionAccess: false };
 const eq = (a, b, message) => { assert.deepEqual(a, b, message); checks++; };
 const ok = (a, message) => { assert.ok(a, message); checks++; };
@@ -24,7 +24,7 @@ async function actor(kind) {
   return serial(async () => {
     const id = crypto.randomUUID(), email = `${id}@example.invalid`;
     await db.query('reset role');
-    await db.query('insert into auth.users(id,email,raw_user_meta_data,email_confirmed_at) values($1,$2,$3,now())', [id, email, JSON.stringify({ account_role: kind })]);
+    await db.query('insert into auth.users(id,email,raw_user_meta_data,email_confirmed_at) values($1,$2,$3,now())', [id, email, JSON.stringify({ account_role: kind, ...(kind==='specialist'?{profile_contract_version:2,first_name:'Rūta',last_name:'Jankauskaitė',professional_role_code:'veterinarian'}:{}) })]);
     await db.query('insert into auth.sessions(id,user_id) values($1,$1)', [id]);
     const claims = { sub: id, session_id: id, role: 'authenticated', exp: Math.floor(Date.now()/1000)+3600 };
     const token = [Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url'), Buffer.from(JSON.stringify(claims)).toString('base64url'), 'LOCAL_SYNTHETIC_SIGNATURE'].join('.');
@@ -59,6 +59,8 @@ async function approve(a, admin, scope = 'representation') {
   return rpc(admin, 'admin_resolve_case', { organization_id: c.organization.id, expected_row_version: c.rowVersion, payload: { case_id: caseId, decision: 'approved', method: 'official_contact', reference: 'LOCAL INDEPENDENT SYNTHETIC CONTACT' } });
 }
 const allowRpc = new Set(['account_capabilities','own_org_context','list_my_pending_transfers','create_org_draft','create_second_profile','patch_org_public','save_org_locations','save_org_legal_draft','save_own_representative_details','save_org_type_block','save_org_benefits','request_org_legal_change','request_employer_verification','request_representation_verification','request_org_transfer','accept_org_transfer','decline_org_transfer','cancel_org_transfer','resolve_org_slug','prepare_org_media','commit_org_media','remove_org_media','read_org_media','read_own_specialist_profile','profile_completeness','profile_catalogs']);
+const specialistReadTables=new Set([...fs.readFileSync(path.join(root,'lib/profiles/read.ts'),'utf8').matchAll(/from\('([^']+)'\)/g)].map(m=>m[1]));
+allowRpc.add('read_license');
 async function serve(req, res) {
   res.setHeader('Access-Control-Allow-Origin', origin); res.setHeader('Access-Control-Allow-Headers', '*'); res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
   if (req.method === 'OPTIONS') { res.end(); return; }
@@ -95,15 +97,29 @@ async function serve(req, res) {
     if (url.pathname.startsWith('/rest/v1/rpc/')) {
       const name = url.pathname.split('/').at(-1); if (!allowRpc.has(name)) { send(403, { code: '42501' }); return; }
       if(name.includes('transfer'))logs.push(`Fixture called ${name}\n`);
-      const data = await rpc(a, name, body.length ? JSON.parse(body.toString()) : Object.fromEntries(url.searchParams)); send(200, data); return;
+      const args = body.length ? JSON.parse(body.toString()) : Object.fromEntries(url.searchParams);
+      requests.push({name,args});
+      const data = await rpc(a, name, args); send(200, data); return;
     }
     if (url.pathname === '/rest/v1/organization_memberships') { send(200, await membership(a)); return; }
     if (url.pathname === '/rest/v1/profiles' && a) { send(200, (req.headers.accept || '').includes('vnd.pgrst.object') ? { id: a.id } : [{ id: a.id }]); return; }
+    const table=url.pathname.replace('/rest/v1/','');
+    if(req.method==='GET'&&a&&specialistReadTables.has(table)){
+      const rows=await serial(async()=>{
+        await db.query('reset role');await db.query("select set_config('request.jwt.claims',$1,false)",[JSON.stringify(a.claims)]);await db.query('set role authenticated');
+        const params=[],clauses=[];
+        for(const [field,value] of url.searchParams){if(['user_id','is_active'].includes(field)&&value.startsWith('eq.')){params.push(field==='is_active'?value==='eq.true':value.slice(3));clauses.push(`"${field}"=$${params.length}`);}}
+        const order=(url.searchParams.get('order')||'').split(',').map(value=>value.split('.')[0]).filter(value=>/^[a-z_]+$/.test(value));
+        return(await db.query(`select * from public."${table}"${clauses.length?' where '+clauses.join(' and '):''}${order.length?' order by '+order.map(c=>`"${c}"`).join(','):''}`,params)).rows;
+      });
+      send(200,(req.headers.accept||'').includes('vnd.pgrst.object')?(rows[0]||null):rows);return;
+    }
     send(404, { code: 'LOCAL_UNSUPPORTED_ROUTE' });
   } catch (error) { logs.push(`Fixture ${url.pathname}: ${error.code || 'LOCAL_FIXTURE_ERROR'}\n`); send(400, { code: error.code || 'LOCAL_FIXTURE_ERROR', message: 'Local fixture request failed' }); }
 }
 async function session(a, width = 1440) {
   const context = await browser.newContext({ viewport: { width, height: 900 }, ignoreHTTPSErrors: true });
+  await context.route('**/*',route=>{const u=new URL(route.request().url());if(['localhost','127.0.0.1'].includes(u.hostname))return route.continue();blockedRequests.push(u.origin);return route.abort();});
   await context.addCookies([{ name: 'sb-127-auth-token', value: 'base64-' + Buffer.from(JSON.stringify({ access_token: a.token, refresh_token: 'LOCAL_SYNTHETIC_REFRESH', expires_at: a.claims.exp, expires_in: 3600, token_type: 'bearer', user: a.user })).toString('base64url'), domain: 'localhost', path: '/' }]);
   const page = await context.newPage(); page.on('pageerror', e => errors.push(`${page.url()} | ${groups.at(-1) || 'initial'} | ${e.stack || e.message}`));
   page.on('console',entry=>{if(entry.type()==='warning')warnings.push(entry.text());});
@@ -130,6 +146,13 @@ async function panel(page, name) { const details = page.locator('.employer-panel
 async function overview(page) { await page.getByRole('button', { name: 'Grįžti į profilį', exact: true }).click(); }
 async function overflow(page) { eq(await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth), false, 'Horizontal overflow'); }
 async function touchTargets(page) { eq(await page.locator('main').evaluate(main => [...main.querySelectorAll('button, summary, input:not([type=checkbox]):not([type=radio]):not([type=file]), select, .profile-checks label, .employer-choice label')].filter(e => e.getClientRects().length).every(e => { const box = e.getBoundingClientRect(); return box.width >= 44 && box.height >= 44; })), true, '44px touch targets'); }
+async function capture(page,name,width,fullPage=true){
+  await page.setViewportSize({width,height:900});await page.evaluate(()=>document.fonts.ready);await page.evaluate(()=>window.scrollTo(0,0));await overflow(page);
+  if(await page.locator('.profile-license').count())await page.locator('.profile-license-status').waitFor();
+  // An actual full-height viewport avoids sticky-bar stitching artifacts; no DOM/CSS changes.
+  if(fullPage)await page.setViewportSize({width,height:await page.evaluate(()=>document.documentElement.scrollHeight)});
+  await page.screenshot({path:path.join(out,name+'.png'),fullPage});captures.push({file:name+'.png',viewport:page.viewportSize(),fullPage});await page.setViewportSize({width,height:900});
+}
 async function run() {
   fs.mkdirSync(out, { recursive: true });
   const cert = path.join(out, 'fixture-cert.pem'), key = path.join(out, 'fixture-key.pem');
@@ -155,9 +178,10 @@ async function run() {
     await choose(page, 'Organizacijos tipas', 'veterinary_clinic'); await page.getByRole('button', { name: 'Keisti tipą', exact: true }).click();
     await page.locator('.employer-entries').getByRole('button', { name: /^Pridėti(?: miestą)?$/ }).click(); await page.getByLabel('Miestai 1', { exact: true }).fill('Kaunas'); await save(page);
     eq((await owner(employer)).completeness.total, 20);
-    await edit(page, 2); await page.getByLabel('Juridinis pavadinimas', { exact: true }).fill('LOCAL SYNTHETIC UAB'); await save(page);eq((await owner(employer)).completeness.total,20);
-    await page.getByLabel('Teisinė forma').selectOption('uab'); await page.getByLabel('Juridinio asmens kodas', { exact: true }).fill('LOCAL-ONLY');
-    for (const [label, value] of [['Vardas','Testo'],['Pavardė','Savininkas'],['Atstovavimo pagrindas / pareigos','Vadovas'],['Kontaktinis telefonas','+37000000000']]) await page.getByLabel(label, { exact: true }).fill(value);
+    await overview(page);eq(await page.locator('.employer-overview-identity .employer-status.incomplete').innerText(),'Juodraštis');eq(await page.locator('.employer-overview-step .employer-status.incomplete').count(),2);
+    await edit(page, 2); await page.getByLabel('Juridinis pavadinimas', { exact: true }).fill('Nemuno gyvūnų sveikata, UAB'); await save(page);eq((await owner(employer)).completeness.total,20);
+    await page.getByLabel('Teisinė forma').selectOption('uab'); await page.getByLabel('Juridinio asmens kodas', { exact: true }).fill('309876543');
+    for (const [label, value] of [['Vardas','Rūta'],['Pavardė','Petraitė'],['Atstovavimo pagrindas / pareigos','Klinikos vadovė'],['Kontaktinis telefonas','+37000000000']]) await page.getByLabel(label, { exact: true }).fill(value);
     await save(page); const c = await owner(employer); eq(c.profileState,'active'); eq(c.completeness.total,70); eq(c.organization.publicPhone,undefined); eq(c.organization.publicEmail,undefined);
   });
   await group('All 14 adaptive types; Other; distributor multi including mixed; lab free text', async () => {
@@ -227,25 +251,81 @@ async function run() {
     const publicSession = await browser.newContext({ignoreHTTPSErrors:true}); const publicPage = await publicSession.newPage();publicPage.on('pageerror',e=>errors.push(`${publicPage.url()} | ${e.stack || e.message}`));
     const redirected = await publicSession.request.get(origin+'/darbdaviai/'+old.organization.slug,{maxRedirects:0}); eq(redirected.status(),308);
     await publicPage.goto(origin+'/darbdaviai/'+(await owner(employer)).organization.slug); eq(await publicPage.locator('h1').textContent(),'Kitas serverio pavadinimas');
-    const content = await publicPage.locator('main').innerText(); ok(!content.includes('LOCAL SYNTHETIC UAB')); ok(!content.includes('+37000000000')); ok(!content.includes('70 %')); ok(content.includes('1–5'));
+    const content = await publicPage.locator('main').innerText(); ok(!content.includes('Nemuno gyvūnų sveikata, UAB')); ok(!content.includes('+37000000000')); ok(!content.includes('70 %')); ok(content.includes('1–5'));
     await page.locator('.employer-entries').getByRole('button',{name:/Pašalinti/}).click(); await save(page); eq((await owner(employer)).profileState,'draft');
     eq((await publicSession.request.get(origin+'/darbdaviai/'+(await owner(employer)).organization.slug)).status(),404);
     await page.locator('.employer-entries').getByRole('button',{name:/^Pridėti(?: miestą)?$/}).click(); await page.getByLabel('Miestai 1',{exact:true}).fill('Kaunas'); await save(page); eq((await owner(employer)).profileState,'active');
     eq((await publicSession.request.get(origin+'/darbdaviai/nezinoma-organizacija')).status(),404);
     await publicSession.close();
   });
+  await group('Stage5.14 overview/status/privacy; clinic current/legacy; URL normalization; real screenshots', async () => {
+    await page.getByLabel('Organizacijos pavadinimas',{exact:true}).fill('Nemuno veterinarijos klinika');
+    await choose(page,'Organizacijos tipas','veterinary_clinic');await page.getByRole('button',{name:'Keisti tipą',exact:true}).click();await save(page);
+    await page.locator('.employer-entries').getByRole('button',{name:'Pridėti miestą',exact:true}).click();await page.getByLabel('Miestai 2',{exact:true}).fill(' kaunas ');
+    eq(await page.locator('.profile-field-error').count(),1,'Duplicate city has one useful field error');
+    eq(await page.getByLabel('Miestai 2',{exact:true}).getAttribute('aria-invalid'),'true');
+    await page.locator('.employer-entries').getByRole('button',{name:'Pašalinti: Miestai 2',exact:true}).click();
+    await overview(page);eq(await page.locator('.employer-overview-type').innerText(),catalog.types.find(([c])=>c==='veterinary_clinic')[1]);
+    eq(await page.locator('.employer-overview-identity .employer-status.complete').count(),1);
+    eq(await page.locator('.employer-overview-step .employer-status.complete').count(),2);
+    eq(await page.locator('.employer-overview-step .employer-status.incomplete').count(),1);
+    eq(await page.locator('.employer-ownership').count(),0,'No empty ownership heading without capability');
+    eq(await page.locator('.employer-public-desktop').innerText(),'Peržiūrėti, kaip profilį mato kiti');
+    await capture(page,'01-employer-overview-desktop',1440);await capture(page,'02-employer-overview-mobile',390);await touchTargets(page);
+    await edit(page,2);eq(await page.locator('.employer-private-notice').innerText(),'Šie duomenys privatūs. Kandidatams nerodomi. Duomenys reikalingi Jūsų įmonės verifikacijai ir sklandžiam skelbimų paskelbimui.');
+    eq(await page.locator('.employer-private-notice').evaluate(e=>getComputedStyle(e).fontSize),'16px');
+    eq(await page.locator('.employer-save p').innerText(),'');eq(await page.locator('.employer-save button').isDisabled(),true);
+    await capture(page,'03-step2-privacy',390);await edit(page,3);
+    let activity=await panel(page,'Organizacijos veikla');eq(await activity.locator('.employer-panel-status').innerText(),'Nepilnai užpildyta');
+    let models=activity.locator('.employer-activity-group').filter({has:page.getByText('Darbo modeliai',{exact:true})});
+    const currentLabels=['Dienos metu dirbanti klinika','Visą parą dirbanti klinika','Skubi pagalba','Gyva eilė','Registruoti pacientai','Budėjimai','Naktinės pamainos','Stacionaras'];
+    eq(await models.locator('label').allTextContents(),currentLabels);eq(await models.getByLabel('Įprasta klinika',{exact:true}).count(),0);
+    await activity.getByLabel('Šunys',{exact:true}).check();eq(await activity.locator('.employer-panel-status').innerText(),'Nepilnai užpildyta');
+    await activity.getByLabel('Bendroji praktika',{exact:true}).check();eq(await activity.locator('.employer-panel-status').innerText(),'Veiklos duomenys pateikti');
+    await models.getByLabel(currentLabels[0],{exact:true}).check();await models.getByLabel(currentLabels[1],{exact:true}).check();await save(page);
+    eq((await owner(employer)).organization.typeBlock.find(g=>g.group==='working_models').options,['24_7','daytime_clinic']);
+    await models.screenshot({path:path.join(out,'05-clinic-work-models.png')});captures.push({file:'05-clinic-work-models.png',viewport:page.viewportSize(),element:'Darbo modeliai'});
+    await mutate(employer,'save_org_type_block',{type_revision:(await owner(employer)).typeRevision,groups:[{group_code:'animals',options:['dogs'],custom:[]},{group_code:'clinical_areas',options:['general_practice'],custom:[]},{group_code:'working_models',options:['regular_clinic'],custom:[]}]});
+    await page.reload();await edit(page,3);activity=await panel(page,'Organizacijos veikla');models=activity.locator('.employer-activity-group').filter({has:page.getByText('Darbo modeliai',{exact:true})});eq(await models.getByLabel('Įprasta klinika',{exact:true}).isChecked(),true);
+    const contacts=await panel(page,'Vieši kontaktai');
+    await page.getByLabel(/^Interneto svetainė/).fill('nemunovet.example.invalid');await page.getByLabel(/^Facebook/).fill('www.facebook.com/nemunovet');await save(page);
+    let c=await owner(employer);eq(c.organization.website,'https://nemunovet.example.invalid/');eq(c.organization.facebookUrl,'https://www.facebook.com/nemunovet');eq(c.organization.typeBlock.find(g=>g.group==='working_models').options,['regular_clinic']);
+    for(const [input,expected] of [['www.nemunovet.example.invalid','https://www.nemunovet.example.invalid/'],['https://nemunovet.example.invalid','https://nemunovet.example.invalid/']]){await page.getByLabel(/^Interneto svetainė/).fill(input);await save(page);eq((await owner(employer)).organization.website,expected);}
+    const before=requests.length;await page.getByLabel(/^Interneto svetainė/).fill('javascript:alert(1)');await page.locator('.employer-save button').click();await page.getByRole('alert').filter({hasText:'Patikrinkite svetainės'}).waitFor();eq(requests.slice(before).filter(r=>r.name==='patch_org_public').length,0);eq(await page.getByLabel(/^Interneto svetainė/).inputValue(),'javascript:alert(1)');
+    await page.getByLabel(/^Interneto svetainė/).fill('nemunovet.example.invalid');await page.getByLabel(/^Viešas el. paštas/).fill('darbas@nemunovet.example.invalid');await save(page);
+    const benefit=await panel(page,'Ką siūlome darbuotojams');const add=benefit.getByRole('button',{name:'+ Pridėti dar vieną privalumą',exact:true});
+    await add.click();await page.getByLabel('Kiti privalumai 1',{exact:true}).fill('Kolegų palaikymas ir mokymosi laikas');await save(page);
+    eq((await owner(employer)).organization.typeBlock.find(g=>g.group==='working_models').options,['regular_clinic'],'Legacy preserved while another field saves');
+    await models.getByLabel('Įprasta klinika',{exact:true}).click();eq(await models.getByLabel('Įprasta klinika',{exact:true}).count(),0);await models.getByLabel(currentLabels[0],{exact:true}).check();await models.getByLabel('Stacionaras',{exact:true}).check();
+    await page.getByLabel('Organizacijos aprašymas',{exact:true}).fill('Kaune veikianti smulkiųjų gyvūnų klinika, kurioje rūpinamės šunų, kačių ir egzotinių gyvūnų sveikata. Atliekame profilaktinius patikrinimus, laboratorinius tyrimus, vidaus ligų diagnostiką ir chirurgines procedūras.\n\nMūsų komandoje svarbūs aiškūs darbo procesai, kolegų palaikymas ir nuolatinis profesinis tobulėjimas. Naujam kolegai skiriame mentorių ir deriname darbo grafiką.');await save(page);
+    const media=await panel(page,'Logotipas ir viršelio nuotrauka');const logo=await sharp({create:{width:120,height:120,channels:3,background:'#e6f0fb'}}).png().toBuffer();
+    await media.locator('.employer-media').first().locator('input[type=file]').setInputFiles({name:'local-logo.png',mimeType:'image/png',buffer:logo});await media.locator('.employer-media').first().getByRole('status').filter({hasText:'Vaizdas išsaugotas.'}).waitFor();
+    c=await owner(employer);const publicSession=await session(employer),p=publicSession.page;await p.goto(origin+'/darbdaviai/'+c.organization.slug);
+    for(const width of [320,360,390,1440]){await p.setViewportSize({width,height:900});await overflow(p);const box=await p.locator('.public-employer-cover').boundingBox();ok(Math.abs(box.width/box.height-(width<=900?2.5:4))<.05,'Responsive public banner ratio');eq(await p.locator('.public-employer-cover').evaluate(e=>getComputedStyle(e).objectFit),'cover');}
+    eq(await p.locator('a[href="mailto:darbas%40nemunovet.example.invalid"]').count(),1);eq(await p.locator('a[href="tel:%2B37000000000"]').count(),0);
+    await capture(p,'06-public-cover-mobile',390);await capture(p,'07-public-profile-desktop',1440);await publicSession.context.close();
+    const specialist=await session(recipient);await specialist.page.goto(origin+'/profilis');await specialist.page.locator('.profile-identity').waitFor();
+    for(const width of [320,360,390,1440]){await specialist.page.setViewportSize({width,height:900});await overflow(specialist.page);const visible=specialist.page.locator('.profile-employer-cta').filter({visible:true});eq(await visible.getByRole('link').innerText(),'Sukurkite darbdavio profilį');eq(await visible.getByRole('link').getAttribute('href'),'/profilis/darbdavys');if(width<=900){const identity=await specialist.page.locator('.profile-identity').boundingBox(),cta=await visible.boundingBox();ok(cta.y>identity.y+identity.height,'Mobile CTA below specialist identity');}else{eq(await specialist.page.locator('.profile-steps > .profile-employer-cta').count(),1);}}
+    await capture(specialist.page,'08-specialist-cta-desktop',1440);await capture(specialist.page,'09-specialist-cta-mobile',390);await specialist.context.close();
+  });
   await group('Needs-info neutral owner UI; verified identity readonly + real legal change request', async () => {
     await overview(page); await page.getByRole('button',{name:'Pateikti patikrinimui',exact:true}).click();
-    await page.getByLabel('Patikrinimo būdas').selectOption('official_contact'); await page.getByLabel('Patikrinimo nuoroda / kontaktas').fill('LOCAL OWNER CONTACT'); await page.getByRole('dialog').getByRole('button',{name:'Pateikti patikrinimui',exact:true}).click();
+    eq(await page.getByLabel('Patikrinimo būdas').count(),0);eq(await page.getByLabel('Patikrinimo nuoroda / kontaktas').count(),0);
+    ok((await page.getByRole('dialog').innerText()).includes('VetKarjera administratorius peržiūrės pateiktus darbdavio duomenis.'));
+    await capture(page,'04-verification-modal',390,false);
+    const requestStart=requests.length;await page.getByRole('dialog').getByRole('button',{name:'Pateikti patikrinimui',exact:true}).click();
     await page.getByRole('dialog').waitFor({state:'hidden'}); await page.getByText('Duomenys pateikti patikrinimui.',{exact:true}).first().waitFor();
     let c = await owner(employer); eq(c.verification.state,'pending');
+    const submitted=requests.slice(requestStart).filter(r=>['request_employer_verification','request_representation_verification'].includes(r.name));
+    eq(submitted.map(r=>[r.name,r.args.payload]),[['request_employer_verification',{scope:'identity'}],['request_representation_verification',{}]]);
+    eq(submitted[1].args.expected_row_version,submitted[0].args.expected_row_version+1,'Latest returned version between evidence-free requests');
     const caseId = await serial(async()=>{await db.query('reset role');return(await db.query('select identity_case_id id from private.organization_controls where organization_id=$1',[c.organization.id])).rows[0].id;});
     await rpc(admin,'admin_resolve_case',{organization_id:c.organization.id,expected_row_version:c.rowVersion,payload:{case_id:caseId,decision:'needs_info',reason:'PRIVATE ADMIN QA REASON'}});
     await page.reload(); await page.getByText('Patikrinimui reikia papildomos informacijos.',{exact:true}).waitFor(); ok(!(await page.locator('main').innerText()).includes('PRIVATE ADMIN QA REASON'));
-    await approve(employer,admin,'identity'); await approve(employer,admin); await page.reload();
+    await approve(employer,admin,'identity'); await approve(employer,admin); await page.reload();await page.setViewportSize({width:1440,height:900});
     await edit(page,2); eq(await page.locator('.employer-legal-values dd').first().innerText(), (await owner(employer)).legal.legalName); eq(await page.getByLabel('Juridinis pavadinimas',{exact:true}).count(),0);
     await page.getByRole('button',{name:'Prašyti pakeisti',exact:true}).click(); await page.getByRole('dialog').getByLabel('Juridinis pavadinimas',{exact:true}).fill('LOCAL PROPOSED NAME'); await page.getByRole('button',{name:'Pateikti prašymą'}).click();
-    await page.getByRole('status').filter({hasText:'Pakeitimo prašymas pateiktas peržiūrai.'}).waitFor(); eq((await owner(employer)).legal.legalName,'LOCAL SYNTHETIC UAB');
+    await page.getByRole('status').filter({hasText:'Pakeitimo prašymas pateiktas peržiūrai.'}).waitFor(); eq((await owner(employer)).legal.legalName,'Nemuno gyvūnų sveikata, UAB');
   });
   await group('Transfer cancel/decline/accept; new owner restricted capabilities; representation editing', async () => {
     await overview(page); await page.getByLabel('Gavėjo el. paštas').fill(recipient.email); await page.getByRole('button',{name:'Perduoti savininkystę'}).click(); await page.getByRole('button',{name:'Atšaukti perdavimą'}).waitFor();
@@ -262,11 +342,17 @@ async function run() {
     await target.page.getByRole('button',{name:'Priimti profilio valdymą',exact:true}).click(); await target.page.getByText('Profilį galite peržiūrėti.',{exact:false}).waitFor();
     eq((await owner(recipient)).capabilities.canEditProfile,false); await edit(target.page,1); eq(await target.page.getByLabel('Organizacijos pavadinimas',{exact:true}).isDisabled(),true);
     await edit(target.page,2); eq(await target.page.getByLabel('Kontaktinis telefonas',{exact:true}).isDisabled(),false); await target.page.getByLabel('Kontaktinis telefonas',{exact:true}).fill('+37022222222'); await save(target.page); eq((await owner(recipient)).representative.privatePhone,'+37022222222');
+    await overview(target.page);await target.page.getByRole('button',{name:'Pateikti patikrinimui',exact:true}).click();const representationStart=requests.length;
+    await target.page.getByRole('dialog').getByRole('button',{name:'Pateikti patikrinimui',exact:true}).click();await target.page.getByRole('dialog').waitFor({state:'hidden'});
+    eq(requests.slice(representationStart).filter(r=>['request_employer_verification','request_representation_verification'].includes(r.name)).map(r=>[r.name,r.args.payload]),[['request_representation_verification',{}]],'Approved identity only requests representation');
     await approve(recipient,admin); await target.page.reload(); eq((await owner(recipient)).capabilities.canEditProfile,true);
     await mutate(recipient,'request_org_transfer',{target_email:third.email});
     await serial(async()=>{await db.query('reset role');await db.query("update private.organization_ownership_transfers set expires_at=now()-interval '1 second' where to_user_id=$1 and status='pending'",[third.id]);});
     eq((await rpc(third,'list_my_pending_transfers')).length,0);
-    await target.context.close();
+    const specialist=await session(recipient);await specialist.page.goto(origin+'/profilis');
+    await specialist.page.getByRole('link',{name:'Atidaryti darbdavio profilį',exact:true}).first().waitFor();
+    for(const width of [320,360,390,1440]){await specialist.page.setViewportSize({width,height:900});await overflow(specialist.page);const visible=specialist.page.locator('.profile-employer-cta').filter({visible:true});eq(await visible.getByRole('link').innerText(),'Atidaryti darbdavio profilį');eq(await visible.getByRole('link').getAttribute('href'),'/profilis/darbdavys');}
+    await specialist.context.close();await target.context.close();
   });
   await group('Responsive 320/360/390/1440; long brand; focus/dialog; public minimal profile', async () => {
     await mutate(recipient,'patch_org_public',{name:'IlgasProfesionaliosVeterinarijosOrganizacijosPavadinimas'.repeat(3)});
@@ -317,7 +403,7 @@ async function run() {
     await anonymous.close();
   });
   eq(errors,[],'Browser runtime errors');
-  report.status='PASS'; report.assertions=checks; report.groups=groups; report.browserErrors=errors;report.browserWarnings=[...new Set(warnings)];
+  report.status='PASS'; report.assertions=checks; report.groups=groups; report.browserErrors=errors;report.browserWarnings=[...new Set(warnings)];report.captures=captures;report.blockedExternalRequests=[...new Set(blockedRequests)];
 }
 run().catch(error=>{report.status='FAIL';report.error=error.message;console.error(error.stack);process.exitCode=1;})
-  .finally(async()=>{report.assertions=checks;report.groups=groups;fs.mkdirSync(out,{recursive:true});fs.writeFileSync(path.join(out,'report.json'),JSON.stringify(report,null,2));fs.writeFileSync(path.join(out,'next.log'),logs.join(''));await browser?.close();next?.kill();await new Promise(resolve=>transport ? transport.close(resolve) : resolve());await db?.close();console.log(`Stage5.8 frontend ${report.status}: ${checks} assertions`);});
+  .finally(async()=>{report.assertions=checks;report.groups=groups;fs.mkdirSync(out,{recursive:true});fs.writeFileSync(path.join(out,'report.json'),JSON.stringify(report,null,2));fs.writeFileSync(path.join(out,'next.log'),logs.join(''));await browser?.close();next?.kill();await new Promise(resolve=>transport ? transport.close(resolve) : resolve());await db?.close();console.log(`Stage5.14 frontend ${report.status}: ${checks} assertions`);});
