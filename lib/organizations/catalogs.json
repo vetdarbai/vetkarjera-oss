@@ -70,7 +70,7 @@
       "catalogs": {
         "animals": "dogs / cats / exotics / horses / farm_animals / other",
         "clinical_areas": "general_practice / internal_medicine / surgery / diagnostics / dentistry / dermatology / cardiology / orthopedics_traumatology / ophthalmology / anesthesiology / intensive_care / reproduction / other",
-        "working_models": "regular_clinic / 24_7 / emergency / on_call / inpatient"
+        "working_models": "daytime_clinic / 24_7 / emergency / walk_in / scheduled_patients / on_call / night_shifts / inpatient / regular_clinic"
       }
     },
     {
@@ -574,15 +574,15 @@
     {
       "type": "veterinary_clinic",
       "group": "working_models",
-      "code": "regular_clinic",
-      "label": "Įprasta klinika",
+      "code": "daytime_clinic",
+      "label": "Dienos metu dirbanti klinika",
       "order": 1
     },
     {
       "type": "veterinary_clinic",
       "group": "working_models",
       "code": "24_7",
-      "label": "24/7",
+      "label": "Visą parą dirbanti klinika",
       "order": 2
     },
     {
@@ -595,16 +595,45 @@
     {
       "type": "veterinary_clinic",
       "group": "working_models",
+      "code": "walk_in",
+      "label": "Gyva eilė",
+      "order": 4
+    },
+    {
+      "type": "veterinary_clinic",
+      "group": "working_models",
+      "code": "scheduled_patients",
+      "label": "Registruoti pacientai",
+      "order": 5
+    },
+    {
+      "type": "veterinary_clinic",
+      "group": "working_models",
       "code": "on_call",
       "label": "Budėjimai",
-      "order": 4
+      "order": 6
+    },
+    {
+      "type": "veterinary_clinic",
+      "group": "working_models",
+      "code": "night_shifts",
+      "label": "Naktinės pamainos",
+      "order": 7
     },
     {
       "type": "veterinary_clinic",
       "group": "working_models",
       "code": "inpatient",
       "label": "Stacionaras",
-      "order": 5
+      "order": 8
+    },
+    {
+      "type": "veterinary_clinic",
+      "group": "working_models",
+      "code": "regular_clinic",
+      "label": "Įprasta klinika",
+      "order": 9,
+      "deprecatedForNewSelection": true
     },
     {
       "type": "farm_livestock_poultry",
