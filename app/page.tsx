@@ -27,6 +27,9 @@ export default function HomePage() {
   return (
     <>
       <Navigation />
+      <div role="status" style={{ padding: '8px 16px', textAlign: 'center', fontSize: '14px', lineHeight: 1.5, backgroundColor: '#eff6ff', color: '#1e3a5f', borderBottom: '1px solid #dbeafe' }}>
+        Svetainė kuriama. Netrukus čia rasite veterinarijos darbo skelbimus.
+      </div>
       <main className="registry-home">
         <section className="registry-hero">
           <div className="registry-container">
