@@ -4,7 +4,7 @@ export const jobs: Job[] = [
   {
     id: 1,
     title: 'Veterinarijos gydytojas (-a)',
-    company: 'Vilniaus veterinarijos klinika',
+    company: 'Klinika 1',
     location: 'Vilnius',
     address: 'Vilnius',
     salary: '2200–3200 € / mėn.',
@@ -29,7 +29,7 @@ export const jobs: Job[] = [
   {
     id: 2,
     title: 'Veterinarijos chirurgas (-ė)',
-    company: 'Kauno gyvūnų ligoninė',
+    company: 'Klinika 2',
     location: 'Kaunas',
     address: 'Kaunas',
     salary: '3000–4500 € / mėn.',
@@ -54,7 +54,7 @@ export const jobs: Job[] = [
   {
     id: 3,
     title: 'Veterinarijos studentas (-ė) praktikai',
-    company: 'Klaipėdos gyvūnų klinika',
+    company: 'Klinika 3',
     location: 'Klaipėda',
     salary: 'Praktika',
     type: 'Praktika / stažuotė',
@@ -76,7 +76,7 @@ export const jobs: Job[] = [
   {
     id: 4,
     title: 'Key Account Manager – veterinarija',
-    company: 'Baltic Vet Distribution',
+    company: 'Klinika 4',
     location: 'Lietuva / hibridinis',
     salary: '2600–3800 € / mėn.',
     salaryFrom: 2600,
@@ -100,7 +100,7 @@ export const jobs: Job[] = [
   {
     id: 5,
     title: 'Regulatory Affairs specialistas (-ė)',
-    company: 'VetPharma Baltics',
+    company: 'Klinika 5',
     location: 'Vilnius / hibridinis',
     salary: '2800–4200 € / mėn.',
     salaryFrom: 2800,
@@ -124,7 +124,7 @@ export const jobs: Job[] = [
   {
     id: 6,
     title: 'Bandos sveikatos veterinarijos gydytojas (-a)',
-    company: 'Žemaitijos pieno ūkis',
+    company: 'Klinika 6',
     location: 'Telšių r.',
     salary: '3000–4000 € / mėn.',
     salaryFrom: 3000,
@@ -148,7 +148,7 @@ export const jobs: Job[] = [
   {
     id: 7,
     title: 'Laboratorinės diagnostikos specialistas (-ė)',
-    company: 'VetLab Lietuva',
+    company: 'Klinika 7',
     location: 'Kaunas',
     salary: '2100–3000 € / mėn.',
     salaryFrom: 2100,
@@ -172,7 +172,7 @@ export const jobs: Job[] = [
   {
     id: 8,
     title: 'Klinikos administratorius (-ė)',
-    company: 'Šiaulių veterinarijos centras',
+    company: 'Klinika 8',
     location: 'Šiauliai',
     salary: '1500–2100 € / mėn.',
     salaryFrom: 1500,
